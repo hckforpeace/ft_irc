@@ -23,7 +23,6 @@ class Server {
 	private:
 		std::string	port;
 		std::string	password;
-
 	public:
 		Server(void) {};
 		void	parse_args(char *port, char *password);

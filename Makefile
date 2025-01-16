@@ -1,11 +1,11 @@
 NAME		=	ircserv
 
 CXX			=	c++
-CXX_FLAGS		=	-Wall -Wextra -Werror -std=c++98 -g3
+# CXX_FLAGS	=	-Wall -Wextra -Werror -std=c++98 -g3
 
 SRCS_DIR	=	srcs/
 OBJ_DIR		=	objects/
-SRCS_NAMES	=	main.cpp parse.cpp
+SRCS_NAMES	=	main.cpp Server.cpp
 OBJS_NAMES	=	$(SRCS_NAMES:.cpp=.o)
 SRCS		=	$(addprefix $(SRCS_DIR), $(SRCS_NAMES))
 OBJS		=	$(addprefix $(OBJ_DIR), $(OBJS_NAMES))
@@ -28,11 +28,11 @@ REDO		=	[ 🗘 ]
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	@$(CC) $(C_FLAGS) $(OBJS) $(HEADER) -o $(NAME) || (echo "\n$(RED) ======================= $(ERROR) Linking failed ! =============================== $(RESET)\n"; exit 1)
+	@$(CXX) $(CXX_FLAGS) $(OBJS) $(HEADER) -o $(NAME) || (echo "\n$(RED) ======================= $(ERROR) Linking failed ! =============================== $(RESET)\n"; exit 1)
 	@echo "$(GREEN) ======================= $(SUCCESS) Executable created ! =========================== $(RESET)"
 
 $(OBJ_DIR)%.o: $(SRCS_DIR)%.cpp | $(OBJ_DIR)
-	@$(CC) $(C_FLAGS) -c $< -o $@ $(HEADER) || (echo "\n$(RED) ======================= $(ERROR) Compilation failed ! =========================== $(RESET)\n"; exit 1)
+	@$(CXX) $(CXX_FLAGS) -c $< -o $@ $(HEADER) || (echo "\n$(RED) ======================= $(ERROR) Compilation failed ! =========================== $(RESET)\n"; exit 1)
 	@echo "$(GREEN) ======================= $(SUCCESS) Successful compilation ! ======================= $(RESET)"
 
 $(OBJ_DIR):
