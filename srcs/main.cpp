@@ -12,6 +12,7 @@ int	main(int argc, char **argv)
 	try
 	{
 		serv.parse_args(argv[1], argv[2]);
+		// launch server here
 	}
 	catch(const std::exception& e)
 	{

@@ -5,7 +5,7 @@ C_FLAGS		=	-Wall -Wextra -Werror -std=c++98 -g3
 
 SRCS_DIR	=	srcs/
 OBJ_DIR		=	objects/
-SRCS_NAMES	=	main.cpp server.cpp
+SRCS_NAMES	=	main.cpp parse.cpp
 OBJS_NAMES	=	$(SRCS_NAMES:.cpp=.o)
 SRCS		=	$(addprefix $(SRCS_DIR), $(SRCS_NAMES))
 OBJS		=	$(addprefix $(OBJ_DIR), $(OBJS_NAMES))
