@@ -8,13 +8,33 @@
 #include <string.h>
 #include <sys/epoll.h>
 #include <arpa/inet.h>
+#include <cstddef>
+#include <fcntl.h>
 
 #define MAX_EVENTS 10
+
+int setnonblocking(int sock)
+{
+    int result;
+    int flags;
+
+    flags = ::fcntl(sock, F_GETFL, 0);
+
+    if (flags == -1)
+    {
+        return -1;  // error
+    }
+
+    flags |= O_NONBLOCK;
+
+    result = fcntl(sock , F_SETFL , flags);
+    return result;
+}
 
 int main() 
 {
 	struct epoll_event ev, events[MAX_EVENTS];
-	int nbr_fds;
+	int nbr_fds, con_sock;
 	// struct epoll_event ;
 
 	// With the flag SOCK_NONBLOCK he socket is nonblockant no need for fnctl
@@ -24,6 +44,8 @@ int main()
 	std::cout << "server Socket: " << server_socket << std::endl;
 
 	sockaddr_in server_addr;
+	sockaddr_in client_addr;
+	// client_addr.sin_addr
 	// AF_INET is Ipv4 I TODO
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(4040);
@@ -58,17 +80,40 @@ int main()
 	// added the server_fd to the interest list watching out to READ from IT !
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, server_socket, &ev) == -1)
 		std::cerr << "Error during epoll_ctl => " << strerror(errno) << std::endl;
-
+	char buffer[2];
 	while (1)
 	{
-		nbr_fds = epoll_wait(epfd, events, MAX_EVENTS, 0);
+		nbr_fds = epoll_wait(epfd, events, MAX_EVENTS, -1);
 		for (int i = 0;  i < nbr_fds; ++i)
 		{
 			std::cout << "i: " << i << std::endl;		
 			if (events[i].data.fd == server_socket)
 			{
 				std::cout << "events[i].data.fd: " << events[i].data.fd << std::endl;
-				std::cout << "somebody is trying to connect !";
+				std::cout << "somebody is trying to connect !" << std::endl;
+				socklen_t client_len = sizeof(client_addr);
+				con_sock = accept(server_socket, (struct sockaddr *)&client_addr, &client_len);
+				if (con_sock == -1)
+				{
+					std::cout << "con_sock: " << strerror(errno) << "con_sock: " << con_sock << std::endl;
+					exit(EXIT_FAILURE);
+				}
+				std::cout << "success !! con_sock " << con_sock << std::endl;
+				events[0].data.fd = con_sock;
+				events[0].events = EPOLLIN | EPOLLET;
+				// fcntl(con_sock, );
+				setnonblocking(con_sock);
+				if (epoll_ctl(epfd, EPOLL_CTL_ADD, con_sock, &events[0]) == -1)
+				{
+					std::cout << strerror(errno) << std::endl;
+					exit(EXIT_FAILURE);
+				}
+
+			}
+			else
+			{
+				read(events[i].data.fd, buffer, 2);
+				std::cout << "fd: " << events[i].data.fd << " sent: " << buffer;
 			}
 		}
 	}
