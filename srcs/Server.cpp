@@ -96,6 +96,13 @@ void	Server::launch_server()
 			{
 				// len = read(events[i].data.fd, buffer, 1000);
 				len = recv(events[i].data.fd, buffer, 1000 * sizeof(char), 0);
+				if (len == 0)
+				{
+					std::cout << "An error has occured during recv of the ckient socket => " << events[i].data.fd << " Error: " << strerror(errno) << std::endl;
+					if (close(events[i].data.fd) == -1)
+						std::cerr << "Failed to close socket" << std::endl;
+					break ;
+				}
 				buffer[len] = '\0';
 				std::cout << "fd: " << events[i].data.fd << " event: " << events[i].events	 << " sent: " << buffer;
 				memset(buffer, 0, sizeof(char) * 1000);
