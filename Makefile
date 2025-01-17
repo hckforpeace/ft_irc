@@ -5,7 +5,7 @@ CXX			=	c++
 
 SRCS_DIR	=	srcs/
 OBJ_DIR		=	objects/
-SRCS_NAMES	=	main.cpp Server.cpp
+SRCS_NAMES	=	main.cpp Server.cpp Client.cpp
 OBJS_NAMES	=	$(SRCS_NAMES:.cpp=.o)
 SRCS		=	$(addprefix $(SRCS_DIR), $(SRCS_NAMES))
 OBJS		=	$(addprefix $(OBJ_DIR), $(OBJS_NAMES))

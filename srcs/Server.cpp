@@ -1,9 +1,22 @@
 #include "Server.hpp"
 
+Server::~Server()
+{
+	std::cout << "destructeur sever " << std::endl;
+	std::cout << "number of clients: " << Clients.size() << std::endl;
+	for (std::vector<Client *>::iterator it = Clients.begin(); it != Clients.end(); it++)
+	{
+		
+		std::cout << "destroying" << std::endl;
+		delete *it;
+	}
+}
+
 Server::Server(char *port, char *password)
 {
 	parse_args(port, password);
 	init_server();
+	setupSignals();
 	launch_server();
 	// do stuff;
 }
@@ -23,6 +36,8 @@ int Server::setnonblocking(int sock)
     result = fcntl(sock , F_SETFL , flags);
     return result;
 }
+
+
 
 void	Server::launch_server()
 {
@@ -47,12 +62,11 @@ void	Server::launch_server()
 	// added the server_fd to the interest list watching out to READ from IT !
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, server_socket, &ev) == -1)
 		std::cerr << "Error during epoll_ctl => " << strerror(errno) << std::endl;
-	char buffer[1000];
+	char buffer[512];
 	bool loop = true;	
 	int len;
-	std::cout << "combinaison" << (EPOLLIN | EPOLLOUT) << std::endl;
 	struct stat buf;
-	while (1)
+	while (!server_off)
 	{
 		nbr_fds = epoll_wait(epfd, events, MAX_EVENTS, -1);
 		if (errno == EAGAIN)
@@ -75,16 +89,18 @@ void	Server::launch_server()
 					error += strerror(errno);
 					throw std::runtime_error(error);
 				}
-				std::cout << "success !! con_sock " << con_sock << std::endl;
-				events[i].data.fd = con_sock;
-				events[i].events = EPOLLIN | EPOLLOUT;
+				ev.data.fd = con_sock;
+				ev.events = EPOLLIN | EPOLLOUT;
 				setnonblocking(con_sock);
-				if (epoll_ctl(epfd, EPOLL_CTL_ADD, con_sock, &events[i]) == -1)
+				if (epoll_ctl(epfd, EPOLL_CTL_ADD, con_sock, &ev) == -1)
 				{
 					error = "ERROR !! WHILE ADDING NEW EVENT TO EPOLL INTEREST LIST => ";
 					error += strerror(errno);
 					throw std::runtime_error(error);
 				}
+				Client *new_connection = new Client(con_sock);
+				Clients.push_back(new_connection);
+				std::cout << "success !! con_sock " << con_sock <<  " Connected" << std::endl;
 			}
 			else if (events[i].events == EPOLLOUT && loop)
 			{
@@ -94,21 +110,28 @@ void	Server::launch_server()
 			}
 			else if (events[i].events == (EPOLLIN | EPOLLOUT))
 			{
-				// len = read(events[i].data.fd, buffer, 1000);
-				len = recv(events[i].data.fd, buffer, 1000 * sizeof(char), 0);
+				len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);
 				if (len == 0)
 				{
-					std::cout << "An error has occured during recv of the ckient socket => " << events[i].data.fd << " Error: " << strerror(errno) << std::endl;
+					std::cout << "An error has occured during recv of the client socket => " << events[i].data.fd << std::endl ;
 					if (close(events[i].data.fd) == -1)
 						std::cerr << "Failed to close socket" << std::endl;
 					break ;
 				}
-				buffer[len] = '\0';
-				std::cout << "fd: " << events[i].data.fd << " event: " << events[i].events	 << " sent: " << buffer;
-				memset(buffer, 0, sizeof(char) * 1000);
+				else
+				{
+					buffer[len] = '\0';
+					std::cout << "message len: " << len << ", fd: " << events[i].data.fd << " event: " << events[i].events	 << " sent: " << buffer;
+				}
+				memset(buffer, 0, sizeof(char) * 512);
 			}
 		}
 	}
+	std::cout << "out of the loop" << std::endl;
+	if (!close(server_socket))
+		std::cout << "Successfully closed server_socket" << std::endl;
+	if (!close(epfd))
+		std::cout << "Successfully closed epfd" << std::endl;
 
 }
 
@@ -166,4 +189,16 @@ void	Server::parse_args(char *port, char *password)
 		throw std::runtime_error("Port must be between 0 and 65535");
 	this->_port = port_nb;
 	this->_password = s_password; //password has a length limit?
+}
+
+
+void 	Server::setupSignals()
+{
+	signal(SIGINT, signIntHandler);
+}
+
+void	Server::signIntHandler(int code)
+{
+	if (code == 2)
+		server_off = true;
 }

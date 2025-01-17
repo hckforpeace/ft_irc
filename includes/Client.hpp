@@ -2,14 +2,20 @@
 #define CLIENT_HPP
 
 #include <iostream>
+#include <unistd.h>
+
 
 class Client 
 {
 	private:
 		std::string name;
 		std::string nickname;
+		std::string message;
+		int			fd;
 	public:
-		Client(void) {};
+		Client(int fd);
+		~Client();
+
 };
 
 #endif

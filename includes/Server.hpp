@@ -14,8 +14,13 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <signal.h>
+#include <vector>
+#include "Client.hpp"
 
 #define MAX_EVENTS 1000
+
+static bool server_off = false;
 
 class Server {
 	private:
@@ -29,12 +34,16 @@ class Server {
 		epoll_event	events[MAX_EVENTS];
 		sockaddr_in  server_addr;
  		sockaddr_in  client_addr;
+		std::vector<Client*> Clients;
 
  	public:
 		Server(char *port, char *password);
+		~Server();
 		void	init_server();
 		int		setnonblocking(int sock);
+		void 	setupSignals();
 		void	launch_server();
+		static void signIntHandler(int code);	
 };
 
 #endif
