@@ -25,7 +25,9 @@ static bool server_off = false;
 class Server {
 	private:
 		int	_port;
+		std::string	error;
 		std::string	_password;
+		char		buffer[512];
 		int			epfd;
 		int			server_socket;
  		int			con_socket;
@@ -45,7 +47,11 @@ class Server {
 		void	run_sever();
 		int		setnonblocking(int sock);
 		void 	setupSignals();
-		static void signIntHandler(int code);	
+		static void signIntHandler(int code);
+		void		first_connection(int nbr_fds, int i);
+		void		read_and_process(int i);
+		void		processMessage(std::string str, Client *client);
+		bool		isCRLF(std::string str, Client *client);
 };
 
 #endif

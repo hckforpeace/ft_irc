@@ -66,90 +66,38 @@ void	Server::run_sever()
 {
 	// looping 
 	int nbr_fds;
-	int con_sock;
 	static std::string error;
-	char buffer[512];
-	bool loop = true;	
 	int len;
 	struct stat buf;
 	while (!server_off)
 	{
 		nbr_fds = epoll_wait(epfd, events, MAX_EVENTS, -1);
-		if (errno == EAGAIN)
-			std::cout << "tell me" << std::endl;
+		// if (errno == EAGAIN)
+			// std::cout << "tell me" << std::endl;
 		for (int i = 0;  i < nbr_fds; ++i)
 		{
-			// std::cout << "Something happened event => " << events[i].events << std::endl;
 			if (fstat(events[i].data.fd, &buf) == 0 && errno == EBADF)
 				break;
 			if (events[i].data.fd == server_socket)
 			{
-				std::cout << "events[i].data.fd: " << events[i].data.fd << std::endl;
-				std::cout << "somebody is trying to connect !" << std::endl;
-				socklen_t client_len = sizeof(client_addr);
-				con_sock = accept(server_socket, (struct sockaddr *)&client_addr, &client_len);
-				// write();
-				if (con_sock == -1)
-				{
-					error = "ERROR !! WHILE CONNECTING TO NEW CLIENT SOCKET => ";
-					error += strerror(errno);
-					throw std::runtime_error(error);
-				}
-				ev.data.fd = con_sock;
-				ev.events = EPOLLIN | EPOLLOUT;
-				setnonblocking(con_sock);
-				if (epoll_ctl(epfd, EPOLL_CTL_ADD, con_sock, &ev) == -1)
-				{
-					error = "ERROR !! WHILE ADDING NEW EVENT TO EPOLL INTEREST LIST => ";
-					error += strerror(errno);
-					throw std::runtime_error(error);
-				}
-				Client *new_connection = new Client(con_sock);
-				Clients.push_back(new_connection);
-				std::cout << "success !! con_sock " << con_sock <<  " Connected" << std::endl;
-				send(con_sock, "Insert Password: ", sizeof(char) * 18, 0);
+				std::cout << "Connection request" << std::endl;
+				first_connection(nbr_fds, i);
 			}
-			else if (events[i].events == EPOLLOUT && getClient(events[i].data.fd)->isConnected())
-			{
-				loop = false;
-			}
+			// else if (events[i].events == EPOLLOUT && getClient(events[i].data.fd)->isConnected())
+			// {
+			// 	loop = false;
+			// }
+			
+			// socket available for read operation 
 			else if (events[i].events == (EPOLLIN | EPOLLOUT))
-			{
-				len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);
-				if (len == 0)
-				{
-					std::cout << "An error has occured during recv of the client socket => " << events[i].data.fd << std::endl ;
-					if (close(events[i].data.fd) == -1)
-						std::cerr << "Failed to close socket" << std::endl;
-					break ;
-				}
-				else
-				{
-					buffer[len] = '\0';
-					std::cout << "message len: " << len << ", fd: " << events[i].data.fd << " event: " << events[i].events	 << " sent: " << buffer << std::endl;
-				}
-				getClient(events[i].data.fd)->setMessage(buffer);
-				if (!getClient(events[i].data.fd)->isConnected())
-					std::cout << "comparing pw of len " << this->_password.length() << " => " << this->_password << ", to input password of length " << getClient(events[i].data.fd)->getMessage().length() << " =>"  << getClient(events[i].data.fd)->getMessage() << std::endl ;
-				if (!getClient(events[i].data.fd)->isConnected() && !this->_password.compare(getClient(events[i].data.fd)->getMessage()))
-				{
-					std::cout << "Welcome" << std::endl;
-					getClient(events[i].data.fd)->setConnection();
-				}
-				else
-				{
-					std::cout << "Failed to Connect" << std::endl;
-					break;
-				}
-				memset(buffer, 0, sizeof(char) * 512);
-			}
+				read_and_process(i);
 		}
 	}
 	std::cout << "out of the loop" << std::endl;
-	if (!close(server_socket))
-		std::cout << "Successfully closed server_socket" << std::endl;
-	if (!close(epfd))
-		std::cout << "Successfully closed epfd" << std::endl;
+	if (close(server_socket) == -1)
+		std::cout << RED << "failed to closed server_socket" << RESET << std::endl;
+	if (close(epfd) == -1)
+		std::cout << RED << "Successfully closed epfd" << RESET << std::endl;
 }
 
 /*
@@ -227,4 +175,105 @@ Client*	Server::getClient(int fd)
 			return (*it);
 	}
 	return (NULL);
+}
+
+
+void		Server::first_connection(int nbr_fds, int i)
+{
+	// std::cout << "events[i].data.fd: " << events[i].data.fd << std::endl;
+	// std::cout << "somebody is trying to connect !" << std::endl;
+
+
+	socklen_t client_len = sizeof(client_addr);
+	con_socket = accept(server_socket, (struct sockaddr *)&client_addr, &client_len);
+
+	// error
+	if (con_socket == -1)
+	{
+		error = "ERROR !! WHILE CONNECTING TO NEW CLIENT SOCKET => ";
+		error += strerror(errno);
+		throw std::runtime_error(error);
+	}
+
+	// setting up params the new event 
+	ev.data.fd = con_socket;
+	ev.events = EPOLLIN | EPOLLOUT;
+	setnonblocking(con_socket);
+
+	// adding the event to the interest list
+	if (epoll_ctl(epfd, EPOLL_CTL_ADD, con_socket, &ev) == -1)
+	{
+		error = "ERROR !! WHILE ADDING NEW EVENT TO EPOLL INTEREST LIST => ";
+		error += strerror(errno);
+		throw std::runtime_error(error);
+	}
+
+	// Creating and adding a new obj Client to the vector
+	Client *new_connection = new Client(con_socket);
+	Clients.push_back(new_connection);
+
+	// std::cout << "success !! con_socket " << con_socket <<  " Connected" << std::endl;
+	send(con_socket, "Insert Password: ", sizeof(char) * 18, 0);
+}
+
+void	Server::read_and_process(int i)
+{
+	int	len;
+	std::string str;
+
+	// reading string sent from the Client
+	len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);
+	// Error
+	if (len == 0)
+	{
+		std::cout << "An error has occured during recv of the client socket => " << events[i].data.fd << std::endl ;
+		if (close(events[i].data.fd) == -1)
+			std::cerr << "Failed to close socket" << std::endl;
+	}
+	else
+	{
+		buffer[len] = '\0';
+	}
+
+	str = buffer;
+	Client *client = getClient(events[i].data.fd);
+	if (isCRLF(str, client))
+		processMessage(str, client);
+	memset(buffer, 0, sizeof(char) * 512);
+}
+
+
+bool		Server::isCRLF(std::string str, Client *client)
+{
+	std::size_t pos = str.find("\r\n");
+	std::string sub;
+	
+	if (pos == std::string::npos)
+	{
+		client->setMessage(client->getMessage() + str);
+		return (false);
+	}
+	sub = str.substr(0, str.length() - 2);
+	client->setMessage(client->getMessage() + sub);
+	return (true);
+}
+
+void		Server::processMessage(std::string str, Client *client)
+{
+	if (!client->isConnected())
+	{
+		if (!this->_password.compare(client->getMessage()))
+		{
+			std::cout << "Welcome" << std::endl;
+			client->setConnection();
+		}
+		else
+		{
+			std::cout << "Failed to Connect" << std::endl;
+			// TODO
+			close(client->getFd());
+			// this->Clients.erase(this->Clients.);
+			// delete client;
+		}
+	}
 }
