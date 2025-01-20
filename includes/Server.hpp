@@ -36,7 +36,6 @@ class Server {
 		sockaddr_in  server_addr;
  		sockaddr_in  client_addr;
 		std::vector<Client*> Clients;
-		Client*	getClient(int fd);
 		void	parse_args(char *port, char *password);
 
  	public:
@@ -52,6 +51,8 @@ class Server {
 		void		read_and_process(int i);
 		void		processMessage(std::string str, Client *client);
 		bool		isCRLF(std::string str, Client *client);
+		Client*	getClient(int fd);
+		std::vector<Client *>::iterator	getClientIt(int fd);
 };
 
 #endif

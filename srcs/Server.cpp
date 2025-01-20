@@ -83,10 +83,6 @@ void	Server::run_sever()
 				std::cout << "Connection request" << std::endl;
 				first_connection(nbr_fds, i);
 			}
-			// else if (events[i].events == EPOLLOUT && getClient(events[i].data.fd)->isConnected())
-			// {
-			// 	loop = false;
-			// }
 			
 			// socket available for read operation 
 			else if (events[i].events == (EPOLLIN | EPOLLOUT))
@@ -105,7 +101,8 @@ void	Server::run_sever()
 void	Server::init_server_socket()
 {
 	static std::string error;
-
+	int				opt = 1;
+	
 	// With the flag SOCK_NONBLOCK he socket is nonblockant no need for fnctl
 	this->server_socket = socket(AF_INET , SOCK_STREAM | SOCK_NONBLOCK, 0);
 	if (this->server_socket == -1)
@@ -115,6 +112,13 @@ void	Server::init_server_socket()
 		throw std::runtime_error(error);
 	}
 	std::cout << GREEN << "Server Socket: " << BLU << server_socket << RESET << std::endl;
+
+	// This option allows the server to bind to a socket address that is in the TIME_WAIT state.
+    if (setsockopt(this->server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
+        perror("setsockopt");
+        close(this->server_socket);
+        exit(EXIT_FAILURE);
+    }
 
 	// setting up server parameters
 	server_addr.sin_family = AF_INET;
@@ -177,6 +181,16 @@ Client*	Server::getClient(int fd)
 	return (NULL);
 }
 
+std::vector<Client *>::iterator	Server::getClientIt(int fd)
+{
+	for (std::vector<Client *>::iterator it = Clients.begin(); it != Clients.end(); it++)
+	{
+		if ((*it)->getFd() == fd)
+			return (it);
+	}
+	return (Clients.begin());
+}
+
 
 void		Server::first_connection(int nbr_fds, int i)
 {
@@ -220,6 +234,7 @@ void	Server::read_and_process(int i)
 {
 	int	len;
 	std::string str;
+	Client *client = getClient(events[i].data.fd);
 
 	// reading string sent from the Client
 	len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);
@@ -227,8 +242,10 @@ void	Server::read_and_process(int i)
 	if (len == 0)
 	{
 		std::cout << "An error has occured during recv of the client socket => " << events[i].data.fd << std::endl ;
-		if (close(events[i].data.fd) == -1)
-			std::cerr << "Failed to close socket" << std::endl;
+		this->Clients.erase(getClientIt(client->getFd()));
+		delete client;
+		std::cout << "Client deleted !" << std::endl;
+		return ;
 	}
 	else
 	{
@@ -236,7 +253,6 @@ void	Server::read_and_process(int i)
 	}
 
 	str = buffer;
-	Client *client = getClient(events[i].data.fd);
 	if (isCRLF(str, client))
 		processMessage(str, client);
 	memset(buffer, 0, sizeof(char) * 512);
@@ -269,11 +285,7 @@ void		Server::processMessage(std::string str, Client *client)
 		}
 		else
 		{
-			std::cout << "Failed to Connect" << std::endl;
-			// TODO
-			close(client->getFd());
-			// this->Clients.erase(this->Clients.);
-			// delete client;
+			std::cout << RED << "Failed to Connect" << RESET << std::endl;
 		}
 	}
 }
