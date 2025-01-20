@@ -24,7 +24,6 @@ static bool server_off = false;
 
 class Server {
 	private:
-		void	parse_args(char *port, char *password);
 		int	_port;
 		std::string	_password;
 		int			epfd;
@@ -35,14 +34,17 @@ class Server {
 		sockaddr_in  server_addr;
  		sockaddr_in  client_addr;
 		std::vector<Client*> Clients;
+		Client*	getClient(int fd);
+		void	parse_args(char *port, char *password);
 
  	public:
 		Server(char *port, char *password);
 		~Server();
+		void	init_server_socket();
 		void	init_server();
+		void	run_sever();
 		int		setnonblocking(int sock);
 		void 	setupSignals();
-		void	launch_server();
 		static void signIntHandler(int code);	
 };
 

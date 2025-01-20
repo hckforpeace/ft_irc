@@ -15,9 +15,10 @@ Server::~Server()
 Server::Server(char *port, char *password)
 {
 	parse_args(port, password);
+	init_server_socket();
 	init_server();
 	setupSignals();
-	launch_server();
+	run_sever();
 	// do stuff;
 }
 
@@ -39,13 +40,10 @@ int Server::setnonblocking(int sock)
 
 
 
-void	Server::launch_server()
+void	Server::init_server()
 {
-	int nbr_fds;
-	int con_sock;
 	static std::string error;
 	// epoll file descriptor
-	int epfd;
 	epfd = epoll_create1(0);
 	if (epfd == -1)
 	{
@@ -53,15 +51,23 @@ void	Server::launch_server()
 		error += strerror(errno);
 		throw std::runtime_error(error);
 	}
-	std::cout << "epfd: " << epfd << std::endl;
+	std::cout << GREEN << "epfd: " << RESET << epfd << std::endl;
 
-	// this is for the server
+	// this is for the 
 	ev.events = EPOLLIN;
 	ev.data.fd = server_socket;
 
 	// added the server_fd to the interest list watching out to READ from IT !
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, server_socket, &ev) == -1)
 		std::cerr << "Error during epoll_ctl => " << strerror(errno) << std::endl;
+}
+
+void	Server::run_sever()
+{
+	// looping 
+	int nbr_fds;
+	int con_sock;
+	static std::string error;
 	char buffer[512];
 	bool loop = true;	
 	int len;
@@ -101,11 +107,10 @@ void	Server::launch_server()
 				Client *new_connection = new Client(con_sock);
 				Clients.push_back(new_connection);
 				std::cout << "success !! con_sock " << con_sock <<  " Connected" << std::endl;
-			}
-			else if (events[i].events == EPOLLOUT && loop)
-			{
-				std::cout << "Password: " << std::endl;
 				send(con_sock, "Insert Password: ", sizeof(char) * 18, 0);
+			}
+			else if (events[i].events == EPOLLOUT && getClient(events[i].data.fd)->isConnected())
+			{
 				loop = false;
 			}
 			else if (events[i].events == (EPOLLIN | EPOLLOUT))
@@ -121,7 +126,20 @@ void	Server::launch_server()
 				else
 				{
 					buffer[len] = '\0';
-					std::cout << "message len: " << len << ", fd: " << events[i].data.fd << " event: " << events[i].events	 << " sent: " << buffer;
+					std::cout << "message len: " << len << ", fd: " << events[i].data.fd << " event: " << events[i].events	 << " sent: " << buffer << std::endl;
+				}
+				getClient(events[i].data.fd)->setMessage(buffer);
+				if (!getClient(events[i].data.fd)->isConnected())
+					std::cout << "comparing pw of len " << this->_password.length() << " => " << this->_password << ", to input password of length " << getClient(events[i].data.fd)->getMessage().length() << " =>"  << getClient(events[i].data.fd)->getMessage() << std::endl ;
+				if (!getClient(events[i].data.fd)->isConnected() && !this->_password.compare(getClient(events[i].data.fd)->getMessage()))
+				{
+					std::cout << "Welcome" << std::endl;
+					getClient(events[i].data.fd)->setConnection();
+				}
+				else
+				{
+					std::cout << "Failed to Connect" << std::endl;
+					break;
 				}
 				memset(buffer, 0, sizeof(char) * 512);
 			}
@@ -132,13 +150,11 @@ void	Server::launch_server()
 		std::cout << "Successfully closed server_socket" << std::endl;
 	if (!close(epfd))
 		std::cout << "Successfully closed epfd" << std::endl;
-
 }
-
 
 /*
 */
-void	Server::init_server()
+void	Server::init_server_socket()
 {
 	static std::string error;
 
@@ -201,4 +217,14 @@ void	Server::signIntHandler(int code)
 {
 	if (code == 2)
 		server_off = true;
+}
+
+Client*	Server::getClient(int fd)
+{
+	for (std::vector<Client *>::iterator it = Clients.begin(); it != Clients.end(); it++)
+	{
+		if ((*it)->getFd() == fd)
+			return (*it);
+	}
+	return (NULL);
 }
