@@ -1,8 +1,9 @@
-#include "ft_irc.hpp"
+// #include "ft_irc.hpp"
+// #include "Server.hpp"
+#include "Server.hpp"
 
 int	main(int argc, char **argv)
 {
-	Server serv;
 
 	if (argc != 3)
 	{
@@ -11,7 +12,7 @@ int	main(int argc, char **argv)
 	}
 	try
 	{
-		serv.parse_args(argv[1], argv[2]);
+		Server server(argv[1], argv[2]);
 	}
 	catch(const std::exception& e)
 	{
