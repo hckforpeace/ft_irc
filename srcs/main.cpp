@@ -13,6 +13,7 @@ int	main(int argc, char **argv)
 	try
 	{
 		Server server(argv[1], argv[2]);
+		// launch server here
 	}
 	catch(const std::exception& e)
 	{

@@ -15,7 +15,6 @@ class Client {
 	private:
 		std::string name;
 		std::string nickname;
-		int			fd;
 	public:
 		Client(void) {};
 };

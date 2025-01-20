@@ -14,14 +14,21 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <signal.h>
+#include <vector>
+#include "Client.hpp"
+#include "Replies.hpp"
 
 #define MAX_EVENTS 1000
 
+static bool server_off = false;
+
 class Server {
 	private:
-		void	parse_args(char *port, char *password);
 		int	_port;
+		std::string	error;
 		std::string	_password;
+		char		buffer[512];
 		int			epfd;
 		int			server_socket;
  		int			con_socket;
@@ -29,12 +36,24 @@ class Server {
 		epoll_event	events[MAX_EVENTS];
 		sockaddr_in  server_addr;
  		sockaddr_in  client_addr;
+		std::vector<Client*> Clients;
+		Client*	getClient(int fd);
+		void	parse_args(char *port, char *password);
 
  	public:
 		Server(char *port, char *password);
+		~Server();
+		void	init_server_socket();
 		void	init_server();
+		void	run_sever();
 		int		setnonblocking(int sock);
-		void	launch_server();
+		void 	setupSignals();
+		static void signIntHandler(int code);
+		void		first_connection(int nbr_fds, int i);
+		void		read_and_process(int i);
+		void		parse_exec_cmd(std::vector<std::string> cmd, Client *client);
+		std::vector<std::string> split_buffer(std::string str);				
+		bool		isCRLF(std::string str, Client *client);
 };
 
 #endif

@@ -1,10 +1,24 @@
 #include "Server.hpp"
 
+Server::~Server()
+{
+	std::cout << "destructeur sever " << std::endl;
+	std::cout << "number of clients: " << Clients.size() << std::endl;
+	for (std::vector<Client *>::iterator it = Clients.begin(); it != Clients.end(); it++)
+	{
+		
+		std::cout << "destroying" << std::endl;
+		delete *it;
+	}
+}
+
 Server::Server(char *port, char *password)
 {
 	parse_args(port, password);
+	init_server_socket();
 	init_server();
-	launch_server();
+	setupSignals();
+	run_sever();
 	// do stuff;
 }
 
@@ -24,13 +38,12 @@ int Server::setnonblocking(int sock)
     return result;
 }
 
-void	Server::launch_server()
+
+
+void	Server::init_server()
 {
-	int nbr_fds;
-	int con_sock;
 	static std::string error;
 	// epoll file descriptor
-	int epfd;
 	epfd = epoll_create1(0);
 	if (epfd == -1)
 	{
@@ -38,91 +51,58 @@ void	Server::launch_server()
 		error += strerror(errno);
 		throw std::runtime_error(error);
 	}
-	std::cout << "epfd: " << epfd << std::endl;
+	std::cout << GREEN << "epfd: " << RESET << epfd << std::endl;
 
-	// this is for the server
+	// this is for the 
 	ev.events = EPOLLIN;
 	ev.data.fd = server_socket;
 
 	// added the server_fd to the interest list watching out to READ from IT !
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, server_socket, &ev) == -1)
 		std::cerr << "Error during epoll_ctl => " << strerror(errno) << std::endl;
-	char buffer[1000];
-	bool loop = true;	
+}
+
+void	Server::run_sever()
+{
+	// looping 
+	int nbr_fds;
+	static std::string error;
 	int len;
-	std::cout << "combinaison" << (EPOLLIN | EPOLLOUT) << std::endl;
 	struct stat buf;
-	while (1)
+	while (!server_off)
 	{
 		nbr_fds = epoll_wait(epfd, events, MAX_EVENTS, -1);
-		if (errno == EAGAIN)
-			std::cout << "tell me" << std::endl;
+		// if (errno == EAGAIN)
+			// std::cout << "tell me" << std::endl;
 		for (int i = 0;  i < nbr_fds; ++i)
 		{
-			// std::cout << "Something happened event => " << events[i].events << std::endl;
 			if (fstat(events[i].data.fd, &buf) == 0 && errno == EBADF)
 				break;
 			if (events[i].data.fd == server_socket)
 			{
-				std::cout << "events[i].data.fd: " << events[i].data.fd << std::endl;
-				std::cout << "somebody is trying to connect !" << std::endl;
-				socklen_t client_len = sizeof(client_addr);
-				con_sock = accept(server_socket, (struct sockaddr *)&client_addr, &client_len);
-				// write();
-				if (con_sock == -1)
-				{
-					error = "ERROR !! WHILE CONNECTING TO NEW CLIENT SOCKET => ";
-					error += strerror(errno);
-					throw std::runtime_error(error);
-				}
-				std::cout << "success !! con_sock " << con_sock << std::endl;
-				events[i].data.fd = con_sock;
-				events[i].events = EPOLLIN | EPOLLOUT;
-				setnonblocking(con_sock);
-				if (epoll_ctl(epfd, EPOLL_CTL_ADD, con_sock, &events[i]) == -1)
-				{
-					error = "ERROR !! WHILE ADDING NEW EVENT TO EPOLL INTEREST LIST => ";
-					error += strerror(errno);
-					throw std::runtime_error(error);
-				}
+				std::cout << "Connection request" << std::endl;
+				first_connection(nbr_fds, i);
 			}
-			else if (events[i].events == EPOLLOUT && loop)
-			{
-				std::cout << "Password: " << std::endl;
-				send(con_sock, "Insert Password: ", sizeof(char) * 18, 0);
-				loop = false;
-			}
+			// else if (events[i].events == EPOLLOUT && getClient(events[i].data.fd)->isConnected())
+			// {
+			// 	loop = false;
+			// }
+			
+			// socket available for read operation 
 			else if (events[i].events == (EPOLLIN | EPOLLOUT))
-			{
-				// len = read(events[i].data.fd, buffer, 1000);
-				len = recv(events[i].data.fd, buffer, 1000 * sizeof(char), 0);
-				if (len == 0)
-				{
-					std::cout << "An error has occured during recv of the ckient socket => " << events[i].data.fd << " Error: " << strerror(errno) << std::endl;
-					if (close(events[i].data.fd) == -1)
-						std::cerr << "Failed to close socket" << std::endl;
-					break ;
-				}
-				buffer[len] = '\0';
-				std::cout << "fd: " << events[i].data.fd << " event: " << events[i].events	 << " sent: " << buffer;
-				memset(buffer, 0, sizeof(char) * 1000);
-			}
+				read_and_process(i);
 		}
 	}
-}
-
-pass / nick / user / join / invite / kick / mode
-
-void	par_exec_cmd(std::string cmd, int fd)
-{
-	if (cmd == 'pass' || cmd == 'PASS')
-		auth_client(cmd, fd);
-	else if ()
+	std::cout << "out of the loop" << std::endl;
+	if (close(server_socket) == -1)
+		std::cout << RED << "failed to closed server_socket" << RESET << std::endl;
+	if (close(epfd) == -1)
+		std::cout << RED << "Successfully closed epfd" << RESET << std::endl;
 }
 
 /*
 */
-void	Server::init_server()
+void	Server::init_server_socket()
 {
 	static std::string error;
 
@@ -167,12 +147,176 @@ void	Server::parse_args(char *port, char *password)
 	int					port_nb;
 	
 	ss >> port_nb;
-	if (ss.fail() || !ss.eof())
+	if (ss.fail())
 		throw std::runtime_error("Port is not a number");
-	if (port_nb < 1024 || port_nb > 65535)
-		throw std::runtime_error("Port must be between 1024 and 65535");
-	if (s_password.size() > 15)
-		throw std::runtime_error("Password is too long, it's 15 characters max");
+	if (port_nb > 65535)
+		throw std::runtime_error("Port must be between 0 and 65535");
 	this->_port = port_nb;
-	this->_password = s_password;
+	this->_password = s_password; //password has a length limit?
 }
+
+
+void 	Server::setupSignals()
+{
+	signal(SIGINT, signIntHandler);
+}
+
+void	Server::signIntHandler(int code)
+{
+	if (code == 2)
+		server_off = true;
+}
+
+Client*	Server::getClient(int fd)
+{
+	for (std::vector<Client *>::iterator it = Clients.begin(); it != Clients.end(); it++)
+	{
+		if ((*it)->getFd() == fd)
+			return (*it);
+	}
+	return (NULL);
+}
+
+
+void		Server::first_connection(int nbr_fds, int i)
+{
+	// std::cout << "events[i].data.fd: " << events[i].data.fd << std::endl;
+	// std::cout << "somebody is trying to connect !" << std::endl;
+
+
+	socklen_t client_len = sizeof(client_addr);
+	con_socket = accept(server_socket, (struct sockaddr *)&client_addr, &client_len);
+
+	// error
+	if (con_socket == -1)
+	{
+		error = "ERROR !! WHILE CONNECTING TO NEW CLIENT SOCKET => ";
+		error += strerror(errno);
+		throw std::runtime_error(error);
+	}
+
+	// setting up params the new event 
+	ev.data.fd = con_socket;
+	ev.events = EPOLLIN | EPOLLOUT;
+	setnonblocking(con_socket);
+
+	// adding the event to the interest list
+	if (epoll_ctl(epfd, EPOLL_CTL_ADD, con_socket, &ev) == -1)
+	{
+		error = "ERROR !! WHILE ADDING NEW EVENT TO EPOLL INTEREST LIST => ";
+		error += strerror(errno);
+		throw std::runtime_error(error);
+	}
+
+	// Creating and adding a new obj Client to the vector
+	Client *new_connection = new Client(con_socket);
+	Clients.push_back(new_connection);
+
+	// std::cout << "success !! con_socket " << con_socket <<  " Connected" << std::endl;
+	send(con_socket, "Insert Password: ", sizeof(char) * 18, 0);
+}
+
+void	Server::read_and_process(int i)
+{
+	int	len;
+	std::string str;
+
+	// reading string sent from the Client
+	len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);
+	// Error
+	if (len == 0)
+	{
+		std::cout << "An error has occured during recv of the client socket => " << events[i].data.fd << std::endl ;
+		if (close(events[i].data.fd) == -1)
+			std::cerr << "Failed to close socket" << std::endl;
+	}
+	else
+	{
+		buffer[len] = '\0';
+	}
+
+	str = buffer;
+	Client *client = getClient(events[i].data.fd);
+	if (isCRLF(str, client))
+	{
+		parse_exec_cmd(split_buffer(client->getMessage()), client);
+		client->setMessage("");
+	}
+	memset(buffer, 0, sizeof(char) * 512);
+}
+
+std::vector<std::string> Server::split_buffer(std::string str)
+{
+	std::vector<std::string> vec;
+	std::istringstream	ss(str);
+	std::string token;
+
+	while (ss >> token)
+	{
+		vec.push_back(token);
+		token.clear();
+	}
+	return (vec);
+}
+
+bool	Server::isCRLF(std::string str, Client *client)
+{
+	std::size_t pos = str.find("\r\n");
+	std::string sub;
+	
+	if (pos == std::string::npos)
+	{
+		client->setMessage(client->getMessage() + str);
+		return (false);
+	}
+	sub = str.substr(0, str.length() - 2);
+	client->setMessage(client->getMessage() + sub);
+	return (true);
+}
+
+void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
+{
+	//std::cout << "cmd[0] -> " << cmd[0] << std::endl;
+	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
+		std::cout << "test" << std::endl;// authenticate
+	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
+		std::cout << "test" << std::endl;// set nickename
+	else if (cmd.size() != 0 && (cmd[0] == "user" || cmd[0] == "USER"))
+		std::cout << "test" << std::endl;// set username
+	else if (cmd.size() != 0 && (cmd[0] == "join" || cmd[0] == "JOIN"))
+		std::cout << "test" << std::endl;// join channel
+	else if (cmd.size() != 0 && (cmd[0] == "invite" || cmd[0] == "INVITE"))
+		std::cout << "test" << std::endl;// invite client to channel
+	else if (cmd.size() != 0 && (cmd[0] == "topic" || cmd[0] == "TOPIC"))
+		std::cout << "test" << std::endl;// change the topic of a channel
+	else if (cmd.size() != 0 && (cmd[0] == "kick" || cmd[0] == "KICK"))
+		std::cout << "test" << std::endl;// kick a client from a channel
+	else if (cmd.size() != 0 && (cmd[0] == "mode" || cmd[0] == "MODE"))
+		std::cout << "test" << std::endl;// change the modes of a channel or client (user operator)
+	else if (cmd.size() != 0 && (cmd[0] == "privmsg" || cmd[0] == "PRIVMSG"))
+		std::cout << "test" << std::endl;//send a mp or a msg to a channel
+	else if (cmd.size() != 0 && (cmd[0] == "quit" || cmd[0] == "QUIT"))
+		std::cout << "test" << std::endl;// quit the server
+	else if (cmd.size() != 0)
+	{
+		std::string err = ERR_UNKNOWNCOMMAND(cmd[0]);
+		send(con_socket, err.c_str(), sizeof(err), 0);
+	}
+}
+
+// if (!client->isConnected())
+// {
+// 	if (!this->_password.compare(client->getMessage()))
+// 	{
+// 		std::cout << "Welcome" << std::endl;
+// 		client->setConnection();
+// 	}
+// 	else
+// 	{
+// 		std::cout << "Failed to Connect" << std::endl;
+// 		// TODO
+// 		close(client->getFd());
+// 		// this->Clients.erase(this->Clients.);
+// 		// delete client;
+// 	}
+// }
