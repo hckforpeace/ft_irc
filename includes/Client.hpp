@@ -9,11 +9,12 @@ class Client
 {
 	private:
 		std::string name;
-		std::string nickname;
+		std::string nickname = "*";
 		std::string message;
 		std::vector<std::string>	cmd;
 		int			fd;
 		bool		connected = false;
+
 	public:
 		Client(int fd);
 		~Client();

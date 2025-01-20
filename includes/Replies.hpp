@@ -23,13 +23,25 @@
 // Any command requiring operator privileges to operate must return this error to indicate the attempt was unsuccessful.
 # define ERR_NOPRIVILEGES "481 :Permission Denied- You're not an IRC operator\n"
 
+// Indicates that no client can be found for the supplied nickname.
+# define ERR_NOSUCHNICK(nickname) "401 " + nickname + " :No such nickname\n"
+
+// Indicates that no channel can be found for the supplied channel name.
+# define ERR_NOSUCHCHANNEL(channel) "403 " + channel + " :No such channel\n"
+
+// Returned by the PRIVMSG command to indicate the message wasn’t delivered because there was no text to send.
+# define ERR_NOTEXTTOSEND "412 <client> :No text to send"
+
+// Indicates a given line does not follow the specified size limits (512 bytes for the main section, 4094 or 8191 bytes for the tag section).
+# define ERR_INPUTTOOLONG "417 <client> :Input line was too long"
+
 //Channel errors
 
 // Returned when a client tries to invite a user to a channel they are already on.
 # define ERR_USERONCHANNEL(user, channel) "443 " + user + channel + " :is already on channel\n"
 
 // Sent to a user when they have joined the maximum number of allowed channels and they try to join another channel.
-# define ERR_TOOMANYCHANNELS(channel_name) "405 " + channel_name + " :You have joined too many channels\n"
+# define ERR_TOOMANYCHANNELS(channel) "405 " + channel + " :You have joined too many channels\n"
 
 # define ERR_CHANNELISFULL(channel) "471 " + channel + " :Cannot join channel (+l)\n"
 

@@ -10,12 +10,13 @@
 #include <netinet/in.h>
 #include <errno.h>
 #include <string.h>
-#include "Colors.hpp"
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <signal.h>
 #include <vector>
+
+#include "Colors.hpp"
 #include "Client.hpp"
 #include "Replies.hpp"
 
