@@ -213,7 +213,6 @@ void		Server::first_connection(int nbr_fds, int i)
 	ev.data.fd = con_socket;
 	ev.events = EPOLLIN | EPOLLOUT;
 	setnonblocking(con_socket);
-
 	// adding the event to the interest list
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, con_socket, &ev) == -1)
 	{
@@ -227,7 +226,7 @@ void		Server::first_connection(int nbr_fds, int i)
 	Clients.push_back(new_connection);
 
 	// std::cout << "success !! con_socket " << con_socket <<  " Connected" << std::endl;
-	send(con_socket, "Insert Password: ", sizeof(char) * 18, 0);
+	//send(con_socket, "Insert Password: ", sizeof(char) * 18, 0);
 }
 
 void	Server::read_and_process(int i)
@@ -253,7 +252,6 @@ void	Server::read_and_process(int i)
 	}
 
 	str = buffer;
-	Client *client = getClient(events[i].data.fd);
 	if (isCRLF(str, client))
 	{
 		parse_exec_cmd(split_buffer(client->getMessage()), client);
@@ -310,6 +308,7 @@ void		Server::processMessage(std::string str, Client *client)
 void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
 	//std::cout << "cmd[0] -> " << cmd[0] << std::endl;
+	const char *buffer;
 	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
 		std::cout << "test" << std::endl;// authenticate
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
@@ -333,7 +332,10 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 	else if (cmd.size() != 0)
 	{
 		std::string err = ERR_UNKNOWNCOMMAND(cmd[0]);
-		send(con_socket, err.c_str(), sizeof(err), 0);
+		buffer = err.c_str();
+		//std::cout << buffer <<  ", with size of: " << sizeof(buffer)  << std::endl;
+		buffer[err.length()];
+		send(client->getFd(), buffer, err.length(), 0);
 	}
 }
 

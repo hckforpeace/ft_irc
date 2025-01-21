@@ -52,7 +52,6 @@ class Server {
 		void		first_connection(int nbr_fds, int i);
 		void		read_and_process(int i);
 		void		processMessage(std::string str, Client *client);
-		bool		isCRLF(std::string str, Client *client);
 		Client*	getClient(int fd);
 		std::vector<Client *>::iterator	getClientIt(int fd);
 		void		parse_exec_cmd(std::vector<std::string> cmd, Client *client);
