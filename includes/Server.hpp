@@ -10,13 +10,15 @@
 #include <netinet/in.h>
 #include <errno.h>
 #include <string.h>
-#include "Colors.hpp"
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <signal.h>
 #include <vector>
+
+#include "Colors.hpp"
 #include "Client.hpp"
+#include "Replies.hpp"
 
 #define MAX_EVENTS 1000
 
@@ -53,6 +55,9 @@ class Server {
 		bool		isCRLF(std::string str, Client *client);
 		Client*	getClient(int fd);
 		std::vector<Client *>::iterator	getClientIt(int fd);
+		void		parse_exec_cmd(std::vector<std::string> cmd, Client *client);
+		std::vector<std::string> split_buffer(std::string str);				
+		bool		isCRLF(std::string str, Client *client);
 };
 
 #endif
