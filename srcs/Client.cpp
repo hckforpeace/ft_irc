@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(int fd):fd(fd)
+Client::Client(int fd):fd(fd), realname("*"), nickname("*"), username("*")
 {
 
 }
@@ -58,4 +58,20 @@ std::string	Client::getUsername()
 void Client::setUsername(std::string str)
 {
 	this->username = str;
+}
+
+void  Client::setRealname(std::string str)
+{
+  this->realname = str;
+}
+
+std::string Client::getRealname()
+{
+  return (this->realname);
+}
+
+
+bool  Client::isRegistered()
+{
+  return (this->isConnected() && this->username.compare("*") && this->realname.compare("*") && this->nickname.compare("*"));
 }

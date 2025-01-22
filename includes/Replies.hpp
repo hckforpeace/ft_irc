@@ -9,13 +9,16 @@
 # define ERR_UNKNOWNCOMMAND(command) "421 " + command + " :Unknown command\n"
 
 // Returned by the server to indicate that the client must be registered before the server will allow it to be parsed in detail.
-# define ERR_NOTREGISTERED "451 : You have not registered\n"
+# define ERR_NOTREGISTERED(nick) "451 " + nick +  " : You have not registered\n"
 
 // Returned by the server by numerous commands to indicate to the client that it didn't supply enough parameters.
 # define ERR_NEEDMOREPARAMS(command) "461 " + command + " :Not enough parameters\n"
 
 // Returned by the server to any link which tries to change part of the registered details (such as password or user details from second USER message).
 # define ERR_ALREADYREGISTRED(user) "462 " + user + " :You may not reregister\n"
+
+
+# define ERR_PASSWORDNOTINSERTED "42 :You didn't insert the password\n"
 
 // Returned to indicate a failed attempt at registering a connection for which a password was required and was either not given or incorrect.
 # define ERR_PASSWDMISMATCH "464 :Password incorrect\n"
@@ -52,6 +55,5 @@
 # define ERR_UNKNOWNMODE(char) "472 " + char + " :is unknown mode char to me\n"
 
 # define ERR_INVITEONLYCHAN(channel) "473 " + channel + " :Cannot join channel (+i)\n"
-
 
 #endif
