@@ -14,13 +14,16 @@
 # define ERR_UNKNOWNCOMMAND(command) RED "421 " + command + " :Unknown command" RESET
 
 // Returned by the server to indicate that the client must be registered before the server will allow it to be parsed in detail.
-# define ERR_NOTREGISTERED(nickanme) RED "451 " + nickname + " : You have not registered" RESET
+# define ERR_NOTREGISTERED(nickname) RED "451 " + nickname + " : You have not registered" RESET
 
 // Returned by the server by numerous commands to indicate to the client that it didn't supply enough parameters.
 # define ERR_NEEDMOREPARAMS(command) RED "461 " + command + " :Not enough parameters" RESET
 
 // Returned by the server to any link which tries to change part of the registered details (such as password or user details from second USER message).
 # define ERR_ALREADYREGISTRED(user) RED "462 " + user + " :You may not reregister" RESET
+
+
+# define ERR_PASSWORDNOTINSERTED "42 :You didn't insert the password\n"
 
 // Returned to indicate a failed attempt at registering a connection for which a password was required and was either not given or incorrect.
 # define ERR_PASSWDMISMATCH RED "464 :Password incorrect" RESET
@@ -30,6 +33,10 @@
 
 // Indicates that no client can be found for the supplied nickname.
 # define ERR_NOSUCHNICK(nickname) RED "401 " + nickname + " :No such nickname" RESET
+
+# define ERR_NICKNAMEINUSE(nickname) RED "433 " + nickname + " :Nickname is already in use" RESET
+
+# define ERR_ERRONEUSNICKNAME(nickname) RED "432 " + nickname + " :Erroneus nickname" RESET 
 
 // Indicates that no channel can be found for the supplied channel name.
 # define ERR_NOSUCHCHANNEL(channel) RED "403 " + channel + " :No such channel" RESET

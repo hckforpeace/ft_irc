@@ -81,10 +81,6 @@ void	Server::run_sever()
 				std::cout << "Connection request" << std::endl;
 				first_connection(nbr_fds, i);
 			}
-			// else if (events[i].events == EPOLLOUT && getClient(events[i].data.fd)->isConnected())
-			// {
-			// 	loop = false;
-			// }
 			
 			// socket available for read operation 
 			else if (events[i].events == (EPOLLIN | EPOLLOUT))
@@ -103,7 +99,8 @@ void	Server::run_sever()
 void	Server::init_server_socket()
 {
 	static std::string error;
-
+	int				opt = 1;
+	
 	// With the flag SOCK_NONBLOCK he socket is nonblockant no need for fnctl
 	this->server_socket = socket(AF_INET , SOCK_STREAM | SOCK_NONBLOCK, 0);
 	if (this->server_socket == -1)
@@ -113,6 +110,13 @@ void	Server::init_server_socket()
 		throw std::runtime_error(error);
 	}
 	std::cout << GREEN << "Server Socket: " << BLU << server_socket << RESET << std::endl;
+
+	// This option allows the server to bind to a socket address that is in the TIME_WAIT state.
+    if (setsockopt(this->server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
+        perror("setsockopt");
+        close(this->server_socket);
+        exit(EXIT_FAILURE);
+    }
 
 	// setting up server parameters
 	server_addr.sin_family = AF_INET;
@@ -153,7 +157,6 @@ void	Server::parse_args(char *port, char *password)
 	this->_password = s_password; //password has a length limit?
 }
 
-
 void 	Server::setupSignals()
 {
 	signal(SIGINT, signIntHandler);
@@ -175,13 +178,14 @@ Client*	Server::getClient(int fd)
 	return (NULL);
 }
 
-void	Server::sendMSG(std::string message, int fd)
+std::vector<Client *>::iterator	Server::getClientIt(int fd)
 {
-	const char *buffer;
-
-	buffer = message.c_str();
-	if (send(fd, buffer, message.length(), 0) == -1)
-		std::cout << RED << "send() failed" << RESET << std::endl;
+	for (std::vector<Client *>::iterator it = Clients.begin(); it != Clients.end(); it++)
+	{
+		if ((*it)->getFd() == fd)
+			return (it);
+	}
+	return (Clients.begin());
 }
 
 void		Server::first_connection(int nbr_fds, int i)
@@ -205,7 +209,6 @@ void		Server::first_connection(int nbr_fds, int i)
 	ev.data.fd = con_socket;
 	ev.events = EPOLLIN | EPOLLOUT;
 	setnonblocking(con_socket);
-
 	// adding the event to the interest list
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, con_socket, &ev) == -1)
 	{
@@ -219,13 +222,14 @@ void		Server::first_connection(int nbr_fds, int i)
 	Clients.push_back(new_connection);
 
 	// std::cout << "success !! con_socket " << con_socket <<  " Connected" << std::endl;
-	send(con_socket, "Insert Password: ", sizeof(char) * 18, 0);
+	//send(con_socket, "Insert Password: ", sizeof(char) * 18, 0);
 }
 
 void	Server::read_and_process(int i)
 {
 	int	len;
 	std::string str;
+	Client *client = getClient(events[i].data.fd);
 
 	// reading string sent from the Client
 	len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);
@@ -233,8 +237,10 @@ void	Server::read_and_process(int i)
 	if (len == 0)
 	{
 		std::cout << "An error has occured during recv of the client socket => " << events[i].data.fd << std::endl ;
-		if (close(events[i].data.fd) == -1)
-			std::cerr << "Failed to close socket" << std::endl;
+		this->Clients.erase(getClientIt(client->getFd()));
+		delete client;
+		std::cout << "Client deleted !" << std::endl;
+		return ;
 	}
 	else
 	{
@@ -242,7 +248,6 @@ void	Server::read_and_process(int i)
 	}
 
 	str = buffer;
-	Client *client = getClient(events[i].data.fd);
 	if (isCRLF(str, client))
 	{
 		parse_exec_cmd(split_buffer(client->getMessage()), client);
@@ -265,31 +270,33 @@ std::vector<std::string> Server::split_buffer(std::string str)
 	return (vec);
 }
 
-bool	Server::isCRLF(std::string str, Client *client)
+
+void		Server::processMessage(std::string str, Client *client)
 {
-	std::size_t pos = str.find("\r\n");
-	std::string sub;
-	
-	if (pos == std::string::npos)
+	if (!client->isConnected())
 	{
-		client->setMessage(client->getMessage() + str);
-		return (false);
+		if (!this->_password.compare(client->getMessage()))
+		{
+			std::cout << "Welcome" << std::endl;
+			client->setConnection();
+		}
+		else
+		{
+			std::cout << RED << "Failed to Connect" << RESET << std::endl;
+		}
 	}
-	sub = str.substr(0, str.length() - 2);
-	client->setMessage(client->getMessage() + sub);
-	return (true);
 }
 
 void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
 	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
-		std::cout << "test" << std::endl;//pass(cmd, client);
+		authenticate(client, cmd);// authenticate
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
-		std::cout << "test" << std::endl;//nick(cmd, client);
+		setNickname(client, cmd);// set nickename
 	else if (cmd.size() != 0 && (cmd[0] == "user" || cmd[0] == "USER"))
-		std::cout << "test" << std::endl;//user(cmd, client);
+		setUser(client, cmd);
 	else if (cmd.size() != 0 && (cmd[0] == "join" || cmd[0] == "JOIN"))
-		join(cmd, client);
+		join(cmd, client); // join a channel
 	else if (cmd.size() != 0 && (cmd[0] == "invite" || cmd[0] == "INVITE"))
 		std::cout << "test" << std::endl;//invite(client, channel);
 	else if (cmd.size() != 0 && (cmd[0] == "topic" || cmd[0] == "TOPIC"))
@@ -299,7 +306,7 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 	else if (cmd.size() != 0 && (cmd[0] == "mode" || cmd[0] == "MODE"))
 		std::cout << "test" << std::endl;// change the modes of a channel or client (user operator)
 	else if (cmd.size() != 0 && (cmd[0] == "privmsg" || cmd[0] == "PRIVMSG"))
-		std::cout << "test" << std::endl;//send a mp or a msg to a channel
+    privmsg(client, cmd);
 	else if (cmd.size() != 0 && (cmd[0] == "quit" || cmd[0] == "QUIT"))
 		std::cout << "test" << std::endl;// quit the server
 	else if (cmd.size() != 0)

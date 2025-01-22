@@ -30,12 +30,11 @@ void Server::createChannel(std::string name, Client *client)
 	new_channel->add_operator(client);
 	this->Channels.push_back(new_channel);
 	client->joinChanCounter();
-	sendMSG(CHAN_WELC(client->getNick(), name), client->getFd());
+	sendMSG(CHAN_WELC(client->getNickname(), name), client->getFd());
 }
 
 void Server::enterChannel(Channel *channel, Client *client)
 {
-	std::cout << "yoyoyoyo" << std::endl;
 	channel->add_client(client);
-	sendMSG(CHAN_WELC(client->getNick(), channel->getName()), client->getFd());
+	sendMSG(CHAN_WELC(client->getNickname(), channel->getName()), client->getFd());
 }
