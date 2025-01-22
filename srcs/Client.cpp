@@ -2,7 +2,7 @@
 
 Client::Client(int fd):fd(fd)
 {
-
+	this->nickname = "*";
 }
 
 Client::~Client()
@@ -16,6 +16,11 @@ Client::~Client()
 int	Client::getFd()
 {
 	return (this->fd);
+}
+
+std::string Client::getNick(void)
+{
+	 return (this->nickname);
 }
 
 void	Client::setMessage(std::string str)

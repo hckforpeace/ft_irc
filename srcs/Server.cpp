@@ -38,8 +38,6 @@ int Server::setnonblocking(int sock)
     return result;
 }
 
-
-
 void	Server::init_server()
 {
 	static std::string error;
@@ -177,6 +175,11 @@ Client*	Server::getClient(int fd)
 	return (NULL);
 }
 
+void	Server::sendMSG(std::string message, int fd)
+{
+	if (send(fd, message.c_str(), sizeof(message), 0) == -1)
+		std::cout << RED << "send() failed" << RESET << std::endl;
+}
 
 void		Server::first_connection(int nbr_fds, int i)
 {
@@ -276,19 +279,20 @@ bool	Server::isCRLF(std::string str, Client *client)
 
 void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
-	//std::cout << "cmd[0] -> " << cmd[0] << std::endl;
+	const char *buffer;
+
 	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
-		std::cout << "test" << std::endl;// authenticate
+		std::cout << "test" << std::endl;//pass(cmd, client);
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
-		std::cout << "test" << std::endl;// set nickename
+		std::cout << "test" << std::endl;//nick(cmd, client);
 	else if (cmd.size() != 0 && (cmd[0] == "user" || cmd[0] == "USER"))
-		std::cout << "test" << std::endl;// set username
+		std::cout << "test" << std::endl;//user(cmd, client);
 	else if (cmd.size() != 0 && (cmd[0] == "join" || cmd[0] == "JOIN"))
-		std::cout << "test" << std::endl;// join channel
+		join(cmd, client);
 	else if (cmd.size() != 0 && (cmd[0] == "invite" || cmd[0] == "INVITE"))
-		std::cout << "test" << std::endl;// invite client to channel
+		std::cout << "test" << std::endl;//invite(client, channel);
 	else if (cmd.size() != 0 && (cmd[0] == "topic" || cmd[0] == "TOPIC"))
-		std::cout << "test" << std::endl;// change the topic of a channel
+		std::cout << "test" << std::endl;//topic 
 	else if (cmd.size() != 0 && (cmd[0] == "kick" || cmd[0] == "KICK"))
 		std::cout << "test" << std::endl;// kick a client from a channel
 	else if (cmd.size() != 0 && (cmd[0] == "mode" || cmd[0] == "MODE"))
@@ -300,23 +304,7 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 	else if (cmd.size() != 0)
 	{
 		std::string err = ERR_UNKNOWNCOMMAND(cmd[0]);
+		buffer = err.c_str();
 		send(con_socket, err.c_str(), sizeof(err), 0);
 	}
 }
-
-// if (!client->isConnected())
-// {
-// 	if (!this->_password.compare(client->getMessage()))
-// 	{
-// 		std::cout << "Welcome" << std::endl;
-// 		client->setConnection();
-// 	}
-// 	else
-// 	{
-// 		std::cout << "Failed to Connect" << std::endl;
-// 		// TODO
-// 		close(client->getFd());
-// 		// this->Clients.erase(this->Clients.);
-// 		// delete client;
-// 	}
-// }
