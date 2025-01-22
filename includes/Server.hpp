@@ -39,7 +39,7 @@ class Server {
 		sockaddr_in  server_addr;
  		sockaddr_in  client_addr;
 		std::vector<Client*> Clients;
-		std::vector<Channel> Channels;
+		std::vector<Channel*> Channels;
 		Client*	getClient(int fd);
 		void	parse_args(char *port, char *password);
 
@@ -59,11 +59,10 @@ class Server {
 		bool		isCRLF(std::string str, Client *client);
 		void		sendMSG(std::string message, int fd);
 
-
 		// Channel
 		void		join(std::vector<std::string>, Client *client);
 		void		createChannel(std::string name, Client *client);
-		void		enterChannel(std::string name, Client *client);
+		void		enterChannel(Channel *channel, Client *client);
 };
 
 #endif

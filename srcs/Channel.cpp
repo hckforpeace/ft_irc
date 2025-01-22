@@ -1,9 +1,10 @@
 #include "Channel.hpp"
 
-Channel::Channel(void)
+Channel::Channel(std::string name)
 {
 	this->limit = 20; // we have to verify the real limit
-
+	this->name = name;
+	
 }
 
 Channel::~Channel()
@@ -22,12 +23,12 @@ Channel::Channel(Channel const &src)
 // }
 
 /*=========================== METHODS ==============================*/
-void	Channel::add_client(Client new_client)
+void	Channel::add_client(Client *new_client)
 {
-
+	chan_clients.push_back(new_client);
 }
 
-void	Channel::add_operator(Client new_operator)
+void	Channel::add_operator(Client *new_operator)
 {
 	operators.push_back(new_operator);
 }

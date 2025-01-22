@@ -14,7 +14,7 @@ class Client
 		std::vector<std::string>	cmd;
 		int			fd;
 		int			channel_counter; // max 10
-		bool		connected = false;
+		bool		connected;
 
 	public:
 		Client(int fd);
@@ -27,6 +27,7 @@ class Client
 		void	setMessage(std::string str);
 		void	setConnection();
 		void	setCmd(std::vector<std::string> cmd) {this->cmd = cmd;};
+		void	joinChanCounter(void);
 };
 
 #endif

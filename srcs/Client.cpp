@@ -3,6 +3,7 @@
 Client::Client(int fd):fd(fd)
 {
 	this->nickname = "*";
+	this->channel_counter = 0;
 }
 
 Client::~Client()
@@ -42,4 +43,9 @@ void	Client::setConnection()
 bool	Client::isConnected()
 {
 	return (this->connected);
+}
+
+void	Client::joinChanCounter(void)
+{
+	this->channel_counter++;
 }

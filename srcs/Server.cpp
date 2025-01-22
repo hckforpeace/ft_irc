@@ -177,7 +177,10 @@ Client*	Server::getClient(int fd)
 
 void	Server::sendMSG(std::string message, int fd)
 {
-	if (send(fd, message.c_str(), sizeof(message), 0) == -1)
+	const char *buffer;
+
+	buffer = message.c_str();
+	if (send(fd, buffer, message.length(), 0) == -1)
 		std::cout << RED << "send() failed" << RESET << std::endl;
 }
 
@@ -279,8 +282,6 @@ bool	Server::isCRLF(std::string str, Client *client)
 
 void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
-	const char *buffer;
-
 	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
 		std::cout << "test" << std::endl;//pass(cmd, client);
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
@@ -302,9 +303,5 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 	else if (cmd.size() != 0 && (cmd[0] == "quit" || cmd[0] == "QUIT"))
 		std::cout << "test" << std::endl;// quit the server
 	else if (cmd.size() != 0)
-	{
-		std::string err = ERR_UNKNOWNCOMMAND(cmd[0]);
-		buffer = err.c_str();
-		send(con_socket, err.c_str(), sizeof(err), 0);
-	}
+		sendMSG(ERR_UNKNOWNCOMMAND(cmd[0]), client->getFd());
 }

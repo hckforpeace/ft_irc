@@ -12,10 +12,10 @@ class Channel
 		std::string name;
 		std::string topic_name;
 		std::string password; // if there's a key
-		std::vector<Client> Clients;
-		std::vector<Client> operators;
+		std::vector<Client*> chan_clients;
+		std::vector<Client*> operators;
 	public:
-		Channel();
+		Channel(std::string name);
 		~Channel();
 		Channel(Channel const &src);
 		Channel &operator=(Channel const &src);
@@ -27,8 +27,8 @@ class Channel
 		void	setName(std::string name);
 
 		/*methods*/
-		void	add_client(Client new_client);
-		void	add_operator(Client new_operator);
+		void	add_client(Client *new_client);
+		void	add_operator(Client *new_operator);
 };
 
 #endif
