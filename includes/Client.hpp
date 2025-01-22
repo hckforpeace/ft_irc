@@ -8,13 +8,12 @@
 class Client 
 {
 	private:
-		std::string name;
-		std::string nickname = "*";
+		std::string username = "";
+		std::string nickname = "";
 		std::string message;
 		std::vector<std::string>	cmd;
 		int			fd;
 		bool		connected = false;
-
 	public:
 		Client(int fd);
 		~Client();
@@ -25,6 +24,10 @@ class Client
 		void	setMessage(std::string str);
 		void	setConnection();
 		void	setCmd(std::vector<std::string> cmd) {this->cmd = cmd;};
+		void	setNickname(std::string nick);
+		std::string	getNickname();
+		std::string	getUsername();
+		void		setUsername(std::string str);
 };
 
 #endif

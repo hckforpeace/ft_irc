@@ -38,3 +38,24 @@ bool	Client::isConnected()
 {
 	return (this->connected);
 }
+
+void	Client::setNickname(std::string nick)
+{
+	this->nickname = nick;
+}
+
+std::string	Client::getNickname()
+{
+	return (this->nickname);
+}
+
+
+std::string	Client::getUsername()
+{
+	return (this->username);
+}
+
+void Client::setUsername(std::string str)
+{
+	this->username = str;
+}

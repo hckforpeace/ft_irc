@@ -57,6 +57,12 @@ class Server {
 		void		parse_exec_cmd(std::vector<std::string> cmd, Client *client);
 		std::vector<std::string> split_buffer(std::string str);				
 		bool		isCRLF(std::string str, Client *client);
+
+		// commands execution
+		void	authenticate(Client *client, std::vector<std::string> cmd);
+		void	setNickname(Client *client, std::vector<std::string> cmd);
+		void	setUsername(Client *client, std::vector<std::string> cmd);
+		bool	nickInUse(std::string nickname);
 };
 
 #endif

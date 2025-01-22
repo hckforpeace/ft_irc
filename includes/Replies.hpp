@@ -9,7 +9,7 @@
 # define ERR_UNKNOWNCOMMAND(command) "421 " + command + " :Unknown command\n"
 
 // Returned by the server to indicate that the client must be registered before the server will allow it to be parsed in detail.
-# define ERR_NOTREGISTERED "451 : You have not registered"
+# define ERR_NOTREGISTERED "451 : You have not registered\n"
 
 // Returned by the server by numerous commands to indicate to the client that it didn't supply enough parameters.
 # define ERR_NEEDMOREPARAMS(command) "461 " + command + " :Not enough parameters\n"
@@ -26,14 +26,18 @@
 // Indicates that no client can be found for the supplied nickname.
 # define ERR_NOSUCHNICK(nickname) "401 " + nickname + " :No such nickname\n"
 
+# define ERR_NICKNAMEINUSE(nickname) "433 " + nickname + " :Nickname is already in use\n"
+
+# define ERR_ERRONEUSNICKNAME(nickname) "432 " + nickname + " :Erroneus nickname\n" 
+
 // Indicates that no channel can be found for the supplied channel name.
 # define ERR_NOSUCHCHANNEL(channel) "403 " + channel + " :No such channel\n"
 
 // Returned by the PRIVMSG command to indicate the message wasn’t delivered because there was no text to send.
-# define ERR_NOTEXTTOSEND "412 <client> :No text to send"
+# define ERR_NOTEXTTOSEND "412 <client> :No text to send\n"
 
 // Indicates a given line does not follow the specified size limits (512 bytes for the main section, 4094 or 8191 bytes for the tag section).
-# define ERR_INPUTTOOLONG "417 <client> :Input line was too long"
+# define ERR_INPUTTOOLONG "417 <client> :Input line was too long\n"
 
 //Channel errors
 

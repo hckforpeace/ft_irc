@@ -310,9 +310,9 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 	//std::cout << "cmd[0] -> " << cmd[0] << std::endl;
 	const char *buffer;
 	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
-		std::cout << "test" << std::endl;// authenticate
+		authenticate(client, cmd);// authenticate
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
-		std::cout << "test" << std::endl;// set nickename
+		setNickname(client, cmd);// set nickename
 	else if (cmd.size() != 0 && (cmd[0] == "user" || cmd[0] == "USER"))
 		std::cout << "test" << std::endl;// set username;;
 	else if (cmd.size() != 0 && (cmd[0] == "join" || cmd[0] == "JOIN"))
@@ -334,11 +334,75 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 		std::string err = ERR_UNKNOWNCOMMAND(cmd[0]);
 		buffer = err.c_str();
 		//std::cout << buffer <<  ", with size of: " << sizeof(buffer)  << std::endl;
-		buffer[err.length()];
 		send(client->getFd(), buffer, err.length(), 0);
 	}
 }
 
+
+// Commands
+void	Server::authenticate(Client *client, std::vector<std::string> cmd)
+{
+	const	char *buffer;
+	std::string		err;
+
+	if (cmd.size() == 1)
+		err = ERR_NEEDMOREPARAMS(cmd[0]);
+	else if (client->isConnected())
+		err = ERR_ALREADYREGISTRED(cmd[0]);
+	else
+	{
+		if (!cmd[1].compare(this->_password))
+		{
+			client->setConnection();
+			return ;
+		}
+		else
+			err = ERR_PASSWDMISMATCH;
+	}
+	buffer = err.c_str();
+	send(client->getFd(), buffer, err.length(), 0);
+}
+
+void	Server::setNickname(Client *client, std::vector<std::string> cmd)
+{
+	const	char *buffer;
+	std::string		err;
+	if (cmd.size() < 2)
+		err = ERR_NEEDMOREPARAMS(cmd[0]);
+	else if (!client->isConnected())
+		err = ERR_NOTREGISTERED;
+	else if (nickInUse(cmd[1]))
+		err = ERR_NICKNAMEINUSE(cmd[1]);
+	else
+	{
+		std::string temp = cmd[1];
+		if (temp.at(0) == ':' || temp.at(0) == '#')
+			err = ERR_ERRONEUSNICKNAME(cmd[1]);
+		else
+		{
+			client->setNickname(cmd[1]);
+			return ;
+		}
+	}
+	buffer = err.c_str();
+	send(client->getFd(), buffer, err.length(), 0);
+
+}
+
+bool	Server::nickInUse(std::string nickname)
+{
+	for (std::vector<Client *>::iterator it = Clients.begin(); it != Clients.end(); it++)
+	{
+		if (!(*it)->getNickname().compare(nickname))
+			return (true);
+	}
+	return (false);
+}
+
+void	Server::setUsername(Client *client, std::vector<std::string> cmd)
+{
+	// if ()
+}
 // if (!client->isConnected())
 // {
 // 	if (!this->_password.compare(client->getMessage()))
