@@ -38,8 +38,6 @@ int Server::setnonblocking(int sock)
     return result;
 }
 
-
-
 void	Server::init_server()
 {
 	static std::string error;
@@ -159,7 +157,6 @@ void	Server::parse_args(char *port, char *password)
 	this->_password = s_password; //password has a length limit?
 }
 
-
 void 	Server::setupSignals()
 {
 	signal(SIGINT, signIntHandler);
@@ -191,6 +188,15 @@ std::vector<Client *>::iterator	Server::getClientIt(int fd)
 	return (Clients.begin());
 }
 
+void	Server::sendMSG(std::string message, int fd)
+{
+	const char *buffer;
+
+	message.append("\r\n");
+	buffer = message.c_str();
+	if (send(fd, buffer, message.length(), 0) == -1)
+		std::cout << RED << "send() failed" << RESET << std::endl;
+}
 
 void		Server::first_connection(int nbr_fds, int i)
 {
@@ -307,8 +313,6 @@ void		Server::processMessage(std::string str, Client *client)
 
 void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
-	//std::cout << "cmd[0] -> " << cmd[0] << std::endl;
-	const char *buffer;
 	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
 		authenticate(client, cmd);// authenticate
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
@@ -316,11 +320,11 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 	else if (cmd.size() != 0 && (cmd[0] == "user" || cmd[0] == "USER"))
 		std::cout << "test" << std::endl;// set username;;
 	else if (cmd.size() != 0 && (cmd[0] == "join" || cmd[0] == "JOIN"))
-		std::cout << "test" << std::endl;// join channel
+		join(cmd, client);
 	else if (cmd.size() != 0 && (cmd[0] == "invite" || cmd[0] == "INVITE"))
-		std::cout << "test" << std::endl;// invite client to channel
+		std::cout << "test" << std::endl;//invite(client, channel);
 	else if (cmd.size() != 0 && (cmd[0] == "topic" || cmd[0] == "TOPIC"))
-		std::cout << "test" << std::endl;// change the topic of a channel
+		std::cout << "test" << std::endl;//topic 
 	else if (cmd.size() != 0 && (cmd[0] == "kick" || cmd[0] == "KICK"))
 		std::cout << "test" << std::endl;// kick a client from a channel
 	else if (cmd.size() != 0 && (cmd[0] == "mode" || cmd[0] == "MODE"))
@@ -330,14 +334,8 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 	else if (cmd.size() != 0 && (cmd[0] == "quit" || cmd[0] == "QUIT"))
 		std::cout << "test" << std::endl;// quit the server
 	else if (cmd.size() != 0)
-	{
-		std::string err = ERR_UNKNOWNCOMMAND(cmd[0]);
-		buffer = err.c_str();
-		//std::cout << buffer <<  ", with size of: " << sizeof(buffer)  << std::endl;
-		send(client->getFd(), buffer, err.length(), 0);
-	}
+		sendMSG(ERR_UNKNOWNCOMMAND(cmd[0]), client->getFd());
 }
-
 
 // Commands
 void	Server::authenticate(Client *client, std::vector<std::string> cmd)
@@ -346,9 +344,9 @@ void	Server::authenticate(Client *client, std::vector<std::string> cmd)
 	std::string		err;
 
 	if (cmd.size() == 1)
-		err = ERR_NEEDMOREPARAMS(cmd[0]);
+		sendMSG(ERR_NEEDMOREPARAMS(cmd[0]), client->getFd());
 	else if (client->isConnected())
-		err = ERR_ALREADYREGISTRED(cmd[0]);
+		sendMSG(ERR_ALREADYREGISTRED(cmd[0]), client->getFd());
 	else
 	{
 		if (!cmd[1].compare(this->_password))
@@ -357,10 +355,8 @@ void	Server::authenticate(Client *client, std::vector<std::string> cmd)
 			return ;
 		}
 		else
-			err = ERR_PASSWDMISMATCH;
+			sendMSG(ERR_PASSWDMISMATCH, client->getFd());
 	}
-	buffer = err.c_str();
-	send(client->getFd(), buffer, err.length(), 0);
 }
 
 void	Server::setNickname(Client *client, std::vector<std::string> cmd)
@@ -368,25 +364,22 @@ void	Server::setNickname(Client *client, std::vector<std::string> cmd)
 	const	char *buffer;
 	std::string		err;
 	if (cmd.size() < 2)
-		err = ERR_NEEDMOREPARAMS(cmd[0]);
+		sendMSG(ERR_NEEDMOREPARAMS(cmd[0]), client->getFd());
 	else if (!client->isConnected())
-		err = ERR_NOTREGISTERED;
+		sendMSG(ERR_NOTREGISTERED(client->getNickname()), client->getFd());
 	else if (nickInUse(cmd[1]))
-		err = ERR_NICKNAMEINUSE(cmd[1]);
+		sendMSG(ERR_NICKNAMEINUSE(cmd[1]), client->getFd());
 	else
 	{
 		std::string temp = cmd[1];
 		if (temp.at(0) == ':' || temp.at(0) == '#')
-			err = ERR_ERRONEUSNICKNAME(cmd[1]);
+			sendMSG(ERR_ERRONEUSNICKNAME(cmd[1]), client->getFd());
 		else
 		{
 			client->setNickname(cmd[1]);
 			return ;
 		}
 	}
-	buffer = err.c_str();
-	send(client->getFd(), buffer, err.length(), 0);
-
 }
 
 bool	Server::nickInUse(std::string nickname)
@@ -403,19 +396,3 @@ void	Server::setUsername(Client *client, std::vector<std::string> cmd)
 {
 	// if ()
 }
-// if (!client->isConnected())
-// {
-// 	if (!this->_password.compare(client->getMessage()))
-// 	{
-// 		std::cout << "Welcome" << std::endl;
-// 		client->setConnection();
-// 	}
-// 	else
-// 	{
-// 		std::cout << "Failed to Connect" << std::endl;
-// 		// TODO
-// 		close(client->getFd());
-// 		// this->Clients.erase(this->Clients.);
-// 		// delete client;
-// 	}
-// }

@@ -8,16 +8,20 @@
 class Client 
 {
 	private:
-		std::string username = "";
-		std::string nickname = "";
+		std::string name;
+		std::string nickname;
+		std::string username;
 		std::string message;
 		std::vector<std::string>	cmd;
 		int			fd;
-		bool		connected = false;
+		int			channel_counter; // max 10
+		bool		connected; // false by default
+
 	public:
 		Client(int fd);
 		~Client();
 		int	getFd();
+		std::string	getNick(void);
 		std::vector<std::string> getCmd() {return (this->cmd);};
 		std::string&	getMessage();
 		bool	isConnected();
@@ -28,6 +32,7 @@ class Client
 		std::string	getNickname();
 		std::string	getUsername();
 		void		setUsername(std::string str);
+		void		joinChanCounter(void);
 };
 
 #endif

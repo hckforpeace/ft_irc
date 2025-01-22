@@ -2,7 +2,8 @@
 
 Client::Client(int fd):fd(fd)
 {
-
+	this->nickname = "*";
+	this->channel_counter = 0;
 }
 
 Client::~Client()
@@ -58,4 +59,9 @@ std::string	Client::getUsername()
 void Client::setUsername(std::string str)
 {
 	this->username = str;
+}
+
+void	Client::joinChanCounter(void)
+{
+	this->channel_counter++;
 }

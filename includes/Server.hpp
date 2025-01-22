@@ -19,6 +19,7 @@
 #include "Colors.hpp"
 #include "Client.hpp"
 #include "Replies.hpp"
+#include "Channel.hpp"
 
 #define MAX_EVENTS 1000
 
@@ -38,6 +39,7 @@ class Server {
 		sockaddr_in  server_addr;
  		sockaddr_in  client_addr;
 		std::vector<Client*> Clients;
+		std::vector<Channel*> Channels;
 		void	parse_args(char *port, char *password);
 
  	public:
@@ -63,6 +65,12 @@ class Server {
 		void	setNickname(Client *client, std::vector<std::string> cmd);
 		void	setUsername(Client *client, std::vector<std::string> cmd);
 		bool	nickInUse(std::string nickname);
+		void	sendMSG(std::string message, int fd);
+
+		// Channel
+		void	join(std::vector<std::string>, Client *client);
+		void	createChannel(std::string name, Client *client);
+		void	enterChannel(Channel *channel, Client *client);
 };
 
 #endif
