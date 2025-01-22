@@ -22,6 +22,9 @@
 // Returned by the server to any link which tries to change part of the registered details (such as password or user details from second USER message).
 # define ERR_ALREADYREGISTRED(user) RED "462 " + user + " :You may not reregister" RESET
 
+
+# define ERR_PASSWORDNOTINSERTED "42 :You didn't insert the password\n"
+
 // Returned to indicate a failed attempt at registering a connection for which a password was required and was either not given or incorrect.
 # define ERR_PASSWDMISMATCH RED "464 :Password incorrect" RESET
 

@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(int fd):fd(fd)
+Client::Client(int fd):fd(fd), realname("*"), nickname("*"), username("*")
 {
 	this->nickname = "*";
 	this->channel_counter = 0;
@@ -64,4 +64,20 @@ void Client::setUsername(std::string str)
 void	Client::joinChanCounter(void)
 {
 	this->channel_counter++;
+}
+
+void  Client::setRealname(std::string str)
+{
+  this->realname = str;
+}
+
+std::string Client::getRealname()
+{
+  return (this->realname);
+}
+
+
+bool  Client::isRegistered()
+{
+  return (this->isConnected() && this->username.compare("*") && this->realname.compare("*") && this->nickname.compare("*"));
 }

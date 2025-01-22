@@ -1,0 +1,41 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-c",
+      "-Iincludes/",
+      "-o",
+      "objects/main.o",
+      "srcs/main.cpp"
+    ],
+    "directory": "/home/pbeyloun/Documents/ft_irc",
+    "file": "/home/pbeyloun/Documents/ft_irc/srcs/main.cpp",
+    "output": "/home/pbeyloun/Documents/ft_irc/objects/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-c",
+      "-Iincludes/",
+      "-o",
+      "objects/Server.o",
+      "srcs/Server.cpp"
+    ],
+    "directory": "/home/pbeyloun/Documents/ft_irc",
+    "file": "/home/pbeyloun/Documents/ft_irc/srcs/Server.cpp",
+    "output": "/home/pbeyloun/Documents/ft_irc/objects/Server.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-c",
+      "-Iincludes/",
+      "-o",
+      "objects/Client.o",
+      "srcs/Client.cpp"
+    ],
+    "directory": "/home/pbeyloun/Documents/ft_irc",
+    "file": "/home/pbeyloun/Documents/ft_irc/srcs/Client.cpp",
+    "output": "/home/pbeyloun/Documents/ft_irc/objects/Client.o"
+  }
+]

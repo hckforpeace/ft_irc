@@ -54,23 +54,32 @@ class Server {
 		void		first_connection(int nbr_fds, int i);
 		void		read_and_process(int i);
 		void		processMessage(std::string str, Client *client);
+
+    	// getters
 		Client*	getClient(int fd);
 		std::vector<Client *>::iterator	getClientIt(int fd);
-		void		parse_exec_cmd(std::vector<std::string> cmd, Client *client);
+
+    	void		parse_exec_cmd(std::vector<std::string> cmd, Client *client);
 		std::vector<std::string> split_buffer(std::string str);				
-		bool		isCRLF(std::string str, Client *client);
 
 		// commands execution
 		void	authenticate(Client *client, std::vector<std::string> cmd);
 		void	setNickname(Client *client, std::vector<std::string> cmd);
 		void	setUsername(Client *client, std::vector<std::string> cmd);
-		bool	nickInUse(std::string nickname);
-		void	sendMSG(std::string message, int fd);
 
 		// Channel
 		void	join(std::vector<std::string>, Client *client);
 		void	createChannel(std::string name, Client *client);
 		void	enterChannel(Channel *channel, Client *client);
+		void	setUser(Client *client, std::vector<std::string> cmd);
+	  	void	privmsg(Client *client, std::vector<std::string> cmd);
+
+    	// utils
+    	bool	nickInUse(std::string nickname);
+		bool	isCRLF(std::string str, Client *client);
+		bool 	 isRegistered(Client *client);
+    	Client*  findClient(std::string nickname);
+		void     sendMSG(std::string message, int fd);
 };
 
 #endif
