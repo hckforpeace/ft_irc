@@ -6,7 +6,7 @@
 /*================ CHANNEL ====================*/
 
 // Welcome message when a client joins a channel
-# define CHAN_WELC(nickname, channel) GREEN "<" + nickname + "> joined <"  + channel + "> channel" RESET
+# define CHAN_WELC(nickname, channel) GREEN + nickname + " has joined #"  + channel + RESET
 
 /*================= ERRORS ===================*/
 
@@ -21,7 +21,6 @@
 
 // Returned by the server to any link which tries to change part of the registered details (such as password or user details from second USER message).
 # define ERR_ALREADYREGISTRED(user) RED "462 " + user + " :You may not reregister" RESET
-
 
 # define ERR_PASSWORDNOTINSERTED "42 :You didn't insert the password\n"
 
@@ -50,12 +49,7 @@
 //Channel errors
 
 // Returned when a client tries to invite a user to a channel they are already on.
-# define ERR_USERONCHANNEL(user, channel) RED "443 " + user + channel + " :is already on channel" RESET
-
-// Sent to a user when they have joined the maximum number of allowed channels and they try to join another channel.
-# define ERR_TOOMANYCHANNELS(channel) RED "405 " + channel + " :You have joined too many channels" RESET
-
-# define ERR_CHANNELISFULL(channel) RED "471 " + channel + " :Cannot join channel (+l)" RESET
+# define ERR_USERONCHANNEL(user, channel) RED "443 :" + user + " is already on channel #" + channel + RESET
 
 # define ERR_UNKNOWNMODE(char) RED "472 " + char + " :is unknown mode char to me" RESET
 
@@ -63,5 +57,26 @@
 
 // Returned when the "join #channel" syntax is not respected
 # define ERR_INVCHANNELNAME	RED "The channel name must be preceded by an '#' to be interpreted" RESET
+
+// Sent to a user when they have joined the maximum number of allowed channels and they try to join another channel.
+# define ERR_TOOMANYCHANNELS(client) RED "405 " + client + ": You have already joined 10 channels, you can't join any other one" RESET
+
+/*========== INVITE =============*/
+# define INVITE_ONLY(channel) RED "Cannot join to channel #" + channel + " (You must be invited)" + RESET
+
+/*======================== MODES =============================*/
+
+// mode/#channel [+/-k pass] || mode/#channel [+/-o client] || mode/#channel [+l limit]
+# define MODE_SET(channel, nickname, mode) BLU "mode/#" + channel + " [+" + mode + "] by " + nickname + RESET
+# define MODE_UNSET(channel, nickname, mode) YEL "mode/#" + channel + " [-" + mode + "] by " + nickname + RESET
+
+// Password
+# define CHAN_PASS(channel) RED "Cannot join to channel #" + channel + " (Bad channel key)" RESET
+
+// Operator
+# define ERR_NOTOPERATOR(channel) RED "#" + channel + " :You're not channel operator" RESET
+
+// User limit
+# define ERR_CHANNELISFULL(channel) RED "471: Cannot join to channel #" + channel + " (Channel is full)" RESET
 
 #endif

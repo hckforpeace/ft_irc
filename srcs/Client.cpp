@@ -4,6 +4,7 @@ Client::Client(int fd):fd(fd), realname("*"), nickname("*"), username("*")
 {
 	this->nickname = "*";
 	this->channel_counter = 0;
+	this->connected = false;
 }
 
 Client::~Client()
@@ -13,15 +14,9 @@ Client::~Client()
 		std::cerr << "failed to close fd: " << fd << std::endl;
 }
 
-
 int	Client::getFd()
 {
 	return (this->fd);
-}
-
-void	Client::setMessage(std::string str)
-{
-	this->message = str;
 }
 
 std::string&	Client::getMessage()
@@ -29,20 +24,9 @@ std::string&	Client::getMessage()
 	return (this->message);
 }
 
-void	Client::setConnection()
-{
-	this->connected = true;
-}
-
-
 bool	Client::isConnected()
 {
 	return (this->connected);
-}
-
-void	Client::setNickname(std::string nick)
-{
-	this->nickname = nick;
 }
 
 std::string	Client::getNickname()
@@ -50,10 +34,36 @@ std::string	Client::getNickname()
 	return (this->nickname);
 }
 
-
 std::string	Client::getUsername()
 {
 	return (this->username);
+}
+
+std::string Client::getRealname()
+{
+  return (this->realname);
+}
+
+int		Client::getChanCounter(void)
+{
+	return (this->channel_counter);
+}
+
+/*========================== SETTERS ===========================*/
+
+void	Client::setNickname(std::string nick)
+{
+	this->nickname = nick;
+}
+
+void	Client::setMessage(std::string str)
+{
+	this->message = str;
+}
+
+void	Client::setConnection()
+{
+	this->connected = true;
 }
 
 void Client::setUsername(std::string str)
@@ -61,7 +71,7 @@ void Client::setUsername(std::string str)
 	this->username = str;
 }
 
-void	Client::joinChanCounter(void)
+void	Client::setChanCounter(void)
 {
 	this->channel_counter++;
 }
@@ -71,11 +81,7 @@ void  Client::setRealname(std::string str)
   this->realname = str;
 }
 
-std::string Client::getRealname()
-{
-  return (this->realname);
-}
-
+/*======================== METHODS ===============================*/
 
 bool  Client::isRegistered()
 {

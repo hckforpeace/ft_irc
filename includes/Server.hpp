@@ -38,13 +38,13 @@ class Server {
 		epoll_event	events[MAX_EVENTS];
 		sockaddr_in  server_addr;
  		sockaddr_in  client_addr;
-		std::vector<Client*> Clients;
-		std::vector<Channel*> Channels;
-		void	parse_args(char *port, char *password);
+		std::vector<Client *> Clients;
+		std::vector<Channel *> Channels;
 
  	public:
 		Server(char *port, char *password);
 		~Server();
+		void	parse_args(char *port, char *password);
 		void	init_server_socket();
 		void	init_server();
 		void	run_sever();
@@ -58,6 +58,7 @@ class Server {
     	// getters
 		Client*	getClient(int fd);
 		std::vector<Client *>::iterator	getClientIt(int fd);
+		Channel* getChannel(std::string channel_name);
 
     	void		parse_exec_cmd(std::vector<std::string> cmd, Client *client);
 		std::vector<std::string> split_buffer(std::string str);				
@@ -67,19 +68,27 @@ class Server {
 		void	setNickname(Client *client, std::vector<std::string> cmd);
 		void	setUsername(Client *client, std::vector<std::string> cmd);
 
+		// Modes
+		void	mode(std::vector<std::string> cmd, Client *client);
+
 		// Channel
-		void	join(std::vector<std::string>, Client *client);
+		void	join(std::vector<std::string> cmd, Client *client);
 		void	createChannel(std::string name, Client *client);
 		void	enterChannel(Channel *channel, Client *client);
 		void	setUser(Client *client, std::vector<std::string> cmd);
 	  	void	privmsg(Client *client, std::vector<std::string> cmd);
+		bool 	isOperator(Client *client, Channel *channel);
+		bool	setOperator(Client *client, Channel *channel);
 
     	// utils
     	bool	nickInUse(std::string nickname);
 		bool	isCRLF(std::string str, Client *client);
-		bool 	 isRegistered(Client *client);
-    	Client*  findClient(std::string nickname);
-		void     sendMSG(std::string message, int fd);
+		bool 	isRegistered(Client *client);
+    	Client* findClient(std::string nickname);
+		void    sendMSG(std::string message, int fd);
+		void  	sendToChannel(std::string message, std::string nickname, Channel *channel);
+		void    sendMSGChan(std::string message, Channel *channel);
+		bool	isinChan(Client *client, Channel *channel);
 };
 
 #endif

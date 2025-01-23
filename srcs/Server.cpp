@@ -2,14 +2,15 @@
 
 Server::~Server()
 {
-	std::cout << "destructeur sever " << std::endl;
+	std::cout << "destructor sever" << std::endl;
 	std::cout << "number of clients: " << Clients.size() << std::endl;
 	for (std::vector<Client *>::iterator it = Clients.begin(); it != Clients.end(); it++)
 	{
-		
 		std::cout << "destroying" << std::endl;
 		delete *it;
 	}
+	for (std::vector<Channel *>::iterator it = Channels.begin(); it != Channels.end(); it++)
+		delete *it;
 }
 
 Server::Server(char *port, char *password)
@@ -270,7 +271,6 @@ std::vector<std::string> Server::split_buffer(std::string str)
 	return (vec);
 }
 
-
 void		Server::processMessage(std::string str, Client *client)
 {
 	if (!client->isConnected())
@@ -290,23 +290,23 @@ void		Server::processMessage(std::string str, Client *client)
 void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
 	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
-		authenticate(client, cmd);// authenticate
+		authenticate(client, cmd); // authenticate
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
-		setNickname(client, cmd);// set nickename
+		setNickname(client, cmd); // set nickename
 	else if (cmd.size() != 0 && (cmd[0] == "user" || cmd[0] == "USER"))
-		setUser(client, cmd);
+		setUser(client, cmd); // set username
 	else if (cmd.size() != 0 && (cmd[0] == "join" || cmd[0] == "JOIN"))
 		join(cmd, client); // join a channel
 	else if (cmd.size() != 0 && (cmd[0] == "invite" || cmd[0] == "INVITE"))
-		std::cout << "test" << std::endl;//invite(client, channel);
+		std::cout << "test" << std::endl; //invite(client, channel);
 	else if (cmd.size() != 0 && (cmd[0] == "topic" || cmd[0] == "TOPIC"))
-		std::cout << "test" << std::endl;//topic 
+		std::cout << "test" << std::endl; //topic 
 	else if (cmd.size() != 0 && (cmd[0] == "kick" || cmd[0] == "KICK"))
-		std::cout << "test" << std::endl;// kick a client from a channel
+		std::cout << "test" << std::endl; // kick a client from a channel
 	else if (cmd.size() != 0 && (cmd[0] == "mode" || cmd[0] == "MODE"))
-		std::cout << "test" << std::endl;// change the modes of a channel or client (user operator)
+		mode(cmd, client); // change the modes of a channel or client (user operator)
 	else if (cmd.size() != 0 && (cmd[0] == "privmsg" || cmd[0] == "PRIVMSG"))
-    privmsg(client, cmd);
+    	privmsg(client, cmd);
 	else if (cmd.size() != 0 && (cmd[0] == "quit" || cmd[0] == "QUIT"))
 		std::cout << "test" << std::endl;// quit the server
 	else if (cmd.size() != 0)
