@@ -39,6 +39,7 @@ class Channel
 		/*methods*/
 		void	add_client(Client *new_client);
 		void	add_operator(Client *new_operator);
+		void	inviteMode(std::string mode);
 };
 
 #endif

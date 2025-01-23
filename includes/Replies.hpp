@@ -79,4 +79,8 @@
 // User limit
 # define ERR_CHANNELISFULL(channel) RED "471: Cannot join to channel #" + channel + " (Channel is full)" RESET
 
+# define ERR_BADMODESYNTAX RED "Bad syntax, mode cmd must be terminated by +/-c, where c is the mode" RESET
+
+# define ERR_BADMODE RED "Mode not handled, aviable modes are: i (invite), t (topic), k (password), o (operator), l (limit)" RESET
+
 #endif
