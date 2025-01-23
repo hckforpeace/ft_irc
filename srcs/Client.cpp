@@ -4,6 +4,7 @@ Client::Client(int fd):fd(fd), realname("*"), nickname("*"), username("*")
 {
 	this->nickname = "*";
 	this->channel_counter = 0;
+  this->connected = false;
 }
 
 Client::~Client()

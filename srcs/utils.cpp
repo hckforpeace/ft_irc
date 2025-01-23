@@ -1,3 +1,6 @@
+#include "Channel.hpp"
+#include "Client.hpp"
+#include "Colors.hpp"
 #include <Server.hpp>
 #include <cstddef>
 #include <vector>
@@ -49,3 +52,35 @@ void    Server::sendMSG(std::string message, int fd)
   if (send(fd, buffer, message.length(), 0) == -1)
     std::cout << RED << "send() failed" << RESET << std::endl;
 }
+
+
+
+Channel*  Server::findChannel(std::string channelname)
+{  
+  for (std::vector<Channel*>::iterator it = this->Channels.begin(); it != this->Channels.end(); it++)
+  {
+    if (!(*it)->getName().compare(channelname))
+      return (*it);
+  }
+  return (NULL);
+}
+
+void  Server::sendToChannel(std::string message, std::string nickname, Channel *chan, Client *client)
+{ 
+  std::vector<Client*> cli = chan->getClients();
+  std::vector<Client*> operators = chan->getOperators();
+
+  std::string is_op = "";
+  if (chan->isOperator(client))
+      is_op = "@";
+  std::cout << "is he op ?: " << is_op << std::endl;
+  for (std::vector<Client*>::iterator it = cli.begin(); it != cli.end(); it++)
+  {
+      this->sendMSG("<" + is_op + nickname + ":" + BLU + "#" + chan->getName() + RESET + "> " + message, (*it)->getFd());
+  }
+  for (std::vector<Client*>::iterator it = operators.begin(); it != operators.end(); it++)
+  {
+    this->sendMSG("<" + is_op + nickname + ":" + BLU + "#" + chan->getName() + RESET + "> " + message, (*it)->getFd());  
+  }
+}
+
