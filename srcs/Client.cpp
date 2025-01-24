@@ -87,3 +87,22 @@ bool  Client::isRegistered()
 {
   return (this->isConnected() && this->username.compare("*") && this->realname.compare("*") && this->nickname.compare("*"));
 }
+
+void	Client::addtoInviteChan(std::string channel)
+{
+	std::vector<std::string> vec;
+
+	vec.push_back(channel);
+	this->invited_to_chan.clear();
+	this->invited_to_chan = vec;
+}
+
+bool	Client::isInvited(std::string channel)
+{
+	if (invited_to_chan.empty())
+		return (false);
+	for (std::vector<std::string>::iterator it = invited_to_chan.begin(); it <= invited_to_chan.end(); it++)
+		if (!(*it).compare(channel))
+			return (true);
+	return (false);
+}

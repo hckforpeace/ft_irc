@@ -296,9 +296,9 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 	else if (cmd.size() != 0 && (cmd[0] == "user" || cmd[0] == "USER"))
 		setUser(client, cmd); // set username
 	else if (cmd.size() != 0 && (cmd[0] == "join" || cmd[0] == "JOIN"))
-		join(cmd, client); // join a channel
+		join(client, cmd); // join a channel
 	else if (cmd.size() != 0 && (cmd[0] == "invite" || cmd[0] == "INVITE"))
-		std::cout << "test" << std::endl; //invite(client, channel);
+		invite(client, cmd); //invite(client, channel);
 	else if (cmd.size() != 0 && (cmd[0] == "topic" || cmd[0] == "TOPIC"))
 		std::cout << "test" << std::endl; //topic 
 	else if (cmd.size() != 0 && (cmd[0] == "kick" || cmd[0] == "KICK"))

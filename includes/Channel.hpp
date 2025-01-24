@@ -15,8 +15,8 @@ class Channel
 		std::vector<Client *> chan_clients;
 		std::vector<Client *> operators;
 		bool		invite_only;
-		bool		topic_mode; //neccesary? could use empty string as a flag
-		bool		keypass_mode;
+		bool		topic_mode;
+		bool		key_mode;
 		bool		limit_mode;
 
 	public:
@@ -31,15 +31,18 @@ class Channel
 		std::string	getName(void);
 		int			getLimit(void);
 		int			getTotalClient(void);
+		bool		isInviteOnly(void);
 
 		/*Setter*/
 		void	setName(std::string name);
 		void	setLimit(int limit);
+		void 	setInvite(bool flag);
+		void	setTopic(bool flag);
+		void	setKey(bool flag);
 
 		/*methods*/
 		void	add_client(Client *new_client);
 		void	add_operator(Client *new_operator);
-		void	inviteMode(std::string mode);
 };
 
 #endif

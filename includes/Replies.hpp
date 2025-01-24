@@ -3,12 +3,12 @@
 
 // Command responses
 
-/*================ CHANNEL ====================*/
+/*============================== CHANNEL ===================================*/
 
 // Welcome message when a client joins a channel
 # define CHAN_WELC(nickname, channel) GREEN + nickname + " has joined #"  + channel + RESET
 
-/*================= ERRORS ===================*/
+/*=============================== ERRORS ===================================*/
 
 //Returned to a registered client to indicate that the command sent is unknown by the server.
 # define ERR_UNKNOWNCOMMAND(command) RED "421 " + command + " :Unknown command" RESET
@@ -61,10 +61,16 @@
 // Sent to a user when they have joined the maximum number of allowed channels and they try to join another channel.
 # define ERR_TOOMANYCHANNELS(client) RED "405 " + client + ": You have already joined 10 channels, you can't join any other one" RESET
 
-/*========== INVITE =============*/
-# define INVITE_ONLY(channel) RED "Cannot join to channel #" + channel + " (You must be invited)" + RESET
+# define ERR_UNKNOWNUSER(client) RED "406 " + client + ": No such nickname" + RESET
 
-/*======================== MODES =============================*/
+/*================================= INVITE ====================================*/
+# define INVITE_ONLY(channel) RED "473: Cannot join to channel #" + channel + " (You must be invited)" + RESET
+
+# define BE_INVITED(client, channel) GREEN + client + " invites you to "+ channel + RESET
+
+# define TO_INVITE(who_invite, invited, channel) BLU + who_invite + " invited " + invited + " into channel " + channel + RESET
+
+/*=================================== MODES =====================================*/
 
 // mode/#channel [+/-k pass] || mode/#channel [+/-o client] || mode/#channel [+l limit]
 # define MODE_SET(channel, nickname, mode) BLU "mode/#" + channel + " [+" + mode + "] by " + nickname + RESET
@@ -79,7 +85,7 @@
 // User limit
 # define ERR_CHANNELISFULL(channel) RED "471: Cannot join to channel #" + channel + " (Channel is full)" RESET
 
-# define ERR_BADMODESYNTAX RED "Bad syntax, mode cmd must be terminated by +/-c, where c is the mode" RESET
+# define ERR_BADMODESYNTAX RED "Bad syntax, use as : mode #channel +/-c [args], where c is the mode" RESET
 
 # define ERR_BADMODE RED "Mode not handled, aviable modes are: i (invite), t (topic), k (password), o (operator), l (limit)" RESET
 

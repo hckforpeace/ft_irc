@@ -58,7 +58,6 @@ class Server {
     	// getters
 		Client*	getClient(int fd);
 		std::vector<Client *>::iterator	getClientIt(int fd);
-		Channel* getChannel(std::string channel_name);
 
     	void		parse_exec_cmd(std::vector<std::string> cmd, Client *client);
 		std::vector<std::string> split_buffer(std::string str);				
@@ -72,7 +71,7 @@ class Server {
 		void	mode(std::vector<std::string> cmd, Client *client);
 
 		// Channel
-		void	join(std::vector<std::string> cmd, Client *client);
+		void	join(Client *client, std::vector<std::string> cmd);
 		void	createChannel(std::string name, Client *client);
 		void	enterChannel(Channel *channel, Client *client);
 		void	setUser(Client *client, std::vector<std::string> cmd);
@@ -80,15 +79,27 @@ class Server {
 		bool 	isOperator(Client *client, Channel *channel);
 		bool	setOperator(Client *client, Channel *channel);
 
+		// Invite
+		void	invite(Client *client, std::vector<std::string> cmd);
+
     	// utils
     	bool	nickInUse(std::string nickname);
 		bool	isCRLF(std::string str, Client *client);
 		bool 	isRegistered(Client *client);
     	Client* findClient(std::string nickname);
+		Channel* findChannel(std::string channel_name);
 		void    sendMSG(std::string message, int fd);
 		void  	sendToChannel(std::string message, std::string nickname, Channel *channel);
 		void    sendMSGChan(std::string message, Channel *channel);
 		bool	isinChan(Client *client, Channel *channel);
+
+		// mode
+		void	inviteMode(std::string mode, Client *client, Channel *channel);
+		void	topicMode(std::string mode, Client *client, Channel *channel);
+		void	keyMode(std::string mode, std::string password, Client *client, Channel *channel);
+		void	operatorMode(std::string mode, std::string new_operator, Client *client, Channel *channel);
+		void	limitModeOn(std::string limit, Client *client, Channel *channel);
+		void	limitModeOff(Client *client, Channel *channel);
 };
 
 #endif
