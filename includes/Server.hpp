@@ -78,8 +78,10 @@ class Server {
     	bool	nickInUse(std::string nickname);
 		bool	isCRLF(std::string str, Client *client);
 		bool 	 isRegistered(Client *client);
-    	Client*  findClient(std::string nickname);
+    Client*  findClient(std::string nickname);
 		void     sendMSG(std::string message, int fd);
+    Channel*  findChannel(std::string channelname);
+    void    sendToChannel(std::string message, std::string nickname, Channel *chan, Client *client);
 };
 
 #endif

@@ -22,13 +22,16 @@ class Channel
 
 		/*Getters*/
 		std::string	getName(void);
-
+    std::vector<Client*>     getClients();
+    std::vector<Client*>     getOperators();
 		/*Setter*/
 		void	setName(std::string name);
 
 		/*methods*/
 		void	add_client(Client *new_client);
 		void	add_operator(Client *new_operator);
+    bool  isOperator(Client *client);
+    bool  isInChannel(Client *client);
 };
 
 #endif
