@@ -5,7 +5,7 @@ CXX			=	c++ -g3
 
 SRCS_DIR	=	srcs/
 OBJ_DIR		=	objects/
-SRCS_NAMES	=	main.cpp Server.cpp Client.cpp basic_commands.cpp utils.cpp Channel.cpp Join.cpp Mode.cpp Invite.cpp
+SRCS_NAMES	=	main.cpp Server.cpp Client.cpp basic_commands.cpp utils.cpp Channel.cpp Join.cpp Mode.cpp Channel_Commands.cpp
 OBJS_NAMES	=	$(SRCS_NAMES:.cpp=.o)
 SRCS		=	$(addprefix $(SRCS_DIR), $(SRCS_NAMES))
 OBJS		=	$(addprefix $(OBJ_DIR), $(OBJS_NAMES))

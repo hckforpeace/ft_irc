@@ -103,6 +103,7 @@ bool	setOperator(Client *client, Channel *channel)
 }
 
 /*=========================== GETTERS ======================================*/
+
 Channel* Server::findChannel(std::string channel_name)
 {
 	for (std::vector<Channel *>::iterator it = Channels.begin(); it != Channels.end(); it++)

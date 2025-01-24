@@ -3,7 +3,10 @@
 void Server::join(Client *client, std::vector<std::string> cmd)
 {
 	int flag = 0;
+	std::string	password;
 
+	if (cmd[3].empty())
+		password = "";
 	if (cmd.size() < 2)
 		return (sendMSG(ERR_NEEDMOREPARAMS(cmd[0]), client->getFd()));
 	if (cmd[1].empty() || cmd[1].at(0) != '#' || (cmd[1].at(0) == '#' && cmd[1].length() == 1))
@@ -36,6 +39,8 @@ void Server::createChannel(std::string name, Client *client)
 
 void Server::enterChannel(Channel *channel, Client *client)
 {
+	std::vector<std::string>	cmd;
+
 	if (client->getChanCounter() >= 10) // limit of connected channels per client
 		return (sendMSG(ERR_TOOMANYCHANNELS(client->getNickname()), client->getFd()));
 	if (channel->getTotalClient() >= channel->getLimit()) // if limit of connected clients in the channel
@@ -44,6 +49,9 @@ void Server::enterChannel(Channel *channel, Client *client)
 		return (sendMSG(ERR_USERONCHANNEL(client->getNickname(), channel->getName()), client->getFd()));
 	if (channel->isInviteOnly() && !client->isInvited(channel->getName())) // if the channel is invite)_only and the client is not invited
 		return (sendMSG(INVITE_ONLY(channel->getName()), client->getFd()));
+	cmd = client->getCmd();
+	if (channel->getKeyMode() && (cmd.size() < 3 || cmd[3] != channel->getPassword()))
+		return (sendMSG(CHAN_PASS(channel->getName()), client->getFd()));
 	channel->add_client(client);
 	client->setChanCounter();
 	sendMSGChan(CHAN_WELC(client->getNickname(), channel->getName()), channel);

@@ -55,6 +55,8 @@
 
 # define ERR_INVITEONLYCHAN(channel) RED "473 " + channel + " :Cannot join channel (+i)" RESET
 
+# define ERR_USERNOTONCHAN(channel) RED "#" + channel + " You are not on that channel" RESET
+
 // Returned when the "join #channel" syntax is not respected
 # define ERR_INVCHANNELNAME	RED "The channel name must be preceded by an '#' to be interpreted" RESET
 
@@ -88,5 +90,12 @@
 # define ERR_BADMODESYNTAX RED "Bad syntax, use as : mode #channel +/-c [args], where c is the mode" RESET
 
 # define ERR_BADMODE RED "Mode not handled, aviable modes are: i (invite), t (topic), k (password), o (operator), l (limit)" RESET
+
+// Topic
+# define EMPTY_TOPIC(channel) RED "#" + channel + ": No topic is set" RESET
+
+# define SHOW_TOPIC(channel, topic, client) "Topic for " BLU "#" + channel + RESET ": " + topic + "\nTopic set by " + client
+
+# define CHANGE_TOPIC(client, channel, topic) client + " changed the topic of #" + channel + " to: " + topic
 
 #endif

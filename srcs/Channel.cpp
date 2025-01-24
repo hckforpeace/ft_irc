@@ -78,6 +78,26 @@ bool	Channel::isInviteOnly(void)
 	return (invite_only);
 }
 
+bool		Channel::getTopicMode(void)
+{
+	return (topic_mode);
+}
+
+std::string Channel::getTopic(void)
+{
+	return (topic_name);
+}
+
+std::string Channel::getPassword(void)
+{
+	return (password);
+}
+
+bool		Channel::getKeyMode(void)
+{
+	return (key_mode);
+}
+
 /*========================== SETTERS ===============================*/
 
 void Channel::setName(std::string name)
@@ -95,7 +115,7 @@ void Channel::setInvite(bool flag)
 	this->invite_only = flag;
 }
 
-void Channel::setTopic(bool flag)
+void Channel::setTopicMode(bool flag)
 {
 	this->topic_mode = flag;
 }
@@ -104,3 +124,14 @@ void Channel::setKey(bool flag)
 {
 	this->key_mode = flag;
 }
+
+void	Channel::setTopic(std::string topic)
+{
+	this->topic_name = topic;
+}
+
+void	Channel::setKeyMode(bool flag)
+{
+	this->key_mode = flag;
+}
+

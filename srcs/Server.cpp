@@ -289,6 +289,7 @@ void		Server::processMessage(std::string str, Client *client)
 
 void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
+	client->setCmd(cmd);
 	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
 		authenticate(client, cmd); // authenticate
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
@@ -298,11 +299,13 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 	else if (cmd.size() != 0 && (cmd[0] == "join" || cmd[0] == "JOIN"))
 		join(client, cmd); // join a channel
 	else if (cmd.size() != 0 && (cmd[0] == "invite" || cmd[0] == "INVITE"))
-		invite(client, cmd); //invite(client, channel);
+		invite(client, cmd); //invite a client to a channel;
 	else if (cmd.size() != 0 && (cmd[0] == "topic" || cmd[0] == "TOPIC"))
-		std::cout << "test" << std::endl; //topic 
+		topic(client, cmd); // set or change the topic
 	else if (cmd.size() != 0 && (cmd[0] == "kick" || cmd[0] == "KICK"))
 		std::cout << "test" << std::endl; // kick a client from a channel
+	else if (cmd.size() != 0 && (cmd[0] == "part" || cmd[0] == "PART"))
+		std::cout << "test" << std::endl; // quiting a channel without quiting the server
 	else if (cmd.size() != 0 && (cmd[0] == "mode" || cmd[0] == "MODE"))
 		mode(cmd, client); // change the modes of a channel or client (user operator)
 	else if (cmd.size() != 0 && (cmd[0] == "privmsg" || cmd[0] == "PRIVMSG"))

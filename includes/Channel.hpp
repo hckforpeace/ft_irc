@@ -32,13 +32,19 @@ class Channel
 		int			getLimit(void);
 		int			getTotalClient(void);
 		bool		isInviteOnly(void);
-
+		bool		getTopicMode(void);
+		bool		getKeyMode(void);	
+		std::string getTopic(void);
+		std::string getPassword(void);
+	
 		/*Setter*/
 		void	setName(std::string name);
 		void	setLimit(int limit);
 		void 	setInvite(bool flag);
-		void	setTopic(bool flag);
+		void	setTopicMode(bool flag);
 		void	setKey(bool flag);
+		void	setTopic(std::string topic);
+		void	setKeyMode(bool flag);
 
 		/*methods*/
 		void	add_client(Client *new_client);
