@@ -40,7 +40,7 @@ void	Server::setNickname(Client *client, std::vector<std::string> cmd)
 		if (temp.at(0) == ':' || temp.at(0) == '#')
 			err = ERR_ERRONEUSNICKNAME(cmd[1]);
 		else
-			{
+    {
 			client->setNickname(cmd[1]);
 			return ;
 		}
@@ -91,7 +91,7 @@ void  Server::privmsg(Client *client, std::vector<std::string> cmd)
 		{
 			if ((rcv = this->findClient(cmd[1])) != NULL)
       {
-        msg = "<"+ client->getNickname() + ">" + " " + cmd[2];
+        msg = "<" RED + client->getNickname() +  RESET ">" + " " + cmd[2];
         sendMSG(msg, rcv->getFd());
         return ;
       }
