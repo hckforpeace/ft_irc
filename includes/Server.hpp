@@ -47,7 +47,7 @@ class Server {
 		~Server();
 		void	init_server_socket();
 		void	init_server();
-		void	run_sever();
+		void	run_server();
 		int		setnonblocking(int sock);
 		void 	setupSignals();
 		static void signIntHandler(int code);

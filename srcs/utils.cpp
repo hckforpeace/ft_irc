@@ -54,6 +54,10 @@ void    Server::sendMSG(std::string message, int fd)
 }
 
 
+/* void    Server::sendRPL(std::string cmd, int fd)
+{
+
+} */
 
 Channel*  Server::findChannel(std::string channelname)
 {  
@@ -76,7 +80,7 @@ void  Server::sendToChannel(std::string message, std::string nickname, Channel *
   std::cout << "is he op ?: " << is_op << std::endl;
   for (std::vector<Client*>::iterator it = cli.begin(); it != cli.end(); it++)
   {
-      this->sendMSG("<" + is_op + nickname + ":" + BLU + "#" + chan->getName() + RESET + "> " + message, (*it)->getFd());
+    this->sendMSG("<" + is_op + nickname + ":" + BLU + "#" + chan->getName() + RESET + "> " + message, (*it)->getFd());
   }
   for (std::vector<Client*>::iterator it = operators.begin(); it != operators.end(); it++)
   {

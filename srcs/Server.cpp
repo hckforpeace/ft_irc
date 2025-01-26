@@ -18,7 +18,7 @@ Server::Server(char *port, char *password)
 	init_server_socket();
 	init_server();
 	setupSignals();
-	run_sever();
+	run_server();
 	// do stuff;
 }
 
@@ -60,7 +60,7 @@ void	Server::init_server()
 		std::cerr << "Error during epoll_ctl => " << strerror(errno) << std::endl;
 }
 
-void	Server::run_sever()
+void	Server::run_server()
 {
 	// looping 
 	int nbr_fds;
@@ -233,6 +233,7 @@ void	Server::read_and_process(int i)
 
 	// reading string sent from the Client
 	len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);
+  std::cout << "Client has sent: " << std::endl << buffer << std::endl;
 	// Error
 	if (len == 0)
 	{
@@ -287,9 +288,38 @@ void		Server::processMessage(std::string str, Client *client)
 	}
 }
 
+
 void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
-	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
+  int i = 0;
+  bool is_loged = client->isConnected();
+
+  while (i < cmd.size())
+  {
+    if (!cmd[i].compare("CAP"))
+      i += 3;
+    else if (!cmd[i].compare("PASS"))
+    {
+      if (!cmd[i + 1].compare(this->_password))
+        sendMSG(ERR_PASSWDMISMATCH, client->getFd());
+      else
+      {
+        // sendMSG();
+        is_loged = true;
+      }
+      i += 2; 
+    }
+  }
+
+
+  if (!client->isConnected())
+  {
+    std::cout << "sending to the server" <<std::endl;
+    std::string accept_connection = ":pedroypablo 001 pierro :Welcome to the Internet Relay Network pierro!pierre@pedroypablo";
+    sendMSG(accept_connection, client->getFd());
+    client->setConnection();
+  }
+	/* if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
 		authenticate(client, cmd);// authenticate
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
 		setNickname(client, cmd);// set nickename
@@ -310,5 +340,5 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 	else if (cmd.size() != 0 && (cmd[0] == "quit" || cmd[0] == "QUIT"))
 		std::cout << "test" << std::endl;// quit the server
 	else if (cmd.size() != 0)
-		sendMSG(ERR_UNKNOWNCOMMAND(cmd[0]), client->getFd());
+		sendMSG(ERR_UNKNOWNCOMMAND(cmd[0]), client->getFd()); */
 }
