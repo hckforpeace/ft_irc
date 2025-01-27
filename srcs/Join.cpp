@@ -5,7 +5,7 @@ void Server::join(std::vector<std::string> cmd, Client *client)
 	int flag = 0;
 	const char *buffer;
 	if (cmd.size() < 2)
-		return (sendMSG(ERR_NEEDMOREPARAMS(cmd[0]), client->getFd()));
+		return (sendMSG(ERR_NEEDMOREPARAMS(client->getNickname(), cmd[0]), client->getFd()));
 	if (cmd[1].empty() || cmd[1].at(0) != '#' || (cmd[1].at(0) == '#' && cmd.size() == 1))
 		return (sendMSG(ERR_INVCHANNELNAME, client->getFd()));
 	for (int i = 0; i < this->Channels.size(); i++)

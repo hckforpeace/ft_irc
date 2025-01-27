@@ -251,7 +251,21 @@ void	Server::read_and_process(int i)
 	str = buffer;
 	if (isCRLF(str, client))
 	{
-		parse_exec_cmd(split_buffer(client->getMessage()), client);
+		const char *mess = (client->getMessage()).c_str();
+		std::vector<std::string> lines = split_line_buffer(mess);
+		int nbr_lines = lines.size();
+		std::cout << "client sent message of: " << lines.size() << std::endl;
+		if (lines.size() > 1)
+		{
+			int i = 0;
+			while (i < lines.size())
+			{
+				parse_exec_cmd(split_buffer(lines[i]), client);
+				i++;
+			}
+		}
+		else
+			parse_exec_cmd(split_buffer(client->getMessage()), client);
 		client->setMessage("");
 	}
 	memset(buffer, 0, sizeof(char) * 512);
@@ -271,6 +285,18 @@ std::vector<std::string> Server::split_buffer(std::string str)
 	return (vec);
 }
 
+std::vector<std::string> Server::split_line_buffer(const char *sentence)
+{
+  	std::stringstream ss(sentence);
+  	std::vector<std::string> message;
+	std::string	line;
+	if (sentence != NULL)
+	{
+		while(std::getline(ss,line,'\n'))
+			message.push_back(line);
+	}
+	return (message);
+}
 
 void		Server::processMessage(std::string str, Client *client)
 {
@@ -291,26 +317,8 @@ void		Server::processMessage(std::string str, Client *client)
 
 void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
-  int i = 0;
+/*   int i = 0;
   bool is_loged = client->isConnected();
-
-  while (i < cmd.size())
-  {
-    if (!cmd[i].compare("CAP"))
-      i += 3;
-    else if (!cmd[i].compare("PASS"))
-    {
-      if (!cmd[i + 1].compare(this->_password))
-        sendMSG(ERR_PASSWDMISMATCH, client->getFd());
-      else
-      {
-        // sendMSG();
-        is_loged = true;
-      }
-      i += 2; 
-    }
-  }
-
 
   if (!client->isConnected())
   {
@@ -318,8 +326,13 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
     std::string accept_connection = ":pedroypablo 001 pierro :Welcome to the Internet Relay Network pierro!pierre@pedroypablo";
     sendMSG(accept_connection, client->getFd());
     client->setConnection();
-  }
-	/* if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
+  } */
+
+
+ 	//special pase for login
+	
+
+	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
 		authenticate(client, cmd);// authenticate
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
 		setNickname(client, cmd);// set nickename
@@ -340,5 +353,5 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 	else if (cmd.size() != 0 && (cmd[0] == "quit" || cmd[0] == "QUIT"))
 		std::cout << "test" << std::endl;// quit the server
 	else if (cmd.size() != 0)
-		sendMSG(ERR_UNKNOWNCOMMAND(cmd[0]), client->getFd()); */
+		sendMSG(ERR_UNKNOWNCOMMAND(cmd[0]), client->getFd());
 }

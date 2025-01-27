@@ -60,7 +60,9 @@ class Server {
 		std::vector<Client *>::iterator	getClientIt(int fd);
 
     	void		parse_exec_cmd(std::vector<std::string> cmd, Client *client);
-		std::vector<std::string> split_buffer(std::string str);				
+		std::vector<std::string> split_buffer(std::string str);
+		std::vector<std::string> split_line_buffer(const char *sentence);
+		
 
 		// commands execution
 		void	authenticate(Client *client, std::vector<std::string> cmd);
@@ -78,10 +80,12 @@ class Server {
     	bool	nickInUse(std::string nickname);
 		bool	isCRLF(std::string str, Client *client);
 		bool 	 isRegistered(Client *client);
-    Client*  findClient(std::string nickname);
+    	Client*  findClient(std::string nickname);
 		void     sendMSG(std::string message, int fd);
-    Channel*  findChannel(std::string channelname);
-    void    sendToChannel(std::string message, std::string nickname, Channel *chan, Client *client);
+    	Channel*  findChannel(std::string channelname);
+    	void    sendToChannel(std::string message, std::string nickname, Channel *chan, Client *client);
+		bool	login_parse(std::vector<std::string> cmds, Client *client);
+		void	send_to_all_client(std::string message);
 };
 
 #endif

@@ -21,7 +21,6 @@ class Client
 		Client(int fd);
 		~Client();
 		int	getFd();
-		std::string	getNick(void);
 		std::vector<std::string> getCmd() {return (this->cmd);};
 		std::string&	getMessage();
 		bool	isConnected();

@@ -88,3 +88,11 @@ void  Server::sendToChannel(std::string message, std::string nickname, Channel *
   }
 }
 
+// bool	Server::login_parse(std::vector<std::string> cmds, Client *client)
+// {
+//   for (int i = 0; i < cmds.size(); i++)
+//   {
+// 	  if ((cmds[i] == "pass" || cmds[i] == "PASS"))		
+// 	  	authenticate(client, cmds[i + 1]);// authenticate  }
+//   }
+// }
