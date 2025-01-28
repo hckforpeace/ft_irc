@@ -96,3 +96,20 @@ void  Server::sendToChannel(std::string message, std::string nickname, Channel *
 // 	  	authenticate(client, cmds[i + 1]);// authenticate  }
 //   }
 // }
+
+std::string	Server::generateNick(std::string base)
+{
+  std::string newNick;
+  std::stringstream str;
+
+  for (int i = 1; i < 2000; i++)
+  {
+    str << i;
+    newNick = base + str.str();
+    if (!nickInUse(newNick))
+      return (newNick);
+    str.clear();
+    str << "";
+  }
+  return ("Error");
+}

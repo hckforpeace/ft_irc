@@ -86,6 +86,7 @@ class Server {
     	void    sendToChannel(std::string message, std::string nickname, Channel *chan, Client *client);
 		bool	login_parse(std::vector<std::string> cmds, Client *client);
 		void	send_to_all_client(std::string message);
+		std::string	generateNick(std::string base);
 };
 
 #endif

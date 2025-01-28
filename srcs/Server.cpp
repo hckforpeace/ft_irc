@@ -233,7 +233,7 @@ void	Server::read_and_process(int i)
 
 	// reading string sent from the Client
 	len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);
-  std::cout << "Client has sent: " << std::endl << buffer << std::endl;
+  // std::cout << "Client has sent: " << std::endl << buffer << std::endl;
 	// Error
 	if (len == 0)
 	{
@@ -251,10 +251,10 @@ void	Server::read_and_process(int i)
 	str = buffer;
 	if (isCRLF(str, client))
 	{
+		std::cout << RED "Client fd: " RESET <<  client->getFd() << RED << "Send: " << RESET << client->getMessage() << std::endl;
 		const char *mess = (client->getMessage()).c_str();
 		std::vector<std::string> lines = split_line_buffer(mess);
 		int nbr_lines = lines.size();
-		std::cout << "client sent message of: " << lines.size() << std::endl;
 		if (lines.size() > 1)
 		{
 			int i = 0;
@@ -320,7 +320,6 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 /*   int i = 0;
   bool is_loged = client->isConnected();
 
-  if (!client->isConnected())
   {
     std::cout << "sending to the server" <<std::endl;
     std::string accept_connection = ":pedroypablo 001 pierro :Welcome to the Internet Relay Network pierro!pierre@pedroypablo";
@@ -352,6 +351,8 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
     privmsg(client, cmd);
 	else if (cmd.size() != 0 && (cmd[0] == "quit" || cmd[0] == "QUIT"))
 		std::cout << "test" << std::endl;// quit the server
-	else if (cmd.size() != 0)
-		sendMSG(ERR_UNKNOWNCOMMAND(cmd[0]), client->getFd());
+  else
+    std::cout << "Unknown command" << std::endl;
+	/* else if (cmd.size() != 0)
+		sendMSG(ERR_UNKNOWNCOMMAND(cmd[0]), client->getFd()); */
 }

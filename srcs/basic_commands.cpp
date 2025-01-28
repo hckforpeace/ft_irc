@@ -33,24 +33,27 @@ void	Server::setNickname(Client *client, std::vector<std::string> cmd)
 		err = ERR_NOTREGISTERED(client->getNickname());
 	else if (cmd.size() < 2)
 		err = ERR_NONICKNAMEGIVEN(client->getNickname());
-	else if (nickInUse(cmd[1]))
-	{
-		std::cout << "FAILED TO SET NCKNAME" << std::endl;
-		err = ERR_NICKNAMEINUSE(client->getNickname());
-	}
 	else
 	{
+		old_nick = client->getNickname();
+		if (nickInUse(cmd[1]))
+		{
+			old_nick = cmd[1];
+			cmd[1] = generateNick(cmd[1]);
+		}
 		std::string temp = cmd[1];
 		if (temp.at(0) == ':' || temp.at(0) == '#')
 			err = ERR_ERRONEUSNICKNAME(cmd[1]);
 		else
     	{
-			old_nick= client->getNickname();
 			client->setNickname(cmd[1]);
-			send_to_all_client(":" + old_nick + " NICK " + cmd[1]);
+			std::cout << "Setting A new nick to fd: " << client->getFd() << ", to: " << cmd[1] << std::endl;
+			std::cout << RED "MESSAGE SENT: "  RESET << ":" + old_nick + " NICK " + cmd[1] << std::endl; 
+ 			sendMSG(":" + old_nick + " NICK " + cmd[1], client->getFd());
 			return ;
 		}
 	}
+  	std::cout << "SetNickname error message sends: " << err << std::endl;
 	this->sendMSG(err, client->getFd()); 
 }
 
@@ -97,9 +100,9 @@ void  Server::privmsg(Client *client, std::vector<std::string> cmd)
 		{
 			if ((rcv = this->findClient(cmd[1])) != NULL)
 		{
-		msg = "<" RED + client->getNickname() +  RESET ">" + " " + cmd[2];
-		sendMSG(msg, rcv->getFd());
-		return ;
+			msg = "<" RED + client->getNickname() +  RESET "r" + " " + cmd[2];
+			sendMSG(msg, rcv->getFd());
+			return ;
 		}
 			else
 				err = ERR_NOSUCHNICK(cmd[1]);
@@ -112,6 +115,10 @@ void  Server::privmsg(Client *client, std::vector<std::string> cmd)
 
 void	Server::send_to_all_client(std::string message)
 {
+	std::cout << "To all clients" << message << std::endl;
 	for (std::vector<Client*>::iterator it = Clients.begin(); it != Clients.end(); it++)
+	{
+		std::cout << "sending to client with fd: " << (*it)->getFd() << std::endl;
 		sendMSG(message, (*it)->getFd());
+	}
 }

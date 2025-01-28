@@ -39,7 +39,8 @@
 // Indicates that no client can be found for the supplied nickname.
 # define ERR_NOSUCHNICK(nickname) "401 " + nickname + " :No such nickname" 
 
-# define ERR_NICKNAMEINUSE(nickname) ": 433 " + nickname + " :Nickname is already in use" 
+// # define ERR_NICKNAMEINUSE(nickname) PREFIX "433 " + nickname + " :Nickname is already in use" 
+# define ERR_NICKNAMEINUSE(nickname) PREFIX "433 " + nickname
 
 # define ERR_ERRONEUSNICKNAME(nickname) "432 " + nickname + " :Erroneus nickname"  
 
