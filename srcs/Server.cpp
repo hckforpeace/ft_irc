@@ -234,7 +234,7 @@ void	Server::read_and_process(int i)
 
 	// reading string sent from the Client
 	len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);
-  std::cout << "Client has sent: " << std::endl << buffer << std::endl;
+  // std::cout << "Client has sent: " << std::endl << buffer << std::endl;
 	// Error
 	if (len == 0)
 	{
@@ -252,7 +252,21 @@ void	Server::read_and_process(int i)
 	str = buffer;
 	if (isCRLF(str, client))
 	{
-		parse_exec_cmd(split_buffer(client->getMessage()), client);
+		std::cout << RED "Client fd: " RESET <<  client->getFd() << RED << "Send: " << RESET << client->getMessage() << std::endl;
+		const char *mess = (client->getMessage()).c_str();
+		std::vector<std::string> lines = split_line_buffer(mess);
+		int nbr_lines = lines.size();
+		if (lines.size() > 1)
+		{
+			int i = 0;
+			while (i < lines.size())
+			{
+				parse_exec_cmd(split_buffer(lines[i]), client);
+				i++;
+			}
+		}
+		else
+			parse_exec_cmd(split_buffer(client->getMessage()), client);
 		client->setMessage("");
 	}
 	memset(buffer, 0, sizeof(char) * 512);
@@ -272,6 +286,19 @@ std::vector<std::string> Server::split_buffer(std::string str)
 	return (vec);
 }
 
+std::vector<std::string> Server::split_line_buffer(const char *sentence)
+{
+  	std::stringstream ss(sentence);
+  	std::vector<std::string> message;
+	std::string	line;
+	if (sentence != NULL)
+	{
+		while(std::getline(ss,line,'\n'))
+			message.push_back(line);
+	}
+	return (message);
+}
+
 void		Server::processMessage(std::string str, Client *client)
 {
 	if (!client->isConnected())
@@ -287,7 +314,6 @@ void		Server::processMessage(std::string str, Client *client)
 		}
 	}
 }
-
 
 void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {

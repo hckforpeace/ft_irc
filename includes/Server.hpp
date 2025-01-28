@@ -59,9 +59,10 @@ class Server {
 		Client*							getClient(int fd);
 		std::vector<Client *>::iterator	getClientIt(int fd);
 
-    	void						parse_exec_cmd(std::vector<std::string> cmd, Client *client);
-		std::vector<std::string>	split_buffer(std::string str);				
-
+    	void		parse_exec_cmd(std::vector<std::string> cmd, Client *client);
+		std::vector<std::string> split_buffer(std::string str);
+		std::vector<std::string> split_line_buffer(const char *sentence);
+		
 		// commands execution
 		void	authenticate(Client *client, std::vector<std::string> cmd);
 		void	setNickname(Client *client, std::vector<std::string> cmd);
@@ -107,6 +108,8 @@ class Server {
 		void	operatorMode(std::string mode, std::string new_operator, Client *client, Channel *channel);
 		void	limitModeOn(std::string limit, Client *client, Channel *channel);
 		void	limitModeOff(Client *client, Channel *channel);
+		bool	login_parse(std::vector<std::string> cmds, Client *client);
+		std::string	generateNick(std::string base);
 };
 
 #endif

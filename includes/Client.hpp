@@ -11,6 +11,7 @@ class Client
 		std::string realname;
 		std::string username;
 		std::string nickname;
+		// std::string	denied_nick;
 		std::string message;
 		std::vector<std::string>	cmd;
 		std::vector<std::string>	invited_to_chan;
@@ -25,12 +26,14 @@ class Client
 		int	getFd();
 		std::vector<std::string> getCmd() {return (this->cmd);};
 		std::string&	getMessage();
-		bool	isConnected();
-    	bool	isRegistered();
+
+		bool		isConnected();
+    	bool		isRegistered();
 		std::string	getNickname();
 		std::string	getUsername();  
 		std::string	getRealname();
 		std::string getHostname();
+		std::string getDeniedNick();
 		int			getChanCounter(void);
 
 		void	setMessage(std::string str);
@@ -42,7 +45,6 @@ class Client
 		void	setRealname(std::string str);
 		void	addtoInviteChan(std::string channel);
 		bool	isInvited(std::string channel);
-
 };
 
 #endif

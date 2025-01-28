@@ -148,3 +148,28 @@ void Server::removeChan(Channel *channel)
 //     	this->sendMSG("<" + is_op + nickname + ":" + BLU + "#" + chan->getName() + RESET + "> " + message, (*it)->getFd());
 //   	}
 // }
+// bool	Server::login_parse(std::vector<std::string> cmds, Client *client)
+// {
+//   for (int i = 0; i < cmds.size(); i++)
+//   {
+// 	  if ((cmds[i] == "pass" || cmds[i] == "PASS"))		
+// 	  	authenticate(client, cmds[i + 1]);// authenticate  }
+//   }
+// }
+
+std::string	Server::generateNick(std::string base)
+{
+  std::string newNick;
+  std::stringstream str;
+
+  for (int i = 1; i < 2000; i++)
+  {
+    str << i;
+    newNick = base + str.str();
+    if (!nickInUse(newNick))
+      return (newNick);
+    str.clear();
+    str << "";
+  }
+  return ("Error");
+}
