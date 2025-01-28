@@ -5,10 +5,10 @@
 
 /*================ PREFIX ====================*/
 # define PREFIX ":localhost "
-# define NETWORK "pedro y pablo"
+# define NETWORK "pedroypablo"
 /*================ CHANNEL ====================*/
 
-# define WLC(user, nick) PREFIX " 001 " + nick + ": Welcome to the pedroypablo, " + nick + "[!<" + user + ">@<localhost>]"
+# define WLC(user, nick) PREFIX "001 " + nick + " :Welcome to the pedroypablo, " + nick + "[!<" + user + ">@<localhost>]"
 
 // Welcome message when a client joins a channel
 # define CHAN_WELC(nickname, channel) "<" + nickname + "> joined <"  + channel + "> channel" 

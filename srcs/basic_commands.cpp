@@ -52,11 +52,9 @@ void	Server::setNickname(Client *client, std::vector<std::string> cmd)
 			err = ERR_ERRONEUSNICKNAME(cmd[1]);
 		else
     	{
-			client->setNickname(cmd[1]);
-			std::cout << "Setting A new nick to fd: " << client->getFd() << ", to: " << cmd[1] << std::endl;
-			std::cout << RED "MESSAGE SENT: "  RESET << " :" + old_nick + "!" + client->getUsername() + "@localhost " + " NICK " + cmd[1] << std::endl; 
- 			// sendMSG(": " + old_nick + " NICK " + cmd[1], client->getFd());
- 			sendMSG(":" + old_nick + "!" + client->getUsername() + "@localhost " + " NICK " + cmd[1], client->getFd());
+			  client->setNickname(cmd[1]);
+ 			  sendMSG(":" + old_nick + " NICK " + cmd[1], client->getFd());
+ 			// sendMSG(":" + old_nick + "!" + client->getUsername() + "@localhost " + " NICK " + cmd[1], client->getFd());
 			return ;
 		}
 	}
@@ -134,3 +132,8 @@ void Server::modei(Client *client, std::vector<std::string> cmd)
 {
 	sendMSG(":localhost MODE " + client->getNickname() + " +i", client->getFd());
 } 
+
+void  Server::pong(Client *client, std::vector<std::string> cmd)
+{
+	sendMSG("PONG " + cmd[1], client->getFd());
+}

@@ -69,6 +69,7 @@ class Server {
 		void	setNickname(Client *client, std::vector<std::string> cmd);
 		void	setUsername(Client *client, std::vector<std::string> cmd);
 		void	modei(Client *client, std::vector<std::string> cmd);
+    void  pong(Client *client, std::vector<std::string> cmd);
 
 		// Channel
 		void	join(std::vector<std::string>, Client *client);
@@ -78,17 +79,17 @@ class Server {
 	  	void	privmsg(Client *client, std::vector<std::string> cmd);
 
     	// utils
-    	bool	nickInUse(std::string nickname);
-		bool	isCRLF(std::string str, Client *client);
-		bool 	 isRegistered(Client *client);
-    	Client*  findClient(std::string nickname);
-		void     sendMSG(std::string message, int fd);
-    	Channel*  findChannel(std::string channelname);
-    	void    sendToChannel(std::string message, std::string nickname, Channel *chan, Client *client);
-		bool	login_parse(std::vector<std::string> cmds, Client *client);
-		void	send_to_all_client(std::string message);
-		std::string	generateNick(std::string base);
-		void	check_connection();
+  bool	nickInUse(std::string nickname);
+  bool	isCRLF(std::string str, Client *client);
+  bool 	 isRegistered(Client *client);
+  Client*  findClient(std::string nickname);
+  void     sendMSG(std::string message, int fd);
+  Channel*  findChannel(std::string channelname);
+  void    sendToChannel(std::string message, std::string nickname, Channel *chan, Client *client);
+  bool	login_parse(std::vector<std::string> cmds, Client *client);
+  void	send_to_all_client(std::string message);
+  std::string	generateNick(std::string base);
+  void	check_connection();
 };
 
 #endif

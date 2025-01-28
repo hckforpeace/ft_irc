@@ -256,7 +256,7 @@ void	Server::read_and_process(int i)
 	str = buffer;
 	if (isCRLF(str, client))
 	{
-		std::cout << RED "Client fd: " RESET <<  client->getFd() << RED << "Send: " << RESET << client->getMessage() << std::endl;
+    std::cout << BLU "[CLIENT] => " RESET << YEL << client->getMessage() << RESET <<std::endl;
 		const char *mess = (client->getMessage()).c_str();
 		std::vector<std::string> lines = split_line_buffer(mess);
 		int nbr_lines = lines.size();
@@ -340,6 +340,8 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 		authenticate(client, cmd);// authenticate
 	else if(cmd.size() != 0 && (cmd[0] == "MODE" || cmd[0] == "MODE"))
 		modei(client, cmd);
+	else if (cmd.size() != 0 && (cmd[0] == "ping" || cmd[0] == "PING"))
+    pong(client, cmd);// set nickename
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
 		setNickname(client, cmd);// set nickename
 	else if (cmd.size() != 0 && (cmd[0] == "user" || cmd[0] == "USER"))
