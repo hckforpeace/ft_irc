@@ -1,5 +1,17 @@
 #include "Server.hpp"
 
+// Constructor starts the server
+Server::Server(char *port, char *password)
+{
+	parse_args(port, password);
+	init_server_socket();
+	init_server();
+	setupSignals();
+	run_server();
+	// do stuff;
+}
+
+// Destructor Deletes Clients and Channels
 Server::~Server()
 {
 	std::cout << "destructeur sever " << std::endl;
@@ -12,90 +24,7 @@ Server::~Server()
 	}
 }
 
-Server::Server(char *port, char *password)
-{
-	parse_args(port, password);
-	init_server_socket();
-	init_server();
-	setupSignals();
-	run_server();
-	// do stuff;
-}
-
-int Server::setnonblocking(int sock)
-{
-    int result;
-    int flags;
-
-    flags = ::fcntl(sock, F_GETFL, 0);
-
-    if (flags == -1)
-		return -1; // error
-
-    flags |= O_NONBLOCK;
-
-    result = fcntl(sock , F_SETFL , flags);
-    return result;
-}
-
-void	Server::init_server()
-{
-	static std::string error;
-	// epoll file descriptor
-	epfd = epoll_create1(0);
-	if (epfd == -1)
-	{
-		error = "ERROR !! epoll_create1 => ";
-		error += strerror(errno);
-		throw std::runtime_error(error);
-	}
-	std::cout << GREEN << "epfd: " << RESET << epfd << std::endl;
-
-	// this is for the 
-	ev.events = EPOLLIN;
-	ev.data.fd = server_socket;
-
-	// added the server_fd to the interest list watching out to READ from IT !
-	if (epoll_ctl(epfd, EPOLL_CTL_ADD, server_socket, &ev) == -1)
-		std::cerr << "Error during epoll_ctl => " << strerror(errno) << std::endl;
-}
-
-void	Server::run_server()
-{
-	// looping 
-	int nbr_fds;
-	static std::string error;
-	int len;
-	struct stat buf;
-	while (!server_off)
-	{
-		nbr_fds = epoll_wait(epfd, events, MAX_EVENTS, -1);
-		// if (errno == EAGAIN)
-			// std::cout << "tell me" << std::endl;
-		for (int i = 0;  i < nbr_fds; ++i)
-		{
-			if (fstat(events[i].data.fd, &buf) == 0 && errno == EBADF)
-				break;
-			if (events[i].data.fd == server_socket)
-			{
-				std::cout << "Connection request" << std::endl;
-				first_connection(nbr_fds, i);
-			}
-			
-			// socket available for read operation 
-			else if (events[i].events == (EPOLLIN | EPOLLOUT))
-				read_and_process(i);
-		}
-	}
-	std::cout << "out of the loop" << std::endl;
-	if (close(server_socket) == -1)
-		std::cout << RED << "failed to closed server_socket" << RESET << std::endl;
-	if (close(epfd) == -1)
-		std::cout << RED << "Successfully closed epfd" << RESET << std::endl;
-}
-
-/*
-*/
+// Creates socket on which the server will listen for incoming connections
 void	Server::init_server_socket()
 {
 	static std::string error;
@@ -140,6 +69,82 @@ void	Server::init_server_socket()
 		error += strerror(errno);
 		throw std::runtime_error(error);
 	}
+}
+
+// Creates epoll instance
+void	Server::init_server()
+{
+	static std::string error;
+	// epoll file descriptor
+	epfd = epoll_create1(0);
+	if (epfd == -1)
+	{
+		error = "ERROR !! epoll_create1 => ";
+		error += strerror(errno);
+		throw std::runtime_error(error);
+	}
+	std::cout << GREEN << "epfd: " << RESET << epfd << std::endl;
+
+	// this is for the 
+	ev.events = EPOLLIN;
+	ev.data.fd = server_socket;
+
+	// added the server_fd to the interest list watching out to READ from IT !
+	if (epoll_ctl(epfd, EPOLL_CTL_ADD, server_socket, &ev) == -1)
+		std::cerr << "Error during epoll_ctl => " << strerror(errno) << std::endl;
+}
+
+// stes an fd or a socket to nonblocking
+int Server::setnonblocking(int sock)
+{
+    int result;
+    int flags;
+
+    flags = ::fcntl(sock, F_GETFL, 0);
+
+    if (flags == -1)
+		return -1; // error
+
+    flags |= O_NONBLOCK;
+
+    result = fcntl(sock , F_SETFL , flags);
+    return result;
+}
+
+// General Loop for server
+void	Server::run_server()
+{
+	// looping 
+	int nbr_fds;
+	static std::string error;
+	int len;
+	struct stat buf;
+	while (!server_off)
+	{
+		nbr_fds = epoll_wait(epfd, events, MAX_EVENTS, -1);
+		check_connection();
+		// if (errno == EAGAIN)
+			// std::cout << "tell me" << std::endl;
+		for (int i = 0;  i < nbr_fds; ++i)
+		{
+			if (fstat(events[i].data.fd, &buf) == 0 && errno == EBADF)
+				break;
+			if (events[i].data.fd == server_socket)
+			{
+				std::cout << "Connection request" << std::endl;
+				first_connection(nbr_fds, i);
+			}
+			
+			// socket available for read operation 
+			else if (events[i].events == (EPOLLIN | EPOLLOUT))
+				read_and_process(i);
+		}
+	}
+	std::cout << "out of the loop" << std::endl;
+	if (close(server_socket) == -1)
+		std::cout << RED << "failed to closed server_socket" << RESET << std::endl;
+	if (close(epfd) == -1)
+		std::cout << RED << "Successfully closed epfd" << RESET << std::endl;
 }
 
 void	Server::parse_args(char *port, char *password)
@@ -333,6 +338,8 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 
 	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
 		authenticate(client, cmd);// authenticate
+	else if(cmd.size() != 0 && (cmd[0] == "MODE" || cmd[0] == "MODE"))
+		modei(client, cmd);
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
 		setNickname(client, cmd);// set nickename
 	else if (cmd.size() != 0 && (cmd[0] == "user" || cmd[0] == "USER"))

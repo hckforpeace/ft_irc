@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(int fd):fd(fd), realname("*"), nickname("*"), username("*")
+Client::Client(int fd):fd(fd), realname("*"), nickname("*"), username("*"), password_inserted(false)
 {
 	this->nickname = "*";
 	this->channel_counter = 0;
@@ -35,6 +35,12 @@ void	Client::setConnection()
 	this->connected = true;
 }
 
+void	Client::setPasswordInserted()
+{
+	this->password_inserted = true;
+}
+
+
 bool	Client::isConnected()
 {
 	return (this->connected);
@@ -54,6 +60,11 @@ std::string	Client::getNickname()
 std::string	Client::getUsername()
 {
 	return (this->username);
+}
+
+bool		Client::getPassstatus()
+{
+	return (this->password_inserted);
 }
 
 void Client::setUsername(std::string str)
@@ -79,5 +90,5 @@ std::string Client::getRealname()
 
 bool  Client::isRegistered()
 {
-  return (this->isConnected() && this->username.compare("*") && this->realname.compare("*") && this->nickname.compare("*"));
+  return (this->getPassstatus() && this->username.compare("*") && this->realname.compare("*") && this->nickname.compare("*"));
 }

@@ -68,6 +68,7 @@ class Server {
 		void	authenticate(Client *client, std::vector<std::string> cmd);
 		void	setNickname(Client *client, std::vector<std::string> cmd);
 		void	setUsername(Client *client, std::vector<std::string> cmd);
+		void	modei(Client *client, std::vector<std::string> cmd);
 
 		// Channel
 		void	join(std::vector<std::string>, Client *client);
@@ -87,6 +88,7 @@ class Server {
 		bool	login_parse(std::vector<std::string> cmds, Client *client);
 		void	send_to_all_client(std::string message);
 		std::string	generateNick(std::string base);
+		void	check_connection();
 };
 
 #endif
