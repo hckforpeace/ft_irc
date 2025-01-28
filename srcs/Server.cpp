@@ -19,7 +19,7 @@ Server::Server(char *port, char *password)
 	init_server_socket();
 	init_server();
 	setupSignals();
-	run_sever();
+	run_server();
 	// do stuff;
 }
 
@@ -61,7 +61,7 @@ void	Server::init_server()
 		std::cerr << "Error during epoll_ctl => " << strerror(errno) << std::endl;
 }
 
-void	Server::run_sever()
+void	Server::run_server()
 {
 	// looping 
 	int nbr_fds;
@@ -234,6 +234,7 @@ void	Server::read_and_process(int i)
 
 	// reading string sent from the Client
 	len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);
+  std::cout << "Client has sent: " << std::endl << buffer << std::endl;
 	// Error
 	if (len == 0)
 	{
@@ -287,11 +288,18 @@ void		Server::processMessage(std::string str, Client *client)
 	}
 }
 
+
 void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
-	client->setCmd(cmd);
+	if (!client->isConnected())
+	{
+		std::cout << "sending to the server" <<std::endl;
+		std::string accept_connection = ":pedroypablo 001 pierro :Welcome to the Internet Relay Network pierro!pierre@pedroypablo";
+		sendMSG(accept_connection, client->getFd());
+		client->setConnection();
+	}
 	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
-		authenticate(client, cmd); // authenticate
+		authenticate(client, cmd); // authenticate (on netcat)
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
 		setNickname(client, cmd); // set nickename
 	else if (cmd.size() != 0 && (cmd[0] == "user" || cmd[0] == "USER"))
@@ -299,19 +307,19 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 	else if (cmd.size() != 0 && (cmd[0] == "join" || cmd[0] == "JOIN"))
 		join(client, cmd); // join a channel
 	else if (cmd.size() != 0 && (cmd[0] == "invite" || cmd[0] == "INVITE"))
-		invite(client, cmd); //invite a client to a channel;
+		invite(client, cmd); // invite a client to a channel;
 	else if (cmd.size() != 0 && (cmd[0] == "topic" || cmd[0] == "TOPIC"))
 		topic(client, cmd); // set or change the topic
 	else if (cmd.size() != 0 && (cmd[0] == "kick" || cmd[0] == "KICK"))
-		std::cout << "test" << std::endl; // kick a client from a channel
+		kick(client, cmd); // kick a client from a channel
 	else if (cmd.size() != 0 && (cmd[0] == "part" || cmd[0] == "PART"))
-		std::cout << "test" << std::endl; // quiting a channel without quiting the server
+		part(client, cmd); // quiting a channel without quiting the server
 	else if (cmd.size() != 0 && (cmd[0] == "mode" || cmd[0] == "MODE"))
 		mode(cmd, client); // change the modes of a channel or client (user operator)
 	else if (cmd.size() != 0 && (cmd[0] == "privmsg" || cmd[0] == "PRIVMSG"))
-    	privmsg(client, cmd);
+    	privmsg(client, cmd); // sends a msg to a client or to a channel
 	else if (cmd.size() != 0 && (cmd[0] == "quit" || cmd[0] == "QUIT"))
 		std::cout << "test" << std::endl;// quit the server
 	else if (cmd.size() != 0)
-		sendMSG(ERR_UNKNOWNCOMMAND(cmd[0]), client->getFd());
+		sendMSG(ERR_UNKNOWNCOMMAND(client->getNickname(), cmd[0]), client->getFd());
 }

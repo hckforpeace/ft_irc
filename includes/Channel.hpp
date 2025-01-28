@@ -36,6 +36,8 @@ class Channel
 		bool		getKeyMode(void);	
 		std::string getTopic(void);
 		std::string getPassword(void);
+		std::string getClientLst(void);
+		int			getClientNb(void);
 	
 		/*Setter*/
 		void	setName(std::string name);
@@ -49,6 +51,10 @@ class Channel
 		/*methods*/
 		void	add_client(Client *new_client);
 		void	add_operator(Client *new_operator);
+    	bool 	isOperator(Client *client);
+    	bool 	isInChannel(Client *client);
+		void	removeClient(Client *client);
+		void	removeOperator(Client *client);
 };
 
 #endif

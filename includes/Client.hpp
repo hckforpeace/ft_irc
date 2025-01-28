@@ -15,7 +15,7 @@ class Client
 		std::vector<std::string>	cmd;
 		std::vector<std::string>	invited_to_chan;
 		int			fd;
-		int			channel_counter; // Max 10
+		int			channel_counter; // max 10
 		bool		connected; // false by default
 
 	public:
@@ -30,6 +30,7 @@ class Client
 		std::string	getNickname();
 		std::string	getUsername();  
 		std::string	getRealname();
+		std::string getHostname();
 		int			getChanCounter(void);
 
 		void	setMessage(std::string str);
@@ -41,6 +42,7 @@ class Client
 		void	setRealname(std::string str);
 		void	addtoInviteChan(std::string channel);
 		bool	isInvited(std::string channel);
+
 };
 
 #endif

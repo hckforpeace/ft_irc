@@ -3,15 +3,15 @@
 void	Server::invite(Client *client, std::vector<std::string> cmd)
 {
 	if (cmd.size() < 3)
-		return (sendMSG(ERR_NEEDMOREPARAMS(cmd[0]), client->getFd()));
-	if (!findClient(cmd[1]))
-		return (sendMSG(ERR_UNKNOWNUSER(cmd[1]), client->getFd()));
+		return (sendMSG(ERR_NEEDMOREPARAMS(client->getNickname()), client->getFd()));
+	if (cmd[1].empty() || !findClient(cmd[1]))
+		return (sendMSG(ERR_NOSUCHNICK(cmd[1]), client->getFd()));
 	if (cmd[2].at(0) != '#' || (cmd[2].at(0) == '#' && cmd[2].length() == 1))
-		return (sendMSG(ERR_INVCHANNELNAME, client->getFd()));
+		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[2]), client->getFd()));
 	if (!findChannel(cmd[2].substr(1)))
-		return (sendMSG(ERR_NOSUCHCHANNEL(cmd[2].substr(1)), client->getFd()));
+		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[2]), client->getFd()));
 	if (!isOperator(client, findChannel(cmd[2].substr(1))))
-		return (sendMSG(ERR_NOTOPERATOR(cmd[2].substr(1)), client->getFd()));
+		return (sendMSG(ERR_NOTOPERATOR(client->getNickname(), cmd[2].substr(1)), client->getFd()));
 	Client *invited = findClient(cmd[1]);
 	invited->addtoInviteChan(cmd[2].substr(1));
 	sendMSG(BE_INVITED(client->getNickname(), cmd[2]), invited->getFd());
@@ -21,11 +21,11 @@ void	Server::invite(Client *client, std::vector<std::string> cmd)
 void	Server::topic(Client *client, std::vector<std::string> cmd)
 {
 	if (cmd.size() < 2)
-		return (sendMSG(ERR_NEEDMOREPARAMS(cmd[0]), client->getFd()));
+		return (sendMSG(ERR_NEEDMOREPARAMS(client->getNickname()), client->getFd()));
 	if (cmd[1].at(0) != '#' || (cmd[1].at(0) == '#' && cmd[1].length() == 1))
-		return (sendMSG(ERR_INVCHANNELNAME, client->getFd()));
+		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[1]), client->getFd()));
 	if (!findChannel(cmd[1].substr(1)))
-		return (sendMSG(ERR_NOSUCHCHANNEL(cmd[1].substr(1)), client->getFd()));
+		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[1]), client->getFd()));
 	Channel *channel = findChannel(cmd[1].substr(1));
 	if (cmd.size() == 2)
 	{
@@ -34,9 +34,49 @@ void	Server::topic(Client *client, std::vector<std::string> cmd)
 		return(sendMSG(SHOW_TOPIC(channel->getName(), channel->getTopic(), client->getNickname()), client->getFd()));
 	}
 	if (!isinChan(client, channel))
-		return (sendMSG(ERR_USERNOTONCHAN(channel->getName()), client->getFd()));
+		return (sendMSG(ERR_USERNOTONCHAN(client->getNickname(), channel->getName()), client->getFd()));
 	if (!isOperator(client, channel) && channel->getTopicMode())
-		return (sendMSG(ERR_NOTOPERATOR(channel->getName()), client->getFd()));
+		return (sendMSG(ERR_NOTOPERATOR(client->getNickname(), channel->getName()), client->getFd()));
 	channel->setTopic(cmd[2]);
 	sendMSG(CHANGE_TOPIC(client->getNickname(), channel->getName(), channel->getTopic()), client->getFd());
+}
+
+void	Server::part(Client *client, std::vector<std::string> cmd)
+{
+	if (cmd.size() < 2)
+		return (sendMSG(ERR_NEEDMOREPARAMS(client->getNickname()), client->getFd()));
+	if (cmd[1].at(0) != '#' || (cmd[1].at(0) == '#' && cmd[1].length() == 1))
+		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[1]), client->getFd()));
+	if (!findChannel(cmd[1].substr(1)))
+		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[1]), client->getFd()));
+	Channel *channel = findChannel(cmd[1].substr(1));
+	if (!isinChan(client, channel))
+		return (sendMSG(ERR_USERNOTONCHAN(client->getNickname(), channel->getName()), client->getFd()));
+	sendMSGChan(RPL_PART(client->getNickname(), client->getUsername(), channel->getName()), channel);
+	if (isOperator(client, channel))
+		channel->removeOperator(client);
+	else
+		channel->removeClient(client);
+	if (channel->getClientNb() == 0)
+		removeChan(channel);
+}
+
+void	Server::kick(Client *client, std::vector<std::string> cmd)
+{
+	if (cmd.size() < 2)
+		return (sendMSG(ERR_NEEDMOREPARAMS(client->getNickname()), client->getFd()));
+	if (cmd[1].at(0) != '#' || (cmd[1].at(0) == '#' && cmd[1].length() == 1))
+		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[1]), client->getFd()));
+	if (!findChannel(cmd[1].substr(1)))
+		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[1]), client->getFd()));
+	Channel *channel = findChannel(cmd[1].substr(1));
+	if (!isinChan(client, channel))
+		return (sendMSG(ERR_USERNOTONCHAN(client->getNickname(), channel->getName()), client->getFd()));
+	sendMSGChan(RPL_PART(client->getNickname(), client->getUsername(), channel->getName()), channel);
+	if (isOperator(client, channel))
+		channel->removeOperator(client);
+	else
+		channel->removeClient(client);
+	if (channel->getClientNb() == 0)
+		removeChan(channel);
 }

@@ -39,6 +39,12 @@ std::string	Client::getUsername()
 	return (this->username);
 }
 
+std::string Client::getHostname(void)
+{
+	std::string hostname = this->nickname + "!" + this->username;
+	return (hostname);
+}
+
 std::string Client::getRealname()
 {
   return (this->realname);
@@ -61,7 +67,7 @@ void	Client::setMessage(std::string str)
 	this->message = str;
 }
 
-void	Client::setConnection()
+void	Client::setConnection(void)
 {
 	this->connected = true;
 }
@@ -80,8 +86,6 @@ void  Client::setRealname(std::string str)
 {
   this->realname = str;
 }
-
-/*======================== METHODS ===============================*/
 
 bool  Client::isRegistered()
 {

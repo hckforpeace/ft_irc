@@ -8,9 +8,9 @@ void Server::join(Client *client, std::vector<std::string> cmd)
 	if (cmd[3].empty())
 		password = "";
 	if (cmd.size() < 2)
-		return (sendMSG(ERR_NEEDMOREPARAMS(cmd[0]), client->getFd()));
+		return (sendMSG(ERR_NEEDMOREPARAMS(client->getNickname()), client->getFd()));
 	if (cmd[1].empty() || cmd[1].at(0) != '#' || (cmd[1].at(0) == '#' && cmd[1].length() == 1))
-		return (sendMSG(ERR_INVCHANNELNAME, client->getFd()));
+		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[1]), client->getFd()));
 	for (int i = 0; i < this->Channels.size(); i++)
 	{
 		if (this->Channels[i]->getName() == cmd[1].substr(1))
@@ -23,7 +23,6 @@ void Server::join(Client *client, std::vector<std::string> cmd)
 	if (!flag)
 		createChannel(cmd[1].substr(1), client);
 }
-
 void Server::createChannel(std::string name, Client *client)
 {
 	if (client->getChanCounter() >= 10) // limit of connected channels per client
@@ -34,7 +33,9 @@ void Server::createChannel(std::string name, Client *client)
 	new_channel->add_operator(client);
 	this->Channels.push_back(new_channel);
 	client->setChanCounter();
-	sendMSGChan(CHAN_WELC(client->getNickname(), name), new_channel);
+	sendMSG(RPL_JOIN(client->getHostname(), new_channel->getName()) + \
+		RPL_NAMES(client->getNickname(), new_channel->getName(), new_channel->getClientLst()) + \
+		RPL_ENDOFNAMES(client->getNickname(),new_channel->getName()), client->getFd());
 }
 
 void Server::enterChannel(Channel *channel, Client *client)
@@ -54,5 +55,14 @@ void Server::enterChannel(Channel *channel, Client *client)
 		return (sendMSG(CHAN_PASS(channel->getName()), client->getFd()));
 	channel->add_client(client);
 	client->setChanCounter();
-	sendMSGChan(CHAN_WELC(client->getNickname(), channel->getName()), channel);
+	if (channel->getTopic().empty())
+		sendMSG(RPL_JOIN(client->getHostname(), channel->getName()) + \
+			RPL_NAMES(client->getNickname(), channel->getName(), channel->getClientLst()) + \
+			RPL_ENDOFNAMES(client->getNickname(),channel->getName()), client->getFd());
+	else
+		sendMSG(RPL_JOIN(client->getHostname(), channel->getName()) + \
+			RPL_TOPIC(client->getNickname(), channel->getName(), channel->getTopic()) + \
+			RPL_NAMES(client->getNickname(), channel->getName(), channel->getClientLst()) + \
+			RPL_ENDOFNAMES(client->getNickname(),channel->getName()), client->getFd());
+	sendMSGChan(RPL_JOIN(client->getHostname(), channel->getName()), channel);
 }

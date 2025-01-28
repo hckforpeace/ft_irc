@@ -27,7 +27,7 @@ static bool server_off = false;
 
 class Server {
 	private:
-		int	_port;
+		int			_port;
 		std::string	error;
 		std::string	_password;
 		char		buffer[512];
@@ -38,29 +38,29 @@ class Server {
 		epoll_event	events[MAX_EVENTS];
 		sockaddr_in  server_addr;
  		sockaddr_in  client_addr;
-		std::vector<Client *> Clients;
-		std::vector<Channel *> Channels;
+		std::vector<Client*> Clients;
+		std::vector<Channel*> Channels;
 
  	public:
 		Server(char *port, char *password);
-		~Server();
-		void	parse_args(char *port, char *password);
-		void	init_server_socket();
-		void	init_server();
-		void	run_sever();
-		int		setnonblocking(int sock);
-		void 	setupSignals();
+		~Server(void);
+		void		parse_args(char *port, char *password);
+		void		init_server_socket();
+		void		init_server();
+		void		run_server();
+		int			setnonblocking(int sock);
+		void 		setupSignals();
 		static void signIntHandler(int code);
 		void		first_connection(int nbr_fds, int i);
 		void		read_and_process(int i);
 		void		processMessage(std::string str, Client *client);
 
     	// getters
-		Client*	getClient(int fd);
+		Client*							getClient(int fd);
 		std::vector<Client *>::iterator	getClientIt(int fd);
 
-    	void		parse_exec_cmd(std::vector<std::string> cmd, Client *client);
-		std::vector<std::string> split_buffer(std::string str);				
+    	void						parse_exec_cmd(std::vector<std::string> cmd, Client *client);
+		std::vector<std::string>	split_buffer(std::string str);				
 
 		// commands execution
 		void	authenticate(Client *client, std::vector<std::string> cmd);
@@ -79,20 +79,25 @@ class Server {
 		bool 	isOperator(Client *client, Channel *channel);
 		bool	setOperator(Client *client, Channel *channel);
 
-		// Invite
+		// CMD
 		void	invite(Client *client, std::vector<std::string> cmd);
 		void	topic(Client *client, std::vector<std::string> cmd);
+		void	part(Client *client, std::vector<std::string> cmd);
+		void	kick(Client *client, std::vector<std::string> cmd);
 
     	// utils
-    	bool	nickInUse(std::string nickname);
-		bool	isCRLF(std::string str, Client *client);
-		bool 	isRegistered(Client *client);
-    	Client* findClient(std::string nickname);
-		Channel* findChannel(std::string channel_name);
-		void    sendMSG(std::string message, int fd);
-		void  	sendToChannel(std::string message, std::string nickname, Channel *channel);
-		void    sendMSGChan(std::string message, Channel *channel);
-		bool	isinChan(Client *client, Channel *channel);
+    	bool		nickInUse(std::string nickname);
+		bool		isCRLF(std::string str, Client *client);
+		bool 		isRegistered(Client *client);
+    	Client*		findClient(std::string nickname);
+		Channel*	findChannel(std::string channel_name);
+		void   		sendMSG(std::string message, int fd);
+		void  		sendToChannel(std::string message, std::string nickname, Channel *channel, Client *client);
+		void    	sendMSGChan(std::string message, Channel *channel);
+		bool		isinChan(Client *client, Channel *channel);
+		void    	send_to_all_client(std::string message);
+		void		removeClient(Client *client, Channel *channel);
+		void		removeChan(Channel *channel);
 
 		// mode
 		void	inviteMode(std::string mode, Client *client, Channel *channel);

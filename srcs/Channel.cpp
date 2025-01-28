@@ -1,4 +1,5 @@
 #include "Channel.hpp"
+#include "Server.hpp"
 
 Channel::Channel(std::string name)
 {
@@ -30,6 +31,7 @@ Channel::~Channel()
 // }
 
 /*=========================== METHODS ==============================*/
+
 void Channel::add_client(Client *new_client)
 {
 	chan_clients.push_back(new_client);
@@ -38,6 +40,59 @@ void Channel::add_client(Client *new_client)
 void Channel::add_operator(Client *new_operator)
 {
 	operators.push_back(new_operator);
+}
+
+bool  Channel::isInChannel(Client *client)
+{
+  for (std::vector<Client*>::iterator it = this->chan_clients.begin(); it != this->chan_clients.end(); it++)
+  {
+    if ((*it) == client)
+      return (true);
+  }
+  for (std::vector<Client*>::iterator it = this->operators.begin(); it != this->operators.end(); it++)
+  {
+    if ((*it) == client)
+      return (true);
+  }
+  return (false);
+}
+
+bool  Channel::isOperator(Client *client)
+{
+  if (!isInChannel(client))
+    return (false);
+
+  for (std::vector<Client*>::iterator it = this->operators.begin(); it != this->operators.end(); it++)
+  {
+    if ((*it) == client)
+      return (true);
+  }
+  return (false);
+
+}
+
+void	Channel::removeClient(Client *client)
+{
+	for (std::vector<Client*>::iterator it = chan_clients.begin(); it != chan_clients.end(); ++it)
+	{
+		if (!(*it)->getNickname().compare(client->getNickname()))
+		{
+			chan_clients.erase(it);
+			break ;
+		}
+	}
+}
+
+void	Channel::removeOperator(Client *client)
+{
+	for (std::vector<Client*>::iterator it = operators.begin(); it != operators.end(); ++it)
+	{
+		if (!(*it)->getNickname().compare(client->getNickname()))
+		{
+			operators.erase(it);
+			break ;
+		}
+	}
 }
 
 /*========================== GETTERS ===============================*/
@@ -96,6 +151,31 @@ std::string Channel::getPassword(void)
 bool		Channel::getKeyMode(void)
 {
 	return (key_mode);
+}
+
+std::string Channel::getClientLst(void)
+{
+	std::string list = "";
+	for (int i = 0; i < operators.size(); i++)
+	{
+		list.append("@" + operators[i]->getNickname());
+		if (i + 1 < operators.size())
+			list.append(" ");
+	}
+	if (chan_clients.size() > 0)
+		list.append(" ");
+	for (int i = 0; i < chan_clients.size(); i++)
+	{
+		list.append(chan_clients[i]->getNickname());
+		if (i + 1 < chan_clients.size())
+			list.append(" ");
+	}
+	return (list);
+}
+
+int	Channel::getClientNb(void)
+{
+	return (chan_clients.size() + operators.size());
 }
 
 /*========================== SETTERS ===============================*/
