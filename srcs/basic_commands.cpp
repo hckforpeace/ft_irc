@@ -79,10 +79,10 @@ void	Server::setUser(Client *client, std::vector<std::string> cmd)
 void  Server::privmsg(Client *client, std::vector<std::string> cmd)
 {
 	std::string		err;
-	Client        *rcv;
-	Channel       *chan;    
-	std::string   channel;
-	std::string   msg;
+	Client			*rcv;
+	Channel			*chan;    
+	std::string		channel;
+	std::string		msg;
 
 	if (!client->isRegistered())
 		err = ERR_NOTREGISTERED(client->getNickname());
@@ -91,25 +91,25 @@ void  Server::privmsg(Client *client, std::vector<std::string> cmd)
 	else
 	{
 		if (cmd[1].at(0) == '#')
-	{
-		channel = cmd[1];
-		channel = channel.substr(1);
-		chan =    findChannel(channel);
-		sendToChannel(cmd[2], client->getNickname(), chan, client);
-		return ;
-	}
+		{
+			channel = cmd[1];
+			channel = channel.substr(1);
+			chan =    findChannel(channel);
+			sendToChannel(cmd[2], client->getNickname(), chan, client);
+			return ;
+		}
 		else
 		{
 			if ((rcv = this->findClient(cmd[1])) != NULL)
-		{
-			msg = "<" RED + client->getNickname() +  RESET "r" + " " + cmd[2];
-			sendMSG(msg, rcv->getFd());
-			return ;
-		}
+			{
+				msg = "<" RED + client->getNickname() +  RESET "r" + " " + cmd[2];
+				sendMSG(msg, rcv->getFd());
+				return ;
+			}
 			else
 				err = ERR_NOSUCHNICK(cmd[1]);
 		
-	}
+		}
 	}
 	this->sendMSG(err, client->getFd());
 }

@@ -15,7 +15,7 @@ void Server::join(Client *client, std::vector<std::string> cmd)
 	{
 		if (this->Channels[i]->getName() == cmd[1].substr(1))
 		{
-			enterChannel(this->Channels[i], client);
+			enterChannel(this->Channels[i], client, password);
 			flag = 1;
 			break ;
 		}
@@ -38,21 +38,18 @@ void Server::createChannel(std::string name, Client *client)
 		RPL_ENDOFNAMES(client->getNickname(),new_channel->getName()), client->getFd());
 }
 
-void Server::enterChannel(Channel *channel, Client *client)
+void Server::enterChannel(Channel *channel, Client *client, std::string password)
 {
-	std::vector<std::string>	cmd;
-
 	if (client->getChanCounter() >= 10) // limit of connected channels per client
 		return (sendMSG(ERR_TOOMANYCHANNELS(client->getNickname()), client->getFd()));
 	if (channel->getTotalClient() >= channel->getLimit()) // if limit of connected clients in the channel
-		return (sendMSG(ERR_CHANNELISFULL(channel->getName()), client->getFd()));
+		return (sendMSG(ERR_CHANNELISFULL(client->getNickname(), channel->getName()), client->getFd()));
 	if (isinChan(client, channel)) // if the client is already on the channel it can't reconnect
 		return (sendMSG(ERR_USERONCHANNEL(client->getNickname(), channel->getName()), client->getFd()));
-	if (channel->isInviteOnly() && !client->isInvited(channel->getName())) // if the channel is invite)_only and the client is not invited
-		return (sendMSG(INVITE_ONLY(channel->getName()), client->getFd()));
-	cmd = client->getCmd();
-	if (channel->getKeyMode() && (cmd.size() < 3 || cmd[3] != channel->getPassword()))
-		return (sendMSG(CHAN_PASS(channel->getName()), client->getFd()));
+	if (channel->isInviteOnly() && !client->isInvited(channel->getName())) // if the channel is invite_only and the client is not invited
+		return (sendMSG(INVITE_ONLY(client->getNickname(), channel->getName()), client->getFd()));
+	if (channel->getKeyMode() && (password.compare(channel->getPassword())))  // if the channel is channel-protected and the password is wrong
+		return (sendMSG(CHAN_PASS(client->getNickname(), channel->getName()), client->getFd()));
 	channel->add_client(client);
 	client->setChanCounter();
 	if (channel->getTopic().empty())

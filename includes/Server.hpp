@@ -74,7 +74,7 @@ class Server {
 		// Channel
 		void	join(Client *client, std::vector<std::string> cmd);
 		void	createChannel(std::string name, Client *client);
-		void	enterChannel(Channel *channel, Client *client);
+		void	enterChannel(Channel *channel, Client *client, std::string password);
 		void	setUser(Client *client, std::vector<std::string> cmd);
 	  	void	privmsg(Client *client, std::vector<std::string> cmd);
 		bool 	isOperator(Client *client, Channel *channel);

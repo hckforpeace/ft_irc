@@ -13,7 +13,9 @@
 
 # define ERR_INVITEONLYCHAN(channel) "473 " + channel + " :Cannot join channel (+i)"
 
-# define ERR_USERNOTONCHAN(nickname, channel) (":localhost 442 " + nickname + " #" + channel + " :You're not on that channel")
+# define ERR_USERNOTINCHAN1(nickname, channel) (":localhost 442 " + nickname + " #" + channel + " :You're not on that channel")
+
+# define ERR_USERNOTINCHAN2(nickname, channel) (":localhost 442 " + nickname + " #" + channel + " :They aren't on that channel")
 
 // Sent to a user when they have joined the maximum number of allowed channels and they try to join another channel.
 # define ERR_TOOMANYCHANNELS(client) ("localhost: 405 " + client + ": You have joined too many channels")
@@ -29,6 +31,10 @@
 /*================================================== PART ====================================================*/
 
 #define RPL_PART(nickname, username, channel) (":" + nickname + "!~" + username + "@127.0.0.1 PART #" + channel)
+
+/*================================================== KICK ====================================================*/
+
+#define RPL_KICK(nickname, username, channel) (":" + nickname + "!~" + username + "@127.0.0.1 KICK #" + channel)
 
 /*================================================= TOPIC ====================================================*/
 
@@ -70,7 +76,8 @@
 # define ERR_ERRONEUSNICKNAME(nickname) (":localhost 432 " + nickname + " :Erroneous nickname")
 
 // Indicates that no channel can be found for the supplied channel name.
-# define ERR_NOSUCHCHANNEL(nickname, channel) (":localhost 403 " + nickname + " " + channel + " :No such channel\r\n")
+# define ERR_NOSUCHCHANNEL(nickname, channel) (":localhost 403 " + nickname + " " + channel + " :No such channel")
+
 
 // Returned by the PRIVMSG command to indicate the message wasn’t delivered because there was no text to send.
 # define ERR_NOTEXTTOSEND (":localhost 412 <client> :No text to send") //????????????
@@ -80,7 +87,7 @@
 
 /*====================================================== INVITE ============================================================*/
 
-# define INVITE_ONLY(channel) "473: Cannot join to channel #" + channel + " (You must be invited)"
+# define INVITE_ONLY(nickname, channel) (":localhost 473 " + nickname + " #" + channel + " :Cannot join channel (+i)")
 
 # define BE_INVITED(client, channel) client + " invites you to "+ channel
 
@@ -94,13 +101,13 @@
 # define MODE_UNSET(channel, nickname, mode) "mode/#" + channel + " [-" + mode + "] by " + nickname
 
 // Password
-# define CHAN_PASS(channel) "Cannot join to channel #" + channel + " (Bad channel key)"
+# define CHAN_PASS(nickname, channel) (":localhost 475 " + nickname + " #" + channel + " :Cannot join channel (+k) - bad key")
 
 // Operator
 # define ERR_NOTOPERATOR(nickname, channel) (":localhost 482 " + nickname + " #" + channel + " :You're not channel operator")
 
 // User limit
-# define ERR_CHANNELISFULL(channel) "471: Cannot join to channel #" + channel + " (Channel is full)"
+# define ERR_CHANNELISFULL(nickname, channel) (":localhost 471 " + nickname + " #" + channel + " :Cannot join channel (+l)")
 
 # define ERR_BADMODESYNTAX "Bad syntax, use as : mode #channel +/-c [args], where c is the mode"
 

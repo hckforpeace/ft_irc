@@ -317,13 +317,13 @@ void		Server::processMessage(std::string str, Client *client)
 
 void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
-	if (!client->isConnected())
-	{
-		std::cout << "sending to the server" <<std::endl;
-		std::string accept_connection = ":pedroypablo 001 pierro :Welcome to the Internet Relay Network pierro!pierre@pedroypablo";
-		sendMSG(accept_connection, client->getFd());
-		client->setConnection();
-	}
+	// if (!client->isConnected())
+	// {
+	// 	std::cout << "sending to the server" <<std::endl;
+	// 	std::string accept_connection = ":pedroypablo 001 pierro :Welcome to the Internet Relay Network pierro!pierre@pedroypablo";
+	// 	sendMSG(accept_connection, client->getFd());
+	// 	client->setConnection();
+	// }
 	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
 		authenticate(client, cmd); // authenticate (on netcat)
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
