@@ -67,6 +67,8 @@ class Server {
 		void	authenticate(Client *client, std::vector<std::string> cmd);
 		void	setNickname(Client *client, std::vector<std::string> cmd);
 		void	setUsername(Client *client, std::vector<std::string> cmd);
+		void	modei(Client *client, std::vector<std::string> cmd);
+    	void 	pong(Client *client, std::vector<std::string> cmd);
 
 		// Modes
 		void	mode(std::vector<std::string> cmd, Client *client);
@@ -110,6 +112,7 @@ class Server {
 		void	limitModeOff(Client *client, Channel *channel);
 		bool	login_parse(std::vector<std::string> cmds, Client *client);
 		std::string	generateNick(std::string base);
+  		void	check_connection();
 };
 
 #endif

@@ -1,7 +1,14 @@
 #ifndef REPLIES_HPP
 # define REPLIES_HPP
 
-/*================================================ CHANNEL ===================================================*/
+// Command responses
+
+/*================ PREFIX ====================*/
+# define PREFIX ":localhost "
+# define NETWORK "pedroypablo"
+/*================ CHANNEL ====================*/
+
+# define WLC(user, nick) PREFIX "001 " + nick + " :Welcome to the pedroypablo, " + nick + "[!<" + user + ">@<localhost>]"
 
 // Welcome message when a client joins a channel
 # define CHAN_WELC(nickname, channel) nickname + " has joined #"  + channel
@@ -38,7 +45,7 @@
 
 /*================================================= TOPIC ====================================================*/
 
-#define RPL_TOPIC(nickname, channel, topic) (": 332 " + nickname + " #" + channel + " :" + topic + "\r\n")
+#define RPL_TOPIC(nickname, channel, topic) (":( 332 " + nickname + " #" + channel + " :" + topic + "\r\n")
 
 # define EMPTY_TOPIC(channel) ("#" + channel + ": No topic is set")
 
@@ -53,6 +60,8 @@
 
 // Returned by the server to indicate that the client must be registered before the server will allow it to be parsed in detail.
 # define ERR_NOTREGISTERED(nickname) (":localhost 451 " + nickname + " : You have not registered")
+
+#define ERR_NONICKNAMEGIVEN(nick) PREFIX "431 " + nick + " :No nickname given"
 
 // Returned by the server by numerous commands to indicate to the client that it didn't supply enough parameters.
 # define ERR_NEEDMOREPARAMS(nickname) (":localhost 461 " + nickname + " :Not enough parameters")
@@ -77,7 +86,6 @@
 
 // Indicates that no channel can be found for the supplied channel name.
 # define ERR_NOSUCHCHANNEL(nickname, channel) (":localhost 403 " + nickname + " " + channel + " :No such channel")
-
 
 // Returned by the PRIVMSG command to indicate the message wasn’t delivered because there was no text to send.
 # define ERR_NOTEXTTOSEND (":localhost 412 <client> :No text to send") //????????????

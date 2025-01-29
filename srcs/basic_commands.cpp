@@ -15,7 +15,7 @@ void	Server::authenticate(Client *client, std::vector<std::string> cmd)
 	{
 		if (!cmd[1].compare(this->_password))
 		{
-			client->setConnection();
+			client->setPasswordInserted();
 			return ;
 		}
 		else
@@ -35,9 +35,16 @@ void	Server::setNickname(Client *client, std::vector<std::string> cmd)
 		err = ERR_NEEDMOREPARAMS(client->getNickname());
 	else if (nickInUse(cmd[1]))
 		err = ERR_NICKNAMEINUSE(cmd[1]);
+	// if (!client->isConnected())
+	// 	err = ERR_NOTREGISTERED(client->getNickname());
+	if (cmd.size() < 2)
+		err = ERR_NONICKNAMEGIVEN(client->getNickname());
 	else
 	{
-		old_nick = client->getNickname();
+		if (client->getNickname().compare(""))
+			old_nick = client->getNickname();
+		else
+			old_nick = cmd[1];
 		if (nickInUse(cmd[1]))
 		{
 			old_nick = cmd[1];
@@ -49,9 +56,8 @@ void	Server::setNickname(Client *client, std::vector<std::string> cmd)
 		else
     	{
 			client->setNickname(cmd[1]);
-			std::cout << "Setting A new nick to fd: " << client->getFd() << ", to: " << cmd[1] << std::endl;
-			std::cout << RED "MESSAGE SENT: "  RESET << ":" + old_nick + " NICK " + cmd[1] << std::endl; 
  			sendMSG(":" + old_nick + " NICK " + cmd[1], client->getFd());
+ 			// sendMSG(":" + old_nick + "!" + client->getUsername() + "@localhost " + " NICK " + cmd[1], client->getFd());
 			return ;
 		}
 	}
@@ -63,9 +69,9 @@ void	Server::setUser(Client *client, std::vector<std::string> cmd)
 {
 	std::string		err;
 
-	if (!client->isConnected())
-		err = ERR_NOTREGISTERED(client->getNickname());
-	else if (cmd.size() < 3)
+	// if (!client->isConnected())
+	// 	err = ERR_NOTREGISTERED(client->getNickname());
+	if (cmd.size() < 3)
 		err = ERR_NEEDMOREPARAMS(client->getNickname());
 	else
 	{
@@ -112,4 +118,14 @@ void  Server::privmsg(Client *client, std::vector<std::string> cmd)
 		}
 	}
 	this->sendMSG(err, client->getFd());
+}
+
+void Server::modei(Client *client, std::vector<std::string> cmd)
+{
+	sendMSG(":localhost MODE " + client->getNickname() + " +i", client->getFd());
+} 
+
+void  Server::pong(Client *client, std::vector<std::string> cmd)
+{
+	sendMSG("PONG " + cmd[1], client->getFd());
 }

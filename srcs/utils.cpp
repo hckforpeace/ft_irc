@@ -82,9 +82,10 @@ void Server::sendMSG(std::string message, int fd)
 	const char *buffer;
 	message.append("\r\n");
 
+	std::cout << RED "[SERVER] => " RESET << GREEN << message << RESET << std::endl;
 	buffer = message.c_str();
 	if (send(fd, buffer, message.length(), 0) == -1)
-		std::cout << RED << "send() failed" << RESET << std::endl;
+    	std::cout << RED << "send() failed" << RESET << std::endl;
 }
 
 Channel *Server::findChannel(std::string channelname)
@@ -172,4 +173,17 @@ std::string	Server::generateNick(std::string base)
     str << "";
   }
   return ("Error");
+}
+
+void	Server::check_connection()
+{
+  for (std::vector<Client*>::iterator it = Clients.begin(); it != Clients.end(); it++)
+  {
+    // std::cout << "Sent WELCOME to: " << (*it)->isRegistered() << std::endl;
+    if (!(*it)->isConnected() && (*it)->isRegistered())
+    {
+      (*it)->setConnection();
+      sendMSG(WLC((*it)->getUsername(), (*it)->getNickname()), (*it)->getFd());
+    }
+  }
 }
