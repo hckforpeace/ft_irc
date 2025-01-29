@@ -82,7 +82,7 @@ void Server::sendMSG(std::string message, int fd)
 	const char *buffer;
 	message.append("\r\n");
 
-	std::cout << RED "[SERVER] => " RESET << GREEN << message << RESET << std::endl;
+	std::cout << RED "[SERVER]<" << fd << "> => " RESET << GREEN << message << RESET << std::endl;
 	buffer = message.c_str();
 	if (send(fd, buffer, message.length(), 0) == -1)
     	std::cout << RED << "send() failed" << RESET << std::endl;
@@ -130,7 +130,7 @@ void Server::removeChan(Channel *channel)
 		if (!(*it)->getName().compare(channel->getName()))
 		{
 			Channels.erase(it);
-			break;
+			break ;
 		}
 	}
 }

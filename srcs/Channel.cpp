@@ -85,7 +85,7 @@ void	Channel::removeClient(Client *client)
 
 void	Channel::removeOperator(Client *client)
 {
-	for (std::vector<Client*>::iterator it = operators.begin(); it != operators.end(); ++it)
+	for (std::vector<Client*>::iterator it = operators.begin(); it != operators.end(); it++)
 	{
 		if (!(*it)->getNickname().compare(client->getNickname()))
 		{

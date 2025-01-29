@@ -113,7 +113,7 @@ void  Server::privmsg(Client *client, std::vector<std::string> cmd)
 				return ;
 			}
 			else
-				err = ERR_NOSUCHNICK(cmd[1]);
+				err = ERR_NOSUCHNICK(client->getNickname(), cmd[1]);
 		
 		}
 	}
