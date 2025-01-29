@@ -1,5 +1,4 @@
 #include "Server.hpp"
-#include "Colors.hpp"
 
 // Constructor starts the server
 Server::Server(char *port, char *password)
@@ -15,14 +14,15 @@ Server::Server(char *port, char *password)
 // Destructor Deletes Clients and Channels
 Server::~Server()
 {
-	std::cout << "destructeur sever " << std::endl;
+	std::cout << "destructor sever" << std::endl;
 	std::cout << "number of clients: " << Clients.size() << std::endl;
 	for (std::vector<Client *>::iterator it = Clients.begin(); it != Clients.end(); it++)
 	{
-		
 		std::cout << "destroying" << std::endl;
 		delete *it;
 	}
+	for (std::vector<Channel *>::iterator it = Channels.begin(); it != Channels.end(); it++)
+		delete *it;
 }
 
 // Creates socket on which the server will listen for incoming connections
@@ -131,7 +131,10 @@ void	Server::run_server()
 			if (fstat(events[i].data.fd, &buf) == 0 && errno == EBADF)
 				break;
 			if (events[i].data.fd == server_socket)
+			{
+				std::cout << "Connection request" << std::endl;
 				first_connection(nbr_fds, i);
+			}
 			
 			// socket available for read operation 
 			else if (events[i].events == (EPOLLIN | EPOLLOUT))
@@ -224,7 +227,6 @@ void		Server::first_connection(int nbr_fds, int i)
 	Client *new_connection = new Client(con_socket);
 	Clients.push_back(new_connection);
 
-  std::cout << RED "[CLIENT-SERVER-CONNECTION] => PORT: " RESET << BLU << con_socket << std::endl;
 	// std::cout << "success !! con_socket " << con_socket <<  " Connected" << std::endl;
 	//send(con_socket, "Insert Password: ", sizeof(char) * 18, 0);
 }
@@ -234,6 +236,7 @@ void	Server::read_and_process(int i)
 	int	len;
 	std::string str;
 	Client *client = getClient(events[i].data.fd);
+  int client_socket = client->getFd();
 
 	// reading string sent from the Client
 	len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);
@@ -255,18 +258,20 @@ void	Server::read_and_process(int i)
 	str = buffer;
 	if (isCRLF(str, client))
 	{
-    std::cout << BLU "[CLIENT] => " RESET << YEL << client->getMessage() << RESET;
+    std::cout << BLU "[CLIENT] " << client_socket << " => " RESET << YEL << client->getMessage() << RESET <<std::endl;
 		const char *mess = (client->getMessage()).c_str();
 		std::vector<std::string> lines = split_line_buffer(mess);
 		int nbr_lines = lines.size();
 		if (lines.size() > 1)
 		{
 			int i = 0;
-			while (i < lines.size())
+			while (i < lines.size() && isOpenedSock(client_socket))
 			{
 				parse_exec_cmd(split_buffer(lines[i]), client);
 				i++;
 			}
+      if (!isOpenedSock(client_socket))
+        return ;
 		}
 		else
 			parse_exec_cmd(split_buffer(client->getMessage()), client);
@@ -318,49 +323,34 @@ void		Server::processMessage(std::string str, Client *client)
 	}
 }
 
-
 void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
-/*   int i = 0;
-  bool is_loged = client->isConnected();
-
-  {
-    std::cout << "sending to the server" <<std::endl;
-    std::string accept_connection = ":pedroypablo 001 pierro :Welcome to the Internet Relay Network pierro!pierre@pedroypablo";
-    sendMSG(accept_connection, client->getFd());
-    client->setConnection();
-  } */
-
-
- 	//special pase for login
-	
-
 	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
 		authenticate(client, cmd);// authenticate
 	else if(cmd.size() != 0 && (cmd[0] == "MODE" || cmd[0] == "MODE"))
-		modei(client, cmd);
+		modei(client, cmd); // welcome invisible user mode msg
 	else if (cmd.size() != 0 && (cmd[0] == "ping" || cmd[0] == "PING"))
-    pong(client, cmd);// set nickename
+    	pong(client, cmd); // answer to ping
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
-		setNickname(client, cmd);// set nickename
+		setNickname(client, cmd); // set nickname
 	else if (cmd.size() != 0 && (cmd[0] == "user" || cmd[0] == "USER"))
-		setUser(client, cmd);
+		setUser(client, cmd); // set username
 	else if (cmd.size() != 0 && (cmd[0] == "join" || cmd[0] == "JOIN"))
-		join(cmd, client); // join a channel
+		join(client, cmd); // join a channel
 	else if (cmd.size() != 0 && (cmd[0] == "invite" || cmd[0] == "INVITE"))
-		std::cout << "test" << std::endl;//invite(client, channel);
+		invite(client, cmd); // invite a client to a channel;
 	else if (cmd.size() != 0 && (cmd[0] == "topic" || cmd[0] == "TOPIC"))
-		std::cout << "test" << std::endl;//topic 
+		topic(client, cmd); // set or change the topic
 	else if (cmd.size() != 0 && (cmd[0] == "kick" || cmd[0] == "KICK"))
-		std::cout << "test" << std::endl;// kick a client from a channel
+		kick(client, cmd); // kick a client from a channel
+	else if (cmd.size() != 0 && (cmd[0] == "part" || cmd[0] == "PART"))
+		part(client, cmd); // quiting a channel without quiting the server
 	else if (cmd.size() != 0 && (cmd[0] == "mode" || cmd[0] == "MODE"))
-		std::cout << "test" << std::endl;// change the modes of a channel or client (user operator)
+		mode(cmd, client); // change the modes of a channel or client (user operator)
 	else if (cmd.size() != 0 && (cmd[0] == "privmsg" || cmd[0] == "PRIVMSG"))
-    privmsg(client, cmd);
+    	privmsg(client, cmd); // sends a msg to a client or to a channel
 	else if (cmd.size() != 0 && (cmd[0] == "quit" || cmd[0] == "QUIT"))
 		std::cout << "test" << std::endl;// quit the server
-  else
-    std::cout << "Unknown command" << std::endl;
-	/* else if (cmd.size() != 0)
-		sendMSG(ERR_UNKNOWNCOMMAND(cmd[0]), client->getFd()); */
+	else if (cmd.size() != 0)
+		sendMSG(ERR_UNKNOWNCOMMAND(client->getNickname(), cmd[0]), client->getFd());
 }

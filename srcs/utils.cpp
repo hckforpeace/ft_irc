@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <vector>
 
-bool	Server::nickInUse(std::string nickname)
+bool Server::nickInUse(std::string nickname)
 {
 	for (std::vector<Client *>::iterator it = Clients.begin(); it != Clients.end(); it++)
 	{
@@ -15,12 +15,11 @@ bool	Server::nickInUse(std::string nickname)
 	return (false);
 }
 
-
-bool	Server::isCRLF(std::string str, Client *client)
+bool Server::isCRLF(std::string str, Client *client)
 {
 	std::size_t pos = str.find("\r\n");
 	std::string sub;
-	
+
 	if (pos == std::string::npos)
 	{
 		client->setMessage(client->getMessage() + str);
@@ -31,64 +30,131 @@ bool	Server::isCRLF(std::string str, Client *client)
 	return (true);
 }
 
-
-Client*  Server::findClient(std::string nickname)
+void Server::sendMSGChan(std::string message, Channel *channel)
 {
-  for (std::vector<Client*>::iterator it = this->Clients.begin(); it != this->Clients.end(); it++)
-  {
-    if (!(*it)->getNickname().compare(nickname))
-      return (*it);
-  }
-  return (NULL);
+	std::vector<Client *> client = channel->getClients();
+	std::vector<Client *> operators = channel->getOperators();
+
+	for (std::vector<Client *>::iterator it = client.begin(); it != client.end(); it++)
+		this->sendMSG(message, (*it)->getFd());
+	for (std::vector<Client *>::iterator it = operators.begin(); it != operators.end(); it++)
+		this->sendMSG(message, (*it)->getFd());
 }
 
-
-void    Server::sendMSG(std::string message, int fd)
+bool Server::isinChan(Client *client, Channel *channel)
 {
-  const char *buffer;
-  message.append("\r\n");
+	std::vector<Client *> chan_client = channel->getClients();
+	std::vector<Client *> operators = channel->getOperators();
 
-  std::cout << RED "[SERVER] => " RESET << GREEN << message << RESET << std::endl;
-  buffer = message.c_str();
-  if (send(fd, buffer, message.length(), 0) == -1)
-    std::cout << RED << "send() failed" << RESET << std::endl;
+	for (std::vector<Client *>::iterator it = chan_client.begin(); it != chan_client.end(); it++)
+		if (!(*it)->getNickname().compare(client->getNickname()))
+			return (true);
+	for (std::vector<Client *>::iterator it = operators.begin(); it != operators.end(); it++)
+		if (!(*it)->getNickname().compare(client->getNickname()))
+			return (true);
+	return (false);
 }
 
-
-/* void    Server::sendRPL(std::string cmd, int fd)
+bool Server::isOperator(Client *client, Channel *channel)
 {
+	std::vector<Client *> operators = channel->getOperators();
 
-} */
-
-Channel*  Server::findChannel(std::string channelname)
-{  
-  for (std::vector<Channel*>::iterator it = this->Channels.begin(); it != this->Channels.end(); it++)
-  {
-    if (!(*it)->getName().compare(channelname))
-      return (*it);
-  }
-  return (NULL);
+	for (std::vector<Client *>::iterator it = operators.begin(); it != operators.end(); it++)
+		if (!(*it)->getNickname().compare(client->getNickname()))
+			return (true);
+	return (false);
 }
 
-void  Server::sendToChannel(std::string message, std::string nickname, Channel *chan, Client *client)
-{ 
-  std::vector<Client*> cli = chan->getClients();
-  std::vector<Client*> operators = chan->getOperators();
+/*======================================== GETTERS ===============================================*/
 
-  std::string is_op = "";
-  if (chan->isOperator(client))
-      is_op = "@";
-  std::cout << "is he op ?: " << is_op << std::endl;
-  for (std::vector<Client*>::iterator it = cli.begin(); it != cli.end(); it++)
-  {
-    this->sendMSG("<" + is_op + nickname + ":" + BLU + "#" + chan->getName() + RESET + "> " + message, (*it)->getFd());
-  }
-  for (std::vector<Client*>::iterator it = operators.begin(); it != operators.end(); it++)
-  {
-    this->sendMSG("<" + is_op + nickname + ":" + BLU + "#" + chan->getName() + RESET + "> " + message, (*it)->getFd());  
-  }
+Client *Server::findClient(std::string nickname)
+{
+	for (std::vector<Client *>::iterator it = this->Clients.begin(); it != this->Clients.end(); it++)
+	{
+		if (!(*it)->getNickname().compare(nickname))
+			return (*it);
+	}
+	return (NULL);
 }
 
+void Server::sendMSG(std::string message, int fd)
+{
+	const char *buffer;
+	message.append("\r\n");
+
+	std::cout << RED "[SERVER] <" << fd << "> => " RESET << GREEN << message << RESET << std::endl;
+	buffer = message.c_str();
+	if (send(fd, buffer, message.length(), 0) == -1)
+    	std::cout << RED << "send() failed" << RESET << std::endl;
+}
+
+Channel *Server::findChannel(std::string channelname)
+{
+	for (std::vector<Channel *>::iterator it = this->Channels.begin(); it != this->Channels.end(); it++)
+	{
+		if (!(*it)->getName().compare(channelname))
+			return (*it);
+	}
+	return (NULL);
+}
+
+void Server::sendToChannel(std::string message, std::string nickname, Channel *chan, Client *client)
+{
+	std::vector<Client *> cli = chan->getClients();
+	std::vector<Client *> operators = chan->getOperators();
+
+	std::string is_op = "";
+	if (chan->isOperator(client))
+		is_op = "@";
+	std::cout << "is he op ?: " << is_op << std::endl;
+	for (std::vector<Client *>::iterator it = cli.begin(); it != cli.end(); it++)
+	{
+		this->sendMSG("<" + is_op + nickname + ":" + BLU + "#" + chan->getName() + RESET + "> " + message, (*it)->getFd());
+	}
+	for (std::vector<Client *>::iterator it = operators.begin(); it != operators.end(); it++)
+	{
+		this->sendMSG("<" + is_op + nickname + ":" + BLU + "#" + chan->getName() + RESET + "> " + message, (*it)->getFd());
+	}
+}
+
+void Server::send_to_all_client(std::string message)
+{
+	for (std::vector<Client *>::iterator it = Clients.begin(); it != Clients.end(); it++)
+		sendMSG(message, (*it)->getFd());
+}
+
+void Server::removeChan(Channel *channel)
+{
+	for (std::vector<Channel *>::iterator it = Channels.begin(); it != Channels.end(); it++)
+	{
+		if (!(*it)->getName().compare(channel->getName()))
+		{
+			Channels.erase(it);
+			break;
+		}
+	}
+}
+
+void Server::removeClient(Client *client)
+{
+		this->Clients.erase(getClientIt(client->getFd()));
+		delete client;
+}
+
+// void		Server::removeClient(Client *client, Channel *channel)
+// {
+// 	std::vector<Client*> clients = channel->getClients();
+// 	std::vector<Client*> operators = channel->getOperators();
+// 	for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); it++)
+//   	{
+//     	if (!client->getNickname().compare((*it)->getNickname()))
+
+//   	}
+//   	for (std::vector<Client*>::iterator it = operators.begin(); it != operators.end(); it++)
+//   	{
+//     	this->sendMSG("<" + is_op + nickname + ":" + BLU + "#" + chan->getName() + RESET + "> " + message, (*it)->getFd());
+//   	}
+// }
 // bool	Server::login_parse(std::vector<std::string> cmds, Client *client)
 // {
 //   for (int i = 0; i < cmds.size(); i++)
@@ -126,4 +192,25 @@ void	Server::check_connection()
       sendMSG(WLC((*it)->getUsername(), (*it)->getNickname()), (*it)->getFd());
     }
   }
+}
+
+bool    Server::isOpenedSock(int socket)
+{
+  struct stat statbuf;
+
+  // Call fstat on the socket file descriptor
+  if (fstat(socket, &statbuf) == -1) 
+    return (false); // If fstat fails, the socket is likely closed or invalid
+  return (true);
+}
+
+void    Server::destroy_cli_chan(Client *client)
+{
+  for (std::vector<Channel*>::iterator it = this->Channels.begin(); it != this->Channels.end(); it++)
+  {
+    if (this->isinChan(client, (*it)) && Channels.size() == 1)
+      this->removeChan((*it));
+  }
+  removeClient(client);
+   
 }
