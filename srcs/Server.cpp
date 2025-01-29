@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "Colors.hpp"
 
 // Constructor starts the server
 Server::Server(char *port, char *password)
@@ -130,10 +131,7 @@ void	Server::run_server()
 			if (fstat(events[i].data.fd, &buf) == 0 && errno == EBADF)
 				break;
 			if (events[i].data.fd == server_socket)
-			{
-				std::cout << "Connection request" << std::endl;
 				first_connection(nbr_fds, i);
-			}
 			
 			// socket available for read operation 
 			else if (events[i].events == (EPOLLIN | EPOLLOUT))
@@ -226,6 +224,7 @@ void		Server::first_connection(int nbr_fds, int i)
 	Client *new_connection = new Client(con_socket);
 	Clients.push_back(new_connection);
 
+  std::cout << RED "[CLIENT-SERVER-CONNECTION] => PORT: " RESET << BLU << con_socket << std::endl;
 	// std::cout << "success !! con_socket " << con_socket <<  " Connected" << std::endl;
 	//send(con_socket, "Insert Password: ", sizeof(char) * 18, 0);
 }
@@ -256,7 +255,7 @@ void	Server::read_and_process(int i)
 	str = buffer;
 	if (isCRLF(str, client))
 	{
-    std::cout << BLU "[CLIENT] => " RESET << YEL << client->getMessage() << RESET <<std::endl;
+    std::cout << BLU "[CLIENT] => " RESET << YEL << client->getMessage() << RESET;
 		const char *mess = (client->getMessage()).c_str();
 		std::vector<std::string> lines = split_line_buffer(mess);
 		int nbr_lines = lines.size();
