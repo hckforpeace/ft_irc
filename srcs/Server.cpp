@@ -280,8 +280,8 @@ void	Server::read_and_process(int i)
 		}
 		else
     {
-      // if (!split_buffer(str)[i].compare("PRIVMSG"))
-      //   client->setPrivmsgParam(str); 
+      if (!split_buffer(str)[0].compare("PRIVMSG"))
+        client->setPrivmsgParam(str); 
 			parse_exec_cmd(split_buffer(client->getMessage()), client);
     }
 		client->setMessage("");

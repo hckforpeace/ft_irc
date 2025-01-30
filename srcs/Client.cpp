@@ -132,7 +132,7 @@ void  Client::setPrivmsgParam(std::string msg)
   // Remove the \r\n
   param = param.erase(param.find('\r'), 2);
   this->privmsg_param = param; 
-  // std::cout << "The parameter for the privmsg is:*" << param << "*" << std::endl;
+  std::cout << "The parameter for the privmsg is:*" << param << "*" << std::endl;
 }
 
 

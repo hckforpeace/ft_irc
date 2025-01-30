@@ -111,7 +111,7 @@ void  Server::privmsg(Client *client, std::vector<std::string> cmd)
   else if (cmd[1].at(0) == '#')
   {
     if (findChannel(cmd[1].substr(1)))
-			return (sendToChannel(client->getPrivmsgParam(), client->getNickname(), findChannel(cmd[1].substr(1)), client));
+			return (sendToChannel(client->getPrivmsgParam().substr(1), client->getNickname(), findChannel(cmd[1].substr(1)), client));
 		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[1]), client->getFd()));
   }
   else
