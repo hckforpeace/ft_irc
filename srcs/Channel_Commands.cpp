@@ -33,10 +33,9 @@ void	Server::topic(Client *client, std::vector<std::string> cmd)
 	Channel *channel = findChannel(cmd[1].substr(1));
 	if (cmd.size() == 2)
 	{
-		std::cout << "TOPIC->" << channel->getTopic() << std::endl;
 		if (channel->getTopic().empty())
 			return(sendMSG(EMPTY_TOPIC(client->getNickname(), channel->getName()), client->getFd()));
-		return(sendMSG(RPL_TOPIC(channel->getName(), channel->getTopic(), client->getNickname()), client->getFd()));
+		return(sendMSG(RPL_TOPIC(client->getNickname(), channel->getName(), channel->getTopic()), client->getFd()));
 	}
 	if (!isinChan(client, channel))
 		return (sendMSG(ERR_USERNOTINCHAN1(client->getNickname(), channel->getName()), client->getFd()));
@@ -59,8 +58,7 @@ void	Server::part(Client *client, std::vector<std::string> cmd)
 		return (sendMSG(ERR_USERNOTINCHAN1(client->getNickname(), channel->getName()), client->getFd()));
 	sendMSGChan(RPL_PART(client->getNickname(), client->getUsername(), channel->getName()), channel);
 	if (isOperator(client, channel))
-		{std::cout << "HERE->" << client->getNickname() << std::endl; 
-		channel->removeOperator(client);}
+		channel->removeOperator(client);
 	else
 		channel->removeClient(client);
 	if (channel->getClientNb() == 0)

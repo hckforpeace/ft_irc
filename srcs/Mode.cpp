@@ -15,10 +15,8 @@ void	Server::mode(std::vector<std::string> cmd, Client *client)
 	Channel *channel = findChannel(cmd[1].substr(1));
 	if (!isOperator(client, channel))
 		return (sendMSG(ERR_NOTOPERATOR(client->getNickname(), channel->getName()), client->getFd()));
-	if (cmd[2].length() != 2 || (cmd[2].at(0) != '-' && cmd[2].at(0) != '+'))
-		return (sendMSG(ERR_BADMODESYNTAX, client->getFd()));
 	if (cmd[2].at(1) != 'i' && cmd[2].at(1) != 't' && cmd[2].at(1) != 'k' && cmd[2].at(1) != 'o' && cmd[2].at(1) != 'l')
-		return (sendMSG(ERR_BADMODE, client->getFd()));
+		return (sendMSG(ERR_UNKNOWNMODE(cmd[2]), client->getFd()));
 	if (!cmd[2].compare("+i") || !cmd[2].compare("-i")) // invite mode
 		inviteMode(cmd[2], client, channel);
 	else if (!cmd[2].compare("+t") || !cmd[2].compare("-t")) // topic mode
@@ -66,12 +64,14 @@ void	Server::topicMode(std::string mode, Client *client, Channel *channel)
 void	Server::keyModeOn(std::string mode, std::string password, Client *client, Channel *channel)
 {
 	channel->setKeyMode(true);
+	channel->setPassword(password);
 	sendMSGChan(RPL_CHANGEMODE(client->getHostname(), channel->getName(), "+k", password), channel);
 }
 
 void	Server::keyModeOff(std::string mode, Client *client, Channel *channel)
 {
 	channel->setKeyMode(false);
+	channel->setPassword("");
 	sendMSGChan(MODE_UNSET(channel->getName(), client->getNickname(), "k " + channel->getPassword()), channel);
 }
 

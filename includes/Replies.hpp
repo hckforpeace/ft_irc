@@ -119,8 +119,6 @@
 // User limit
 # define ERR_CHANNELISFULL(nickname, channel) (":localhost 471 " + nickname + " #" + channel + " :Cannot join channel (+l)")
 
-# define ERR_BADMODESYNTAX "Bad syntax, use as : mode #channel +/-c [args], where c is the mode"
-
-# define ERR_BADMODE "Mode not handled, aviable modes are: i (invite), t (topic), k (password), o (operator), l (limit)"
+//# define ERR_UNKNOWNMODE(nickname, char) ":localhost 472 " + nickname + " " + char + " :is unknown mode char to me"
 
 #endif

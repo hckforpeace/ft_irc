@@ -215,3 +215,7 @@ void	Channel::setKeyMode(bool flag)
 	this->key_mode = flag;
 }
 
+void	Channel::setPassword(std::string password)
+{
+	this->password = password;
+}

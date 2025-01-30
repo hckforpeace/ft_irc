@@ -47,6 +47,7 @@ class Channel
 		void	setKey(bool flag);
 		void	setTopic(std::string topic);
 		void	setKeyMode(bool flag);
+		void	setPassword(std::string password);
 
 		/*methods*/
 		void	add_client(Client *new_client);
