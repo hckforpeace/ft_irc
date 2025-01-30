@@ -259,11 +259,15 @@ void	Server::read_and_process(int i)
 	str = buffer;
 	if (isCRLF(str, client))
 	{
+    // Server outputs...
     std::cout << BLU "[CLIENT] " << client_socket << " => " RESET << YEL << client->getMessage() << RESET <<std::endl;
+
+    
 		const char *mess = (client->getMessage()).c_str();
 		std::vector<std::string> lines = split_line_buffer(mess);
 		int nbr_lines = lines.size();
-		if (lines.size() > 1)
+		
+    if (lines.size() > 1)
 		{
 			int i = 0;
 			while (i < lines.size() && isOpenedSock(client_socket))
@@ -275,7 +279,11 @@ void	Server::read_and_process(int i)
         return ;
 		}
 		else
+    {
+      // if (!split_buffer(str)[i].compare("PRIVMSG"))
+      //   client->setPrivmsgParam(str); 
 			parse_exec_cmd(split_buffer(client->getMessage()), client);
+    }
 		client->setMessage("");
 	}
 	memset(buffer, 0, sizeof(char) * 512);

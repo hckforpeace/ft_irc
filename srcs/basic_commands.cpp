@@ -105,39 +105,53 @@ void  Server::privmsg(Client *client, std::vector<std::string> cmd)
 	std::string		msg;
 
 	if (!client->isRegistered())
-		err = ERR_NOTREGISTERED(client->getNickname());
+		return (sendMSG(ERR_NOTREGISTERED(client->getNickname()), client->getFd()));
 	else if (cmd.size() < 3)
-		err = ERR_NEEDMOREPARAMS(client->getNickname());
-	else
-	{
-		if (cmd[1].at(0) == '#')
-		{
-			// channel = cmd[1];
-			channel = cmd[1].substr(1);
-			chan =    findChannel(channel);
-			if (chan == NULL)
-				return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[1]), client->getFd()));
-			sendToChannel(cmd[2].substr(1), client->getNickname(), chan, client);
-			return ;
-		}
-		else
-		{
-			// :nick!user@127.0.0.1 PRIVMSG target :message
+		return (sendMSG(ERR_NEEDMOREPARAMS(client->getNickname()), client->getFd()));
+  else if (cmd[1].at(0) == '#')
+  {
+    if (findChannel(cmd[1].substr(1)))
+			return (sendToChannel(client->getPrivmsgParam(), client->getNickname(), findChannel(cmd[1].substr(1)), client));
+		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[1]), client->getFd()));
+  }
+  else
+  {
 			if ((rcv = this->findClient(cmd[1])) != NULL)
-			{
-			  // msg = ":" + client->getNickname() + "!~" + client->getUsername() + "@localhost PRIVMSG " + cmd[1] + " :" + cmd[2].substr(1);
-				msg = ":" + client->getNickname() + " PRIVMSG " + cmd[1] + " " + cmd[2];
-				sendMSG(msg, rcv->getFd());
-				return ;
-			}
+				return (sendMSG(":" + client->getNickname() + " PRIVMSG " + cmd[1] + " " + client->getPrivmsgParam(), rcv->getFd()));
 			else
-			{
-				std::cout << "command[1]: " << "*" << cmd[1] << "*" << std::endl;
-				err = ERR_NOSUCHNICK(client->getNickname(),cmd[1]);	
-			}
-		}
-	}
-	this->sendMSG(err, client->getFd());
+				return (sendMSG(ERR_NOSUCHNICK(client->getNickname(), cmd[1]), client->getFd()));
+  }
+
+
+
+	// else
+	// {
+	// 	if (cmd[1].at(0) == '#')
+	// 	{
+	// 		// channel = cmd[1];
+	// 		channel = cmd[1].substr(1);
+	// 		chan =    findChannel(channel);
+	// 		if (chan == NULL)
+	// 			return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[1]), client->getFd()));
+	// 		sendToChannel(cmd[2].substr(1), client->getNickname(), chan, client);
+	// 		return ;
+	// 	}
+	// 	else
+	// 	{
+	// 		if ((rcv = this->findClient(cmd[1])) != NULL)
+	// 		{
+	// 			msg = ":" + client->getNickname() + " PRIVMSG " + cmd[1] + " " + cmd[2];
+	// 			sendMSG(msg, rcv->getFd());
+	// 			return ;
+	// 		}
+	// 		else
+	// 		{
+	// 			std::cout << "command[1]: " << "*" << cmd[1] << "*" << std::endl;
+	// 			return (sendMSG(ERR_NOSUCHNICK(client->getNickname(), cmd[1]), client->getFd()));
+	// 		}
+	// 	}
+	// }
+	// this->sendMSG(err, client->getFd());
 }
 
 void Server::modei(Client *client, std::vector<std::string> cmd)

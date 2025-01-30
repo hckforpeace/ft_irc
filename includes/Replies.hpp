@@ -85,7 +85,9 @@
 # define ERR_ERRONEUSNICKNAME(nickname) (":localhost 432 " + nickname + " :Erroneous nickname")
 
 // Indicates that no channel can be found for the supplied channel name.
-# define ERR_NOSUCHCHANNEL(nickname, channel) (":localhost 403 " + nickname + " " + channel + " :No such channel")
+// # define ERR_NOSUCHCHANNEL(nickname, channel) (":localhost 403 " + nickname + " " + channel + " :No such channel")
+# define ERR_NOSUCHCHANNEL(nickname, channel) (":localhost 403 " + nickname + " :" + channel)
+// # define ERR_NOSUCHCHANNEL(nickname, channel) (":localhost 403 " + nickname + " " + channel + " :No such channel")
 
 // Returned by the PRIVMSG command to indicate the message wasn’t delivered because there was no text to send.
 # define ERR_NOTEXTTOSEND (":localhost 412 <client> :No text to send") //????????????
