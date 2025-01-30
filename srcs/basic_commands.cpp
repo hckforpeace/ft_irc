@@ -163,3 +163,8 @@ void  Server::pong(Client *client, std::vector<std::string> cmd)
 {
 	sendMSG("PONG " + cmd[1], client->getFd());
 }
+
+void  Server::whoIs(Client *client, std::vector<std::string> cmd)
+{
+  sendMSG(this->genWhoisRpl(client->getNickname(), cmd[1]), client->getFd());
+}

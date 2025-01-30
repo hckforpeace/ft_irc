@@ -219,3 +219,35 @@ void    Server::destroy_cli_chan(Client *client)
   removeClient(client);
    
 }
+
+
+std::string Server::genWhoisRpl(std::string client, std::string nick)
+{
+  std::string reponse = RPL_WHOISCHANNELS(client, nick);
+  Client *target = this->findClient(nick);
+  bool first = true;
+  for (std::vector<Channel*>::iterator it = this->Channels.begin(); it != this->Channels.end(); it++)
+  {
+    if ((*it)->isOperator(target))
+    {
+      if (first)
+      {
+        reponse += "@#" + (*it)->getName();
+        first = false;
+      }
+      else
+        reponse += " @#" + (*it)->getName();
+    }
+    else if ((*it)->isInChannel(target))
+    {
+      if (first)
+      {
+        reponse += "#" + (*it)->getName();
+        first = false;
+      }
+      else
+        reponse += " #" + (*it)->getName();
+    }
+  }
+  return (reponse);
+}

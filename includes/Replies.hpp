@@ -123,4 +123,8 @@
 
 # define ERR_BADMODE "Mode not handled, aviable modes are: i (invite), t (topic), k (password), o (operator), l (limit)"
 
+
+/*====================================================== WHOIS ============================================================*/
+# define RPL_WHOISCHANNELS(client, nick) ":localhost 319 " + client + " " + nick + " :" 
+
 #endif

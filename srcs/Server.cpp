@@ -336,6 +336,8 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
 	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
 		authenticate(client, cmd);// authenticate
+	else if(cmd.size() != 0 && (cmd[0] == "WHOIS" || cmd[0] == "WHOIS"))
+    whoIs(client, cmd); // welcome invisible user mode msg
 	else if(cmd.size() != 0 && (cmd[0] == "MODE" || cmd[0] == "MODE"))
 		modei(client, cmd); // welcome invisible user mode msg
 	else if (cmd.size() != 0 && (cmd[0] == "ping" || cmd[0] == "PING"))
