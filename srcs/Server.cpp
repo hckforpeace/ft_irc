@@ -215,6 +215,7 @@ void		Server::first_connection(int nbr_fds, int i)
 	ev.data.fd = con_socket;
 	ev.events = EPOLLIN | EPOLLOUT;
 	setnonblocking(con_socket);
+	
 	// adding the event to the interest list
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, con_socket, &ev) == -1)
 	{
@@ -236,7 +237,7 @@ void	Server::read_and_process(int i)
 	int	len;
 	std::string str;
 	Client *client = getClient(events[i].data.fd);
-  int client_socket = client->getFd();
+	int client_socket = client->getFd();
 
 	// reading string sent from the Client
 	len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);

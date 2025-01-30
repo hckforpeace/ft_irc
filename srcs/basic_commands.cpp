@@ -36,30 +36,47 @@ void	Server::setNickname(Client *client, std::vector<std::string> cmd)
 		err = ERR_NOTREGISTERED(client->getNickname());
 	else if (cmd.size() < 2)
 		err = ERR_NEEDMOREPARAMS(client->getNickname());
+	else if (client->firstConnection() && nickInUse(cmd[1]))
+	{
+		std::cout << "a" << std::endl;
+		sendMSG(":" + cmd[1] + " NICK " + generateNick(cmd[1]), client->getFd());
+		return (client->setNickname(generateNick(cmd[1])));
+	}
+	else if (nickInUse(cmd[1]))
+	{
+		std::cout << "b" << std::endl;
+		sendMSG(":" + client->getNickname() + " NICK " + generateNick(cmd[1]), client->getFd());
+		return (client->setNickname(generateNick(cmd[1])));
+	}
 	else
 	{
-		if (client->getNickname().compare(""))
-			old_nick = client->getNickname();
-		else
-			old_nick = cmd[1];
-		if (nickInUse(cmd[1]))
-		{
-			old_nick = cmd[1];
-			cmd[1] = generateNick(cmd[1]);
-		}
-		std::string temp = cmd[1];
-		if (temp.at(0) == ':' || temp.at(0) == '#')
-			err = ERR_ERRONEUSNICKNAME(cmd[1]);
-		else
-    	{
-			client->setNickname(cmd[1]);
- 			sendMSG(":" + old_nick + " NICK " + cmd[1], client->getFd());
- 			// sendMSG(":" + old_nick + "!" + client->getUsername() + "@localhost " + " NICK " + cmd[1], client->getFd());
-			return ;
-		}
+		sendMSG(":" + client->getNickname() + " NICK " + cmd[1], client->getFd());
+		return (client->setNickname(cmd[1]));
 	}
-  	std::cout << "SetNickname error message sends: " << err << std::endl;
 	this->sendMSG(err, client->getFd()); 
+	// else
+	// {
+	// 	if (client->getNickname().compare(""))
+	// 		old_nick = client->getNickname();
+	// 	else
+	// 		old_nick = cmd[1];
+	// 	if (nickInUse(cmd[1]))
+	// 	{
+	// 		old_nick = cmd[1];
+	// 		cmd[1] = generateNick(cmd[1]);
+	// 	}
+	// 	std::string temp = cmd[1];
+	// 	if (temp.at(0) == ':' || temp.at(0) == '#')
+	// 		err = ERR_ERRONEUSNICKNAME(cmd[1]);
+	// 	else
+    // 	{
+	// 		client->setNickname(cmd[1]);
+ 	// 		sendMSG(":" + old_nick + " NICK " + cmd[1], client->getFd());
+ 	// 		// sendMSG(":" + old_nick + "!" + client->getUsername() + "@localhost " + " NICK " + cmd[1], client->getFd());
+	// 		return ;
+	// 	}
+	// }
+  	// std::cout << "SetNickname error message sends: " << err << std::endl;
 }
 
 void	Server::setUser(Client *client, std::vector<std::string> cmd)
@@ -95,27 +112,29 @@ void  Server::privmsg(Client *client, std::vector<std::string> cmd)
 	{
 		if (cmd[1].at(0) == '#')
 		{
-			channel = cmd[1];
-			channel = channel.substr(1);
+			// channel = cmd[1];
+			channel = cmd[1].substr(1);
 			chan =    findChannel(channel);
-			sendToChannel(cmd[2], client->getNickname(), chan, client);
+			if (chan == NULL)
+				return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[1]), client->getFd()));
+			sendToChannel(cmd[2].substr(1), client->getNickname(), chan, client);
 			return ;
 		}
 		else
 		{
-      // :nick!user@127.0.0.1 PRIVMSG target :message
+			// :nick!user@127.0.0.1 PRIVMSG target :message
 			if ((rcv = this->findClient(cmd[1])) != NULL)
 			{
 			  // msg = ":" + client->getNickname() + "!~" + client->getUsername() + "@localhost PRIVMSG " + cmd[1] + " :" + cmd[2].substr(1);
-        msg = ":" + client->getNickname() + " PRIVMSG " + cmd[1] + " " + cmd[2];
+				msg = ":" + client->getNickname() + " PRIVMSG " + cmd[1] + " " + cmd[2];
 				sendMSG(msg, rcv->getFd());
 				return ;
 			}
 			else
-      {
-        std::cout << "command[1]: " << "*" << cmd[1] << "*" << std::endl;
-        err = ERR_NOSUCHNICK(client->getNickname(),cmd[1]);	
-      }
+			{
+				std::cout << "command[1]: " << "*" << cmd[1] << "*" << std::endl;
+				err = ERR_NOSUCHNICK(client->getNickname(),cmd[1]);	
+			}
 		}
 	}
 	this->sendMSG(err, client->getFd());

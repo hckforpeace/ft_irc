@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(int fd):fd(fd), realname("*"), nickname("*"), username("*"), password_inserted(false)
+Client::Client(int fd):fd(fd), realname("*"), nickname("*"), username("*"), password_inserted(false), first_connection(true)
 {
 	this->nickname = "*";
 	this->channel_counter = 0;
@@ -82,6 +82,11 @@ bool		Client::getPassstatus()
 	return (this->password_inserted);
 }
 
+bool		Client::firstConnection(void)
+{
+	return (this->first_connection);
+}
+
 void Client::setUsername(std::string str)
 {
 	this->username = str;
@@ -95,6 +100,11 @@ void	Client::setChanCounter(void)
 void  Client::setRealname(std::string str)
 {
   this->realname = str;
+}
+
+void	Client::setFirstConnection()
+{
+	this->first_connection = false;
 }
 
 bool  Client::isRegistered()

@@ -19,6 +19,7 @@ class Client
 		int			channel_counter; // max 10
 		bool		connected; // false by default
 		bool		password_inserted; // false by default
+		bool		first_connection;
 
 	public:
 		Client(int fd);
@@ -36,8 +37,10 @@ class Client
 		std::string getDeniedNick(void);
 		int			getChanCounter(void);
 		bool		getPassstatus(void);
+		bool		firstConnection(void);
 
 		void	setMessage(std::string str);
+		void	setFirstConnection();
 		void	setConnection(void);
 		void	setCmd(std::vector<std::string> cmd) {this->cmd = cmd;};
 		void	setNickname(std::string nick);

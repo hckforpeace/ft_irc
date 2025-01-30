@@ -103,17 +103,21 @@ void Server::sendToChannel(std::string message, std::string nickname, Channel *c
 	std::vector<Client *> cli = chan->getClients();
 	std::vector<Client *> operators = chan->getOperators();
 
-	std::string is_op = "";
-	if (chan->isOperator(client))
-		is_op = "@";
-	std::cout << "is he op ?: " << is_op << std::endl;
+	// std::string is_op = "";
+	// if (chan->isOperator(client))
+	// 	is_op = "@";
+	// std::cout << "is he op ?: " << is_op << std::endl;
 	for (std::vector<Client *>::iterator it = cli.begin(); it != cli.end(); it++)
 	{
-		this->sendMSG("<" + is_op + nickname + ":" + BLU + "#" + chan->getName() + RESET + "> " + message, (*it)->getFd());
+		// this->sendMSG("<" + is_op + nickname + ":" + BLU + "#" + chan->getName() + RESET + "> " + message, (*it)->getFd());
+		if ((*it) != client)
+			this->sendMSG(":" + client->getNickname() + " PRIVMSG " + "#" + chan->getName() + " :" + message, (*it)->getFd());
 	}
 	for (std::vector<Client *>::iterator it = operators.begin(); it != operators.end(); it++)
 	{
-		this->sendMSG("<" + is_op + nickname + ":" + BLU + "#" + chan->getName() + RESET + "> " + message, (*it)->getFd());
+		// this->sendMSG("<" + is_op + nickname + ":" + BLU + "#" + chan->getName() + RESET + "> " + message, (*it)->getFd());
+		if ((*it) != client)
+			this->sendMSG(":" + client->getNickname() + " PRIVMSG " + "#" + chan->getName() + " :" + message, (*it)->getFd());
 	}
 }
 
@@ -189,6 +193,7 @@ void	Server::check_connection()
     if (!(*it)->isConnected() && (*it)->isRegistered())
     {
       (*it)->setConnection();
+	  (*it)->setFirstConnection();
       sendMSG(WLC((*it)->getUsername(), (*it)->getNickname()), (*it)->getFd());
     }
   }
