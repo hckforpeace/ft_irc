@@ -41,7 +41,7 @@ class Channel
 	
 		/*Setter*/
 		void	setName(std::string name);
-		void	setLimit(int limit);
+		void	setLimit(std::string limit);
 		void 	setInvite(bool flag);
 		void	setTopicMode(bool flag);
 		void	setKey(bool flag);

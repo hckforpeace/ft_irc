@@ -185,9 +185,13 @@ void Channel::setName(std::string name)
 	this->name = name;
 }
 
-void Channel::setLimit(int limit)
+void Channel::setLimit(std::string limit)
 {
-	this->limit = limit;
+	std::stringstream	slimit(limit);
+	int					nb_limit;
+
+	slimit >> nb_limit;
+	this->limit = nb_limit;
 }
 
 void Channel::setInvite(bool flag)

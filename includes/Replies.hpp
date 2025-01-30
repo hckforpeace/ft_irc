@@ -16,7 +16,7 @@
 // Returned when a client tries to invite a user to a channel they are already on.
 # define ERR_USERONCHANNEL(nickname, channel) (":localhost 443 " + nickname + " " + nickname + " #" + channel + " :is already on channel")
 
-# define ERR_UNKNOWNMODE(char) (":localhost 472 " + char + " :is unknown mode char to me")
+# define ERR_UNKNOWNMODE(nickname, char) (":localhost 472 " + nickname + " :" + char)
 
 # define ERR_INVITEONLYCHAN(channel) (":localhost 473 " + channel + " :Cannot join channel (+i)")
 
@@ -118,7 +118,5 @@
 
 // User limit
 # define ERR_CHANNELISFULL(nickname, channel) (":localhost 471 " + nickname + " #" + channel + " :Cannot join channel (+l)")
-
-//# define ERR_UNKNOWNMODE(nickname, char) ":localhost 472 " + nickname + " " + char + " :is unknown mode char to me"
 
 #endif

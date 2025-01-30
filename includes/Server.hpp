@@ -105,11 +105,9 @@ class Server {
 		// mode
 		void	inviteMode(std::string mode, Client *client, Channel *channel);
 		void	topicMode(std::string mode, Client *client, Channel *channel);
-		void	keyModeOn(std::string mode, std::string password, Client *client, Channel *channel);
-		void	keyModeOff(std::string modeit, Client *client, Channel *channel);
+		void	keyMode(std::string mode, std::string password, Client *client, Channel *channel);
 		void	operatorMode(std::string mode, std::string new_operator, Client *client, Channel *channel);
-		void	limitModeOn(std::string limit, Client *client, Channel *channel);
-		void	limitModeOff(Client *client, Channel *channel);
+		void	limitMode(std::string mode, std::string limit, Client *client, Channel *channel);
 		bool	login_parse(std::vector<std::string> cmds, Client *client);
 		std::string	generateNick(std::string base);
   		void	check_connection();

@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-void	Server::mode(std::vector<std::string> cmd, Client *client)
+void Server::mode(std::vector<std::string> cmd, Client *client)
 {
 	if (cmd.size() < 2)
 		return (sendMSG(ERR_NEEDMOREPARAMS(client->getNickname()), client->getFd()));
@@ -11,26 +11,24 @@ void	Server::mode(std::vector<std::string> cmd, Client *client)
 	if (!findChannel(cmd[1].substr(1)))
 		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[1]), client->getFd()));
 	if (cmd.size() < 3)
-		return ;
+		return;
 	Channel *channel = findChannel(cmd[1].substr(1));
 	if (!isOperator(client, channel))
 		return (sendMSG(ERR_NOTOPERATOR(client->getNickname(), channel->getName()), client->getFd()));
 	if (cmd[2].at(1) != 'i' && cmd[2].at(1) != 't' && cmd[2].at(1) != 'k' && cmd[2].at(1) != 'o' && cmd[2].at(1) != 'l')
-		return (sendMSG(ERR_UNKNOWNMODE(cmd[2]), client->getFd()));
+		return (sendMSG(ERR_UNKNOWNMODE(client->getNickname(), cmd[2].substr(1, 1)), client->getFd()));
 	if (!cmd[2].compare("+i") || !cmd[2].compare("-i")) // invite mode
 		inviteMode(cmd[2], client, channel);
 	else if (!cmd[2].compare("+t") || !cmd[2].compare("-t")) // topic mode
 		topicMode(cmd[2], client, channel);
-	else if (!cmd[2].compare("+k") && cmd[3].empty())
+	if (cmd.size() < 4)
 		return (sendMSG(ERR_NEEDMOREPARAMS(client->getNickname()), client->getFd()));
-	else if (!cmd[2].compare("+k") && !cmd[3].empty()) // key mode
-		keyModeOn(cmd[2], cmd[3], client, channel);
-	else if (!cmd[2].compare("-k")) // key mode off
-		keyModeOff(cmd[2], client, channel);
+	else if (!cmd[2].compare("+k") || !cmd[2].compare("+k")) // key mode
+		keyMode(cmd[2], cmd[3], client, channel);
 	else if (!cmd[2].compare("+o") || !cmd[2].compare("-o")) // operator mode
 		operatorMode(cmd[2], cmd[3], client, channel);
-	else if (!cmd[2].compare("+l") || !cmd[2].compare("-l")) // limit mode on
-		limitModeOn(cmd[2], client, channel);
+	else if (!cmd[2].compare("+l") || !cmd[2].compare("-l")) // limit mode
+		limitMode(cmd[2], cmd[3], client, channel);
 }
 
 void Server::inviteMode(std::string mode, Client *client, Channel *channel)
@@ -47,7 +45,7 @@ void Server::inviteMode(std::string mode, Client *client, Channel *channel)
 	}
 }
 
-void	Server::topicMode(std::string mode, Client *client, Channel *channel)
+void Server::topicMode(std::string mode, Client *client, Channel *channel)
 {
 	if (mode.at(0) == '+')
 	{
@@ -61,31 +59,60 @@ void	Server::topicMode(std::string mode, Client *client, Channel *channel)
 	}
 }
 
-void	Server::keyModeOn(std::string mode, std::string password, Client *client, Channel *channel)
+void Server::keyMode(std::string mode, std::string password, Client *client, Channel *channel)
 {
-	channel->setKeyMode(true);
-	channel->setPassword(password);
-	sendMSGChan(RPL_CHANGEMODE(client->getHostname(), channel->getName(), "+k", password), channel);
+	if (mode.at(0) == '+')
+	{
+		channel->setKeyMode(true);
+		channel->setPassword(password);
+		sendMSGChan(RPL_CHANGEMODE(client->getHostname(), channel->getName(), "+k", password), channel);
+	}
+	if (mode.at(0) == '-')
+	{
+		channel->setKeyMode(false);
+		channel->setPassword("");
+		sendMSGChan(RPL_CHANGEMODE(client->getHostname(), channel->getName(), "-k", password), channel);
+	}
 }
 
-void	Server::keyModeOff(std::string mode, Client *client, Channel *channel)
+void Server::operatorMode(std::string mode, std::string new_operator, Client *client, Channel *channel)
 {
-	channel->setKeyMode(false);
-	channel->setPassword("");
-	sendMSGChan(MODE_UNSET(channel->getName(), client->getNickname(), "k " + channel->getPassword()), channel);
+	Client *op = findClient(new_operator);
+
+	if (!op)
+		return (sendMSG(ERR_NOSUCHNICK(client->getNickname(), new_operator), client->getFd()));
+	if (!isinChan(op, channel))
+		return (sendMSG(ERR_USERNOTINCHAN2(client->getNickname(), channel->getName()), client->getFd()));
+	if (mode.at(0) == '+')
+	{
+		if (!isOperator(op, channel))
+		{
+			channel->add_operator(op);
+			channel->removeClient(op);
+		}
+		sendMSGChan(RPL_CHANGEMODE(client->getHostname(), channel->getName(), "+o", new_operator), channel);
+	}
+	if (mode.at(0) == '-')
+	{
+		if (isOperator(op, channel))
+		{
+			channel->add_client(op);
+			channel->removeOperator(op);
+		}
+		sendMSGChan(RPL_CHANGEMODE(client->getHostname(), channel->getName(), "-o", new_operator), channel);
+	}
 }
 
-void	Server::operatorMode(std::string mode, std::string new_operator, Client *client, Channel *channel)
+void Server::limitMode(std::string mode, std::string limit, Client *client, Channel *channel)
 {
-
-}
-
-void	Server::limitModeOn(std::string limit, Client *client, Channel *channel)
-{
-
-}
-
-void	Server::limitModeOff(Client *client, Channel *channel)
-{
-
+	if (mode.at(0) == '+')
+	{
+		channel->setLimit(limit);
+		sendMSGChan(RPL_CHANGEMODE(client->getHostname(), channel->getName(), "+l", limit), channel);
+	}
+	if (mode.at(0) == '-')
+	{
+		channel->setLimit("512");
+		sendMSGChan(RPL_CHANGEMODE(client->getHostname(), channel->getName(), "-l", limit), channel);
+	}
 }
