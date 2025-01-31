@@ -2,6 +2,7 @@
 #define CLIENT_HPP
 
 #include <iostream>
+#include <string>
 #include <unistd.h>
 #include <vector>
 
@@ -13,12 +14,14 @@ class Client
 		std::string nickname;
 		// std::string	denied_nick;
 		std::string message;
+    std::string privmsg_param;
 		std::vector<std::string>	cmd;
 		std::vector<std::string>	invited_to_chan;
 		int			fd;
 		int			channel_counter; // max 10
 		bool		connected; // false by default
 		bool		password_inserted; // false by default
+		bool		first_connection;
 
 	public:
 		Client(int fd);
@@ -36,8 +39,11 @@ class Client
 		std::string getDeniedNick(void);
 		int			getChanCounter(void);
 		bool		getPassstatus(void);
+		bool		firstConnection(void);
+    	std::string  getPrivmsgParam();
 
 		void	setMessage(std::string str);
+		void	setFirstConnection();
 		void	setConnection(void);
 		void	setCmd(std::vector<std::string> cmd) {this->cmd = cmd;};
 		void	setNickname(std::string nick);
@@ -47,6 +53,7 @@ class Client
 		void	addtoInviteChan(std::string channel);
 		bool	isInvited(std::string channel);
 		void	setPasswordInserted(void);
+    	void	setPrivmsgParam(std::string msg);
 		void	joinChanCounter(void);
 };
 

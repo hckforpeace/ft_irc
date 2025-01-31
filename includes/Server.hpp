@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <sys/epoll.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -69,6 +70,7 @@ class Server {
 		void	setUsername(Client *client, std::vector<std::string> cmd);
 		void	modei(Client *client, std::vector<std::string> cmd);
     	void 	pong(Client *client, std::vector<std::string> cmd);
+    	void 	whoIs(Client *client, std::vector<std::string> cmd);
 
 		// Modes
 		void	mode(std::vector<std::string> cmd, Client *client);
@@ -99,8 +101,11 @@ class Server {
 		void    	sendMSGChan(std::string message, Channel *channel);
 		bool		isinChan(Client *client, Channel *channel);
 		void    	send_to_all_client(std::string message);
-		void		removeClient(Client *client, Channel *channel);
+		void		removeClient(Client *client);
 		void		removeChan(Channel *channel);
+    	bool    	isOpenedSock(int socket);
+    	void    	destroy_cli_chan(Client *client);
+    	std::string genWhoisRpl(std::string client, std::string nick);
 
 		// mode
 		void	inviteMode(std::string mode, Client *client, Channel *channel);

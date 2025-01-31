@@ -1,6 +1,7 @@
 #include "Client.hpp"
+#include <cstddef>
 
-Client::Client(int fd):fd(fd), realname("*"), nickname("*"), username("*"), password_inserted(false)
+Client::Client(int fd):fd(fd), realname("*"), nickname("*"), username("*"), password_inserted(false), first_connection(true), privmsg_param("")
 {
 	this->nickname = "*";
 	this->channel_counter = 0;
@@ -60,6 +61,10 @@ int		Client::getChanCounter(void)
 	return (this->channel_counter);
 }
 
+std::string  Client::getPrivmsgParam()
+{
+  return (this->privmsg_param);
+}
 /*========================== SETTERS ===========================*/
 
 void	Client::setNickname(std::string nick)
@@ -82,6 +87,11 @@ bool		Client::getPassstatus()
 	return (this->password_inserted);
 }
 
+bool		Client::firstConnection(void)
+{
+	return (this->first_connection);
+}
+
 void Client::setUsername(std::string str)
 {
 	this->username = str;
@@ -96,6 +106,35 @@ void  Client::setRealname(std::string str)
 {
   this->realname = str;
 }
+
+void	Client::setFirstConnection()
+{
+	this->first_connection = false;
+}
+
+void  Client::setPrivmsgParam(std::string msg)
+{
+  int i = 0;
+  std::string param;
+
+  while (i < msg.size() && msg[i] == ' ')
+    i++;
+  while (msg[i] != ' ')
+    i++;
+  while (i < msg.size() && msg[i] == ' ')
+    i++;
+  while (msg[i] != ' ')
+    i++;
+  while (i < msg.size() && msg[i] == ' ')
+    i++;
+
+  param = msg.substr(i);
+  // Remove the \r\n
+  param = param.erase(param.find('\r'), 2);
+  this->privmsg_param = param; 
+  std::cout << "The parameter for the privmsg is:*" << param << "*" << std::endl;
+}
+
 
 bool  Client::isRegistered()
 {

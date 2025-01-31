@@ -119,4 +119,7 @@
 // User limit
 # define ERR_CHANNELISFULL(nickname, channel) (":localhost 471 " + nickname + " #" + channel + " :Cannot join channel (+l)")
 
+/*====================================================== WHOIS ============================================================*/
+# define RPL_WHOISCHANNELS(client, nick) ":localhost 319 " + client + " " + nick + " :" 
+
 #endif

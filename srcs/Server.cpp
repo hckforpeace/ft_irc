@@ -231,51 +231,63 @@ void		Server::first_connection(int nbr_fds, int i)
 	//send(con_socket, "Insert Password: ", sizeof(char) * 18, 0);
 }
 
-void	Server::read_and_process(int i)
+void    Server::read_and_process(int i)
 {
-	int	len;
-	std::string str;
-	Client *client = getClient(events[i].data.fd);
+    int    len;
+    std::string str;
+    Client *client = getClient(events[i].data.fd);
+    int client_socket = client->getFd();
 
-	// reading string sent from the Client
-	len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);
-  // std::cout << "Client has sent: " << std::endl << buffer << std::endl;
-	// Error
-	if (len == 0)
-	{
-		std::cout << "An error has occured during recv of the client socket => " << events[i].data.fd << std::endl ;
-		this->Clients.erase(getClientIt(client->getFd()));
-		delete client;
-		std::cout << "Client deleted !" << std::endl;
-		return ;
-	}
-	else
-	{
-		buffer[len] = '\0';
-	}
+    // reading string sent from the Client
+    len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);
+  	// std::cout << "Client has sent: " << std::endl << buffer << std::endl;
+    // Error
+    if (len == 0)
+    {
+        std::cout << "An error has occured during recv of the client socket => " << events[i].data.fd << std::endl ;
+        this->Clients.erase(getClientIt(client->getFd()));
+        delete client;
+        std::cout << "Client deleted !" << std::endl;
+        return ;
+    }
+    else
+    {
+        buffer[len] = '\0';
+    }
 
-	str = buffer;
-	if (isCRLF(str, client))
-	{
-    std::cout << BLU "[CLIENT] => " RESET << YEL << client->getMessage() << RESET <<std::endl;
-		const char *mess = (client->getMessage()).c_str();
-		std::vector<std::string> lines = split_line_buffer(mess);
-		int nbr_lines = lines.size();
-		if (lines.size() > 1)
-		{
-			int i = 0;
-			while (i < lines.size())
-			{
-				parse_exec_cmd(split_buffer(lines[i]), client);
-				i++;
-			}
-		}
-		else
-			parse_exec_cmd(split_buffer(client->getMessage()), client);
-		client->setMessage("");
-	}
-	memset(buffer, 0, sizeof(char) * 512);
+    str = buffer;
+    if (isCRLF(str, client))
+    {
+    // Server outputs...
+    std::cout << BLU "[CLIENT] " << client_socket << " => " RESET << YEL << client->getMessage() << RESET <<std::endl;
+    
+        const char *mess = (client->getMessage()).c_str();
+        std::vector<std::string> lines = split_line_buffer(mess);
+        int nbr_lines = lines.size();
+        
+    if (lines.size() > 1)
+        {
+            int i = 0;
+            while (i < lines.size() && isOpenedSock(client_socket))
+            {
+                parse_exec_cmd(split_buffer(lines[i]), client);
+                i++;
+            }
+      if (!isOpenedSock(client_socket))
+        return ;
+        }
+        else
+    {
+      if (!split_buffer(str)[0].compare("PRIVMSG"))
+        client->setPrivmsgParam(str); 
+            parse_exec_cmd(split_buffer(client->getMessage()), client);
+    }
+        client->setMessage("");
+    }
+    memset(buffer, 0, sizeof(char) * 512);
 }
+
+
 
 std::vector<std::string> Server::split_buffer(std::string str)
 {

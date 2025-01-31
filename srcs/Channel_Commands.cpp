@@ -42,7 +42,7 @@ void	Server::topic(Client *client, std::vector<std::string> cmd)
 	if (!isOperator(client, channel) && channel->getTopicMode())
 		return (sendMSG(ERR_NOTOPERATOR(client->getNickname(), channel->getName()), client->getFd()));
 	channel->setTopic(cmd[2].substr(1));
-	sendMSG(SHOW_TOPIC(client->getHostname(), channel->getName(), channel->getTopic()), client->getFd());
+	sendMSGChan(SHOW_TOPIC(client->getHostname(), channel->getName(), channel->getTopic()), channel);
 }
 
 void	Server::part(Client *client, std::vector<std::string> cmd)
