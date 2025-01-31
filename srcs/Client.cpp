@@ -97,9 +97,14 @@ void Client::setUsername(std::string str)
 	this->username = str;
 }
 
-void	Client::setChanCounter(void)
+void	Client::increaseChanCounter(void)
 {
 	this->channel_counter++;
+}
+
+void	Client::decreaseChanCounter(void)
+{
+	this->channel_counter--;
 }
 
 void  Client::setRealname(std::string str)

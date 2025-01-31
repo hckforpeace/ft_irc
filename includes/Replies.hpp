@@ -41,7 +41,7 @@
 
 /*================================================== KICK ====================================================*/
 
-#define RPL_KICK(nickname, username, channel) (":" + nickname + "!~" + username + "@127.0.0.1 KICK #" + channel)
+#define RPL_KICK(nickname, username, channel, kicked, reason) (":" + nickname + "!~" + username + "@127.0.0.1 KICK #" + channel + " " + kicked + " :" + reason)
 
 /*================================================= TOPIC ====================================================*/
 

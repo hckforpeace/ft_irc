@@ -48,7 +48,8 @@ class Client
 		void	setCmd(std::vector<std::string> cmd) {this->cmd = cmd;};
 		void	setNickname(std::string nick);
 		void	setUsername(std::string str);
-		void	setChanCounter(void);
+		void	increaseChanCounter(void);
+		void	decreaseChanCounter(void);
 		void	setRealname(std::string str);
 		void	addtoInviteChan(std::string channel);
 		bool	isInvited(std::string channel);

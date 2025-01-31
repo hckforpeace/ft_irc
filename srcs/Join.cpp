@@ -34,7 +34,7 @@ void Server::createChannel(std::string name, Client *client)
 	new_channel->setName(name);
 	new_channel->add_operator(client);
 	this->Channels.push_back(new_channel);
-	client->setChanCounter();
+	client->increaseChanCounter();
 	sendMSG(RPL_JOIN(client->getHostname(), new_channel->getName()) + \
 		RPL_NAMES(client->getNickname(), new_channel->getName(), new_channel->getClientLst()) + \
 		RPL_ENDOFNAMES(client->getNickname(),new_channel->getName()), client->getFd());
@@ -56,7 +56,7 @@ void Server::enterChannel(Channel *channel, Client *client, std::string password
 		return (sendMSG(CHAN_PASS(client->getNickname(), channel->getName()), client->getFd()));
 	sendMSGChan(RPL_JOIN(client->getHostname(), channel->getName()), channel);
 	channel->add_client(client);
-	client->setChanCounter();
+	client->increaseChanCounter();
 	if (channel->getTopic().empty())
 		sendMSG(RPL_JOIN(client->getHostname(), channel->getName()) + \
 			RPL_NAMES(client->getNickname(), channel->getName(), channel->getClientLst()) + \

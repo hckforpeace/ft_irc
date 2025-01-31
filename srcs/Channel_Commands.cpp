@@ -63,6 +63,7 @@ void	Server::part(Client *client, std::vector<std::string> cmd)
 		channel->removeClient(client);
 	if (channel->getClientNb() == 0)
 		removeChan(channel);
+	client->decreaseChanCounter();
 }
 
 void	Server::kick(Client *client, std::vector<std::string> cmd)
@@ -76,14 +77,22 @@ void	Server::kick(Client *client, std::vector<std::string> cmd)
 	Client *kicked_client = findClient(cmd[2]);
 	Channel *channel = findChannel(cmd[1].substr(1));
 	if (!kicked_client)
-		return (sendMSG(ERR_NOSUCHNICK(client->getNickname(), cmd[1]), client->getFd()));
+		return (sendMSG(ERR_NOSUCHNICK(client->getNickname(), cmd[2]), client->getFd()));
 	if (!isinChan(client, channel))
 		return (sendMSG(ERR_USERNOTINCHAN2(client->getNickname(), channel->getName()), client->getFd()));
-	sendMSGChan(RPL_KICK(kicked_client->getNickname(), kicked_client->getUsername(), channel->getName()), channel);
+	if (!isinChan(kicked_client, channel))
+		return (sendMSG(ERR_USERNOTINCHAN2(cmd[2], channel->getName()), client->getFd()));
+	if (!isOperator(client, channel) && channel->getTopicMode())
+		return (sendMSG(ERR_NOTOPERATOR(client->getNickname(), channel->getName()), client->getFd()));
+	size_t index = client->getPrivmsgParam().find(':');
+	std::string reason = client->getPrivmsgParam().substr(index + 1);
+	sendMSGChan(RPL_KICK(client->getNickname(), client->getUsername(), channel->getName(), cmd[2], reason), channel);
 	if (isOperator(kicked_client, channel))
 		channel->removeOperator(kicked_client);
 	else
 		channel->removeClient(kicked_client);
 	if (channel->getClientNb() == 0)
 		removeChan(channel);
+	kicked_client->decreaseChanCounter();
+	std::cout << channel->getClientLst() << std::endl;
 }
