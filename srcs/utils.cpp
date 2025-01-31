@@ -82,6 +82,8 @@ void Server::sendMSG(std::string message, int fd)
 	const char *buffer;
 	message.append("\r\n");
 
+  if (!isOpenedSock(fd))
+    return ;
 	std::cout << RED "[SERVER] <" << fd << "> => " RESET << GREEN << message << RESET << std::endl;
 	buffer = message.c_str();
 	if (send(fd, buffer, message.length(), 0) == -1)
@@ -103,13 +105,8 @@ void Server::sendToChannel(std::string message, std::string nickname, Channel *c
 	std::vector<Client *> cli = chan->getClients();
 	std::vector<Client *> operators = chan->getOperators();
 
-	// std::string is_op = "";
-	// if (chan->isOperator(client))
-	// 	is_op = "@";
-	// std::cout << "is he op ?: " << is_op << std::endl;
 	for (std::vector<Client *>::iterator it = cli.begin(); it != cli.end(); it++)
 	{
-		// this->sendMSG("<" + is_op + nickname + ":" + BLU + "#" + chan->getName() + RESET + "> " + message, (*it)->getFd());
 		if ((*it) != client)
 			this->sendMSG(":" + client->getNickname() + " PRIVMSG " + "#" + chan->getName() + " :" + message, (*it)->getFd());
 	}
@@ -134,7 +131,8 @@ void Server::removeChan(Channel *channel)
 		if (!(*it)->getName().compare(channel->getName()))
 		{
 			Channels.erase(it);
-			break;
+      delete channel;
+			break ;
 		}
 	}
 }
@@ -213,11 +211,11 @@ void    Server::destroy_cli_chan(Client *client)
 {
   for (std::vector<Channel*>::iterator it = this->Channels.begin(); it != this->Channels.end(); it++)
   {
-    if (this->isinChan(client, (*it)) && Channels.size() == 1)
+    if (this->isinChan(client, (*it)) && (*it)->getClientNb() == 1)
       this->removeChan((*it));
   }
+  std::cout << "DESTROYING" << std::endl;
   removeClient(client);
-   
 }
 
 

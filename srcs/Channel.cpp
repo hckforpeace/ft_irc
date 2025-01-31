@@ -85,7 +85,7 @@ void	Channel::removeClient(Client *client)
 
 void	Channel::removeOperator(Client *client)
 {
-	for (std::vector<Client*>::iterator it = operators.begin(); it != operators.end(); ++it)
+	for (std::vector<Client*>::iterator it = operators.begin(); it != operators.end(); it++)
 	{
 		if (!(*it)->getNickname().compare(client->getNickname()))
 		{
@@ -185,9 +185,13 @@ void Channel::setName(std::string name)
 	this->name = name;
 }
 
-void Channel::setLimit(int limit)
+void Channel::setLimit(std::string limit)
 {
-	this->limit = limit;
+	std::stringstream	slimit(limit);
+	int					nb_limit;
+
+	slimit >> nb_limit;
+	this->limit = nb_limit;
 }
 
 void Channel::setInvite(bool flag)
@@ -215,3 +219,7 @@ void	Channel::setKeyMode(bool flag)
 	this->key_mode = flag;
 }
 
+void	Channel::setPassword(std::string password)
+{
+	this->password = password;
+}

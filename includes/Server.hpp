@@ -16,7 +16,6 @@
 #include <sys/stat.h>
 #include <signal.h>
 #include <vector>
-
 #include "Colors.hpp"
 #include "Client.hpp"
 #include "Replies.hpp"
@@ -71,6 +70,8 @@ class Server {
 		void	modei(Client *client, std::vector<std::string> cmd);
     void 	pong(Client *client, std::vector<std::string> cmd);
     void 	whoIs(Client *client, std::vector<std::string> cmd);
+    void 	quit(Client *client, std::vector<std::string> cmd);
+    
 
 		// Modes
 		void	mode(std::vector<std::string> cmd, Client *client);
@@ -99,26 +100,23 @@ class Server {
 		void   		sendMSG(std::string message, int fd);
 		void  		sendToChannel(std::string message, std::string nickname, Channel *channel, Client *client);
 		void    	sendMSGChan(std::string message, Channel *channel);
-		bool		  isinChan(Client *client, Channel *channel);
-		void    send_to_all_client(std::string message);
+		bool		isinChan(Client *client, Channel *channel);
+		void    	send_to_all_client(std::string message);
 		void		removeClient(Client *client);
 		void		removeChan(Channel *channel);
-    bool    isOpenedSock(int socket);
-    void    destroy_cli_chan(Client *client);
-    std::string genWhoisRpl(std::string client, std::string nick);
-	// 	err = ERR_NOTREGISTERED(client->getNickname());
+    	bool    	isOpenedSock(int socket);
+    	void    	destroy_cli_chan(Client *client);
+    	std::string genWhoisRpl(std::string client, std::string nick);
 
 		// mode
 		void	inviteMode(std::string mode, Client *client, Channel *channel);
 		void	topicMode(std::string mode, Client *client, Channel *channel);
-		void	keyModeOn(std::string mode, std::string password, Client *client, Channel *channel);
-		void	keyModeOff(std::string modeit, Client *client, Channel *channel);
+		void	keyMode(std::string mode, std::string password, Client *client, Channel *channel);
 		void	operatorMode(std::string mode, std::string new_operator, Client *client, Channel *channel);
-		void	limitModeOn(std::string limit, Client *client, Channel *channel);
-		void	limitModeOff(Client *client, Channel *channel);
+		void	limitMode(std::string mode, std::string limit, Client *client, Channel *channel);
 		bool	login_parse(std::vector<std::string> cmds, Client *client);
 		std::string	generateNick(std::string base);
-    void	check_connection();
+  		void	check_connection();
 };
 
 #endif

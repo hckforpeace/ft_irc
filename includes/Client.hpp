@@ -40,7 +40,7 @@ class Client
 		int			getChanCounter(void);
 		bool		getPassstatus(void);
 		bool		firstConnection(void);
-    std::string  getPrivmsgParam();
+    	std::string  getPrivmsgParam();
 
 		void	setMessage(std::string str);
 		void	setFirstConnection();
@@ -53,7 +53,7 @@ class Client
 		void	addtoInviteChan(std::string channel);
 		bool	isInvited(std::string channel);
 		void	setPasswordInserted(void);
-    void  setPrivmsgParam(std::string msg);
+    	void	setPrivmsgParam(std::string msg);
 		void	joinChanCounter(void);
 };
 

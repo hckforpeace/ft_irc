@@ -10,11 +10,15 @@ void	Server::invite(Client *client, std::vector<std::string> cmd)
 		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[2]), client->getFd()));
 	if (!findChannel(cmd[2].substr(1)))
 		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[2]), client->getFd()));
+	if (!isinChan(client, findChannel(cmd[2].substr(1))))
+		return (sendMSG(ERR_USERNOTINCHAN1(client->getNickname(), cmd[2].substr(1)), client->getFd()));
+	if (isinChan(findClient(cmd[1]), findChannel(cmd[2].substr(1))))
+		return (sendMSG(ERR_USERONCHANNEL(cmd[1], cmd[2].substr(1)), client->getFd()));
 	if (!isOperator(client, findChannel(cmd[2].substr(1))))
 		return (sendMSG(ERR_NOTOPERATOR(client->getNickname(), cmd[2].substr(1)), client->getFd()));
 	Client *invited = findClient(cmd[1]);
 	invited->addtoInviteChan(cmd[2].substr(1));
-	sendMSG(BE_INVITED(client->getNickname(), cmd[2]), invited->getFd());
+	sendMSG(BE_INVITED(client->getHostname(), cmd[1], cmd[2]), invited->getFd());
 	sendMSGChan(TO_INVITE(client->getNickname(), invited->getNickname(), cmd[2]), findChannel(cmd[2].substr(1)));
 }
 
@@ -30,15 +34,15 @@ void	Server::topic(Client *client, std::vector<std::string> cmd)
 	if (cmd.size() == 2)
 	{
 		if (channel->getTopic().empty())
-			return(sendMSG(EMPTY_TOPIC(channel->getName()), client->getFd()));
-		return(sendMSG(SHOW_TOPIC(channel->getName(), channel->getTopic(), client->getNickname()), client->getFd()));
+			return(sendMSG(EMPTY_TOPIC(client->getNickname(), channel->getName()), client->getFd()));
+		return(sendMSG(RPL_TOPIC(client->getNickname(), channel->getName(), channel->getTopic()), client->getFd()));
 	}
 	if (!isinChan(client, channel))
 		return (sendMSG(ERR_USERNOTINCHAN1(client->getNickname(), channel->getName()), client->getFd()));
 	if (!isOperator(client, channel) && channel->getTopicMode())
 		return (sendMSG(ERR_NOTOPERATOR(client->getNickname(), channel->getName()), client->getFd()));
-	channel->setTopic(cmd[2]);
-	sendMSG(CHANGE_TOPIC(client->getNickname(), channel->getName(), channel->getTopic()), client->getFd());
+	channel->setTopic(cmd[2].substr(1));
+	sendMSGChan(SHOW_TOPIC(client->getHostname(), channel->getName(), channel->getTopic()), channel);
 }
 
 void	Server::part(Client *client, std::vector<std::string> cmd)

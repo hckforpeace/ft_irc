@@ -241,7 +241,7 @@ void	Server::read_and_process(int i)
 
 	// reading string sent from the Client
 	len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);
-  // std::cout << "Client has sent: " << std::endl << buffer << std::endl;
+
 	// Error
 	if (len == 0)
 	{
@@ -278,12 +278,12 @@ void	Server::read_and_process(int i)
       if (!isOpenedSock(client_socket))
         return ;
 		}
-		else
-    {
-      if (!split_buffer(str)[0].compare("PRIVMSG"))
-        client->setPrivmsgParam(str); 
+		else if (client->getMessage().compare(""))
+		{
+			if (!split_buffer(client->getMessage())[0].compare("PRIVMSG"))
+				client->setPrivmsgParam(str); 
 			parse_exec_cmd(split_buffer(client->getMessage()), client);
-    }
+		}
 		client->setMessage("");
 	}
 	memset(buffer, 0, sizeof(char) * 512);
@@ -334,12 +334,12 @@ void		Server::processMessage(std::string str, Client *client)
 
 void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
+	// else if(cmd.size() != 0 && (cmd[0] == "MODE" || cmd[0] == "MODE"))
+	// 	modei(client, cmd); // welcome invisible user mode msg
 	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
 		authenticate(client, cmd);// authenticate
 	else if(cmd.size() != 0 && (cmd[0] == "WHOIS" || cmd[0] == "WHOIS"))
     whoIs(client, cmd); // welcome invisible user mode msg
-	else if(cmd.size() != 0 && (cmd[0] == "MODE" || cmd[0] == "MODE"))
-		modei(client, cmd); // welcome invisible user mode msg
 	else if (cmd.size() != 0 && (cmd[0] == "ping" || cmd[0] == "PING"))
     	pong(client, cmd); // answer to ping
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
@@ -361,7 +361,7 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 	else if (cmd.size() != 0 && (cmd[0] == "privmsg" || cmd[0] == "PRIVMSG"))
     	privmsg(client, cmd); // sends a msg to a client or to a channel
 	else if (cmd.size() != 0 && (cmd[0] == "quit" || cmd[0] == "QUIT"))
-		std::cout << "test" << std::endl;// quit the server
+    quit(client, cmd);
 	else if (cmd.size() != 0)
 		sendMSG(ERR_UNKNOWNCOMMAND(client->getNickname(), cmd[0]), client->getFd());
 }

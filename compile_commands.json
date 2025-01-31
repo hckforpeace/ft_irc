@@ -2,6 +2,7 @@
   {
     "arguments": [
       "/usr/bin/c++",
+      "-g3",
       "-c",
       "-Iincludes/",
       "-o",
@@ -15,6 +16,7 @@
   {
     "arguments": [
       "/usr/bin/c++",
+      "-g3",
       "-c",
       "-Iincludes/",
       "-o",
@@ -28,6 +30,7 @@
   {
     "arguments": [
       "/usr/bin/c++",
+      "-g3",
       "-c",
       "-Iincludes/",
       "-o",
@@ -37,5 +40,89 @@
     "directory": "/home/pbeyloun/Documents/ft_irc",
     "file": "/home/pbeyloun/Documents/ft_irc/srcs/Client.cpp",
     "output": "/home/pbeyloun/Documents/ft_irc/objects/Client.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-g3",
+      "-c",
+      "-Iincludes/",
+      "-o",
+      "objects/basic_commands.o",
+      "srcs/basic_commands.cpp"
+    ],
+    "directory": "/home/pbeyloun/Documents/ft_irc",
+    "file": "/home/pbeyloun/Documents/ft_irc/srcs/basic_commands.cpp",
+    "output": "/home/pbeyloun/Documents/ft_irc/objects/basic_commands.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-g3",
+      "-c",
+      "-Iincludes/",
+      "-o",
+      "objects/utils.o",
+      "srcs/utils.cpp"
+    ],
+    "directory": "/home/pbeyloun/Documents/ft_irc",
+    "file": "/home/pbeyloun/Documents/ft_irc/srcs/utils.cpp",
+    "output": "/home/pbeyloun/Documents/ft_irc/objects/utils.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-g3",
+      "-c",
+      "-Iincludes/",
+      "-o",
+      "objects/Channel.o",
+      "srcs/Channel.cpp"
+    ],
+    "directory": "/home/pbeyloun/Documents/ft_irc",
+    "file": "/home/pbeyloun/Documents/ft_irc/srcs/Channel.cpp",
+    "output": "/home/pbeyloun/Documents/ft_irc/objects/Channel.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-g3",
+      "-c",
+      "-Iincludes/",
+      "-o",
+      "objects/Join.o",
+      "srcs/Join.cpp"
+    ],
+    "directory": "/home/pbeyloun/Documents/ft_irc",
+    "file": "/home/pbeyloun/Documents/ft_irc/srcs/Join.cpp",
+    "output": "/home/pbeyloun/Documents/ft_irc/objects/Join.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-g3",
+      "-c",
+      "-Iincludes/",
+      "-o",
+      "objects/Mode.o",
+      "srcs/Mode.cpp"
+    ],
+    "directory": "/home/pbeyloun/Documents/ft_irc",
+    "file": "/home/pbeyloun/Documents/ft_irc/srcs/Mode.cpp",
+    "output": "/home/pbeyloun/Documents/ft_irc/objects/Mode.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/c++",
+      "-g3",
+      "-c",
+      "-Iincludes/",
+      "-o",
+      "objects/Channel_Commands.o",
+      "srcs/Channel_Commands.cpp"
+    ],
+    "directory": "/home/pbeyloun/Documents/ft_irc",
+    "file": "/home/pbeyloun/Documents/ft_irc/srcs/Channel_Commands.cpp",
+    "output": "/home/pbeyloun/Documents/ft_irc/objects/Channel_Commands.o"
   }
 ]

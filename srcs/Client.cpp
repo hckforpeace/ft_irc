@@ -12,7 +12,7 @@ Client::~Client()
 {
     std::cout << "Client with fd: " << fd << " destroyed" << std::endl;
     if (close(fd) == -1)
-		std::cerr << "failed to close fd: " << fd << std::endl;
+		  std::cerr << "failed to close fd: " << fd << std::endl;
 }
 
 int	Client::getFd()

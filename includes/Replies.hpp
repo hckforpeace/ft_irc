@@ -8,24 +8,24 @@
 # define NETWORK "pedroypablo"
 /*================ CHANNEL ====================*/
 
-# define WLC(user, nick) PREFIX "001 " + nick + " :Welcome to the pedroypablo, " + nick + "[!<" + user + ">@<localhost>]"
+# define WLC(user, nick) PREFIX "001 " + nick + " :" GREEN "Welcome to the pedroypablo, " + nick + "[!<" + user + ">@<localhost>]" RESET
 
 // Welcome message when a client joins a channel
 # define CHAN_WELC(nickname, channel) nickname + " has joined #"  + channel
 
 // Returned when a client tries to invite a user to a channel they are already on.
-# define ERR_USERONCHANNEL(user, channel) ("443 :" + user + " is already on channel #" + channel)
+# define ERR_USERONCHANNEL(nickname, channel) (":localhost 443 " + nickname + " " + nickname + " #" + channel + " :is already on channel")
 
-# define ERR_UNKNOWNMODE(char) "472 " + char + " :is unknown mode char to me"
+# define ERR_UNKNOWNMODE(nickname, char) (":localhost 472 " + nickname + " :" + char)
 
-# define ERR_INVITEONLYCHAN(channel) "473 " + channel + " :Cannot join channel (+i)"
+# define ERR_INVITEONLYCHAN(channel) (":localhost 473 " + channel + " :Cannot join channel (+i)")
 
 # define ERR_USERNOTINCHAN1(nickname, channel) (":localhost 442 " + nickname + " #" + channel + " :You're not on that channel")
 
 # define ERR_USERNOTINCHAN2(nickname, channel) (":localhost 442 " + nickname + " #" + channel + " :They aren't on that channel")
 
 // Sent to a user when they have joined the maximum number of allowed channels and they try to join another channel.
-# define ERR_TOOMANYCHANNELS(client) ("localhost: 405 " + client + ": You have joined too many channels")
+# define ERR_TOOMANYCHANNELS(nickname, channel) (":localhost 405 " + nickname + " :#" + channel)
 
 /*================================================= JOIN ======================================================*/
 
@@ -45,11 +45,11 @@
 
 /*================================================= TOPIC ====================================================*/
 
-#define RPL_TOPIC(nickname, channel, topic) (":( 332 " + nickname + " #" + channel + " :" + topic + "\r\n")
+#define RPL_TOPIC(nickname, channel, topic) (":localhost 332 " + nickname + " #" + channel + " " + topic + "\r\n")
 
-# define EMPTY_TOPIC(channel) ("#" + channel + ": No topic is set")
+# define EMPTY_TOPIC(nickname, channel) (":localhost 331 " + nickname + " #" + channel + " :No topic is set.")
 
-# define SHOW_TOPIC(channel, topic, client) ("Topic for #" + channel + ": " + topic + "\nTopic set by " + client)
+# define SHOW_TOPIC(hostname, channel, topic) (":" + hostname + "@127.0.0.1 TOPIC #" + channel + " :" + topic)
 
 # define CHANGE_TOPIC(client, channel, topic) (client + " changed the topic of #" + channel + " to: " + topic)
 
@@ -59,7 +59,7 @@
 #define ERR_UNKNOWNCOMMAND(nickname, command) (":localhost 421 " + nickname + " " + command + " :Unknown command")
 
 // Returned by the server to indicate that the client must be registered before the server will allow it to be parsed in detail.
-# define ERR_NOTREGISTERED(nickname) (":localhost 451 " + nickname + " : You have not registered")
+# define ERR_NOTREGISTERED(nickname) (":localhost 451 " + nickname + " :You have not registered")
 
 #define ERR_NONICKNAMEGIVEN(nick) PREFIX "431 " + nick + " :No nickname given"
 
@@ -85,9 +85,7 @@
 # define ERR_ERRONEUSNICKNAME(nickname) (":localhost 432 " + nickname + " :Erroneous nickname")
 
 // Indicates that no channel can be found for the supplied channel name.
-// # define ERR_NOSUCHCHANNEL(nickname, channel) (":localhost 403 " + nickname + " " + channel + " :No such channel")
-# define ERR_NOSUCHCHANNEL(nickname, channel) (":localhost 403 " + nickname + " :" + channel)
-// # define ERR_NOSUCHCHANNEL(nickname, channel) (":localhost 403 " + nickname + " " + channel + " :No such channel")
+# define ERR_NOSUCHCHANNEL(nickname, channel) (":localhost 403 " + nickname + " " + channel + " :No such channel")
 
 // Returned by the PRIVMSG command to indicate the message wasn’t delivered because there was no text to send.
 # define ERR_NOTEXTTOSEND (":localhost 412 <client> :No text to send") //????????????
@@ -97,16 +95,18 @@
 
 /*====================================================== INVITE ============================================================*/
 
+//# define RPL_INVITE(hostname, nickname, channel) (":" + hostname + "@127.0.0.1 INVITE " + nickname + " " + channel)
+
 # define INVITE_ONLY(nickname, channel) (":localhost 473 " + nickname + " #" + channel + " :Cannot join channel (+i)")
 
-# define BE_INVITED(client, channel) client + " invites you to "+ channel
+# define BE_INVITED(hostname, nickname, channel) (":" + hostname + " INVITE " + nickname + " " + channel)
 
-# define TO_INVITE(who_invite, invited, channel) who_invite + " invited " + invited + " into channel " + channel
+# define TO_INVITE(who_invite, invited, channel) (":" + who_invite + " invited " + invited + " into channel " + channel)
 
 /*==================================================== MODES ===============================================================*/
 
 // mode/#channel [+/-k pass] || mode/#channel [+/-o client] || mode/#channel [+l limit]
-# define MODE_SET(channel, nickname, mode) "mode/#" + channel + " [+" + mode + "] by " + nickname
+# define RPL_CHANGEMODE(hostname, channel, mode, args) (":" + hostname + " MODE #" + channel + " " + mode + " " + args)
 
 # define MODE_UNSET(channel, nickname, mode) "mode/#" + channel + " [-" + mode + "] by " + nickname
 
@@ -118,11 +118,6 @@
 
 // User limit
 # define ERR_CHANNELISFULL(nickname, channel) (":localhost 471 " + nickname + " #" + channel + " :Cannot join channel (+l)")
-
-# define ERR_BADMODESYNTAX "Bad syntax, use as : mode #channel +/-c [args], where c is the mode"
-
-# define ERR_BADMODE "Mode not handled, aviable modes are: i (invite), t (topic), k (password), o (operator), l (limit)"
-
 
 /*====================================================== WHOIS ============================================================*/
 # define RPL_WHOISCHANNELS(client, nick) ":localhost 319 " + client + " " + nick + " :" 
