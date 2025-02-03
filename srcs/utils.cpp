@@ -36,9 +36,13 @@ void Server::sendMSGChan(std::string message, Channel *channel)
 	std::vector<Client *> operators = channel->getOperators();
 
 	for (std::vector<Client *>::iterator it = client.begin(); it != client.end(); it++)
+	{
 		this->sendMSG(message, (*it)->getFd());
+	}
 	for (std::vector<Client *>::iterator it = operators.begin(); it != operators.end(); it++)
+	{
 		this->sendMSG(message, (*it)->getFd());
+	}
 }
 
 bool Server::isinChan(Client *client, Channel *channel)
@@ -47,11 +51,15 @@ bool Server::isinChan(Client *client, Channel *channel)
 	std::vector<Client *> operators = channel->getOperators();
 
 	for (std::vector<Client *>::iterator it = chan_client.begin(); it != chan_client.end(); it++)
+	{
 		if (!(*it)->getNickname().compare(client->getNickname()))
 			return (true);
+	}
 	for (std::vector<Client *>::iterator it = operators.begin(); it != operators.end(); it++)
+	{
 		if (!(*it)->getNickname().compare(client->getNickname()))
 			return (true);
+	}
 	return (false);
 }
 
@@ -140,15 +148,15 @@ void Server::removeChan(Channel *channel)
 	this->Channels.erase(this->getChannelIt(channel->getName()));
 	std::cout << "LENGTH OF THE CHANNEL VECTOR IS: " << Channels.size() << std::endl;
 	delete channel;
+	std::cout << "Number of Channels on the server down to: " << RED << Channels.size() << RESET << std::endl;
 
-	// this->Clients.erase(getClientIt(client->getFd()));
-	// delete client;
 }
 
 void	Server::removeClient(Client *client)
 {
 	this->Clients.erase(getClientIt(client->getFd()));
 	delete client;
+	std::cout << "Number of Clients on the server down to: " << RED << Clients.size() << RESET << std::endl;
 }
 
 // void		Server::removeClient(Client *client, Channel *channel)
@@ -198,9 +206,9 @@ void	Server::check_connection()
     // std::cout << "Sent WELCOME to: " << (*it)->isRegistered() << std::endl;
     if (!(*it)->isConnected() && (*it)->isRegistered())
     {
-      (*it)->setConnection();
-	  (*it)->setFirstConnection();
-      sendMSG(WLC((*it)->getUsername(), (*it)->getNickname()), (*it)->getFd());
+		(*it)->setConnection();
+		(*it)->setFirstConnection();
+		sendMSG(WLC((*it)->getUsername(), (*it)->getNickname()), (*it)->getFd());
     }
   }
 }
@@ -225,14 +233,16 @@ void    Server::destroy_cli_chan(Client *client)
 		if ((*it)->isOperator(client))
 		{
 			std::cout << "**THE CLIENT YOU WANT TO REMOVE IS AN OPERATOR**" << std::endl;
-			(*it)->removeClient(client);
+			(*it)->removeOperator(client);
 		}
 		else if ((*it)->isInChannel(client))
 		{
 			std::cout << "**THE CLIENT YOU WANT TO REMOVE IS NOT AN OPERATOR**" << std::endl;
-			(*it)->removeOperator(client);
+			(*it)->removeClient(client);
 		}
-		if ((*it)->getClientNb() == 1)
+
+		
+		if ((*it)->getClientNb() == 0)
 		{
 			this->removeChan((*it)); // problem here
 			break;

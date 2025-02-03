@@ -3,10 +3,10 @@
 #include <string>
 
 // Commands
-void Server::authenticate(Client *client, std::vector<std::string> cmd)
+void Server::authenticate(Client *client, std::vector<std::string> cmd, int i)
 {
 	std::string err;
-
+	int fd = client->getFd();
 	if (cmd.size() < 2)
 		err = ERR_NEEDMOREPARAMS(client->getNickname());
 	else if (client->isConnected())
@@ -23,6 +23,7 @@ void Server::authenticate(Client *client, std::vector<std::string> cmd)
 			err = ERR_PASSWDMISMATCH(client->getNickname());
 	}
 	this->sendMSG(err, client->getFd());
+	epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &events[i]);
 	destroy_cli_chan(client);
 }
 
@@ -87,13 +88,13 @@ void Server::privmsg(Client *client, std::vector<std::string> cmd)
 	else if (cmd[1].at(0) == '#')
 	{
 		if (findChannel(cmd[1].substr(1)))
-			return (sendToChannel(client->getPrivmsgParam().substr(1), client->getNickname(), findChannel(cmd[1].substr(1)), client));
+			return (sendToChannel(client->getCmdParams().substr(1), client->getNickname(), findChannel(cmd[1].substr(1)), client));
 		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[1]), client->getFd()));
 	}
 	else
 	{
 		if ((rcv = this->findClient(cmd[1])) != NULL)
-			return (sendMSG(":" + client->getNickname() + " PRIVMSG " + cmd[1] + " " + client->getPrivmsgParam(), rcv->getFd()));
+			return (sendMSG(":" + client->getNickname() + " PRIVMSG " + cmd[1] + " " + client->getCmdParams(), rcv->getFd()));
 		else
 			return (sendMSG(ERR_NOSUCHNICK(client->getNickname(), cmd[1]), client->getFd()));
 	}
@@ -119,15 +120,11 @@ void 	Server::quit(Client *client, std::vector<std::string> cmd)
 	std::string param = "";
 
 	if (cmd.size() > 1)
-		param = cmd[1].substr(1);
+		param = client->getCmdParams();
 
 	for (std::vector<Channel *>::iterator it = this->Channels.begin(); it != this->Channels.end(); it++)
 	{
 		if (this->isinChan(client, (*it)))
-			this->sendMSGChan(":" + client->getHostname() + "@localhost QUIT :Quit: " + param, (*it));
+			this->sendMSGChan(":" + client->getHostname() + "@localhost QUIT :Quit: " + param.substr(1), (*it));
 	}
-	// destroy_cli_chan(client);
-
-	// std::cout << RED << "<<QUIT>> LENGTH OF => " << Channels[0]->getClientNb() <<  RESET << std::endl;;
 }
-

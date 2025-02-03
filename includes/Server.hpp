@@ -60,12 +60,12 @@ class Server {
 		std::vector<Client *>::iterator	getClientIt(int fd);
 		std::vector<Channel *>::iterator getChannelIt(std::string name);
 
-    	void		parse_exec_cmd(std::vector<std::string> cmd, Client *client);
+    	void		parse_exec_cmd(std::vector<std::string> cmd, Client *client, int i);
 		std::vector<std::string> split_buffer(std::string str);
 		std::vector<std::string> split_line_buffer(const char *sentence);
 		
 		// commands execution
-		void	authenticate(Client *client, std::vector<std::string> cmd);
+		void	authenticate(Client *client, std::vector<std::string> cmd, int i);
 		void	setNickname(Client *client, std::vector<std::string> cmd);
 		void	setUsername(Client *client, std::vector<std::string> cmd);
 		void	modei(Client *client, std::vector<std::string> cmd);

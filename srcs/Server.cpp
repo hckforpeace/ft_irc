@@ -251,16 +251,13 @@ void	Server::read_and_process(int i)
 
 	// reading string sent from the Client
 	len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);
-	std::cout << "DATA: " << buffer << std::endl;
 	// Error
-	if (len == 0)
+	if (len == 0 || len == -1)
 	{
 		std::cout << "An error has occured during recv of the client socket => " << events[i].data.fd << std::endl ;
-		// this->Clients.erase(getClientIt(client->getFd()));
 		std::cout << "Client deleted !" << std::endl;
-		epoll_ctl(epfd, EPOLL_CTL_DEL, client->getFd(), &events[i]);
+		epoll_ctl(epfd, EPOLL_CTL_DEL, client_socket, &events[i]);
 		destroy_cli_chan(client);
-
 		return ;
 	}
 	else
@@ -284,7 +281,7 @@ void	Server::read_and_process(int i)
 			int i = 0;
 			while (i < lines.size() && isOpenedSock(client_socket))
 			{
-				parse_exec_cmd(split_buffer(lines[i]), client);
+				parse_exec_cmd(split_buffer(lines[i]), client, i);
 				i++;
 			}
 		}
@@ -292,7 +289,9 @@ void	Server::read_and_process(int i)
 		{
 			if (!split_buffer(client->getMessage())[0].compare("PRIVMSG"))
 				client->setPrivmsgParam(str); 
-			parse_exec_cmd(split_buffer(client->getMessage()), client);
+			else if (!split_buffer(client->getMessage())[0].compare("QUIT"))
+				client->setQuitParam(str);
+			parse_exec_cmd(split_buffer(client->getMessage()), client, i);
 		}
 	}
 	memset(buffer, 0, sizeof(char) * 512);
@@ -341,13 +340,13 @@ void		Server::processMessage(std::string str, Client *client)
 	}
 }
 
-void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
+void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client, int i)
 {
   	int fd = client->getFd();
 	// else if(cmd.size() != 0 && (cmd[0] == "MODE" || cmd[0] == "MODE"))
 	// 	modei(client, cmd); // welcome invisible user mode msg
 	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
-		authenticate(client, cmd);// authenticate
+		authenticate(client, cmd, i);// authenticate
 	else if(cmd.size() != 0 && (cmd[0] == "WHOIS" || cmd[0] == "WHOIS"))
     whoIs(client, cmd); // welcome invisible user mode msg
 	else if (cmd.size() != 0 && (cmd[0] == "ping" || cmd[0] == "PING"))
