@@ -124,8 +124,8 @@ void	Server::run_server()
 	{
 		nbr_fds = epoll_wait(epfd, events, MAX_EVENTS, -1);
 		check_connection();
-		// if (errno == EAGAIN)
-			// std::cout << "tell me" << std::endl;
+		if (errno == EAGAIN)
+			std::cout << "tell me" << std::endl;
 		for (int i = 0;  i < nbr_fds; ++i)
 		{
 			if (fstat(events[i].data.fd, &buf) == 0 && errno == EBADF)
@@ -194,6 +194,16 @@ std::vector<Client *>::iterator	Server::getClientIt(int fd)
 	return (Clients.begin());
 }
 
+std::vector<Channel *>::iterator Server::getChannelIt(std::string name)
+{
+	for (std::vector<Channel *>::iterator it = Channels.begin(); it != Channels.end(); it++)
+	{
+		if (!name.compare((*it)->getName()))
+			return (it);
+	}
+	return (Channels.begin());
+}
+
 void		Server::first_connection(int nbr_fds, int i)
 {
 	// std::cout << "events[i].data.fd: " << events[i].data.fd << std::endl;
@@ -241,14 +251,16 @@ void	Server::read_and_process(int i)
 
 	// reading string sent from the Client
 	len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);
-
+	std::cout << "DATA: " << buffer << std::endl;
 	// Error
 	if (len == 0)
 	{
 		std::cout << "An error has occured during recv of the client socket => " << events[i].data.fd << std::endl ;
-		this->Clients.erase(getClientIt(client->getFd()));
-		delete client;
+		// this->Clients.erase(getClientIt(client->getFd()));
 		std::cout << "Client deleted !" << std::endl;
+		epoll_ctl(epfd, EPOLL_CTL_DEL, client->getFd(), &events[i]);
+		destroy_cli_chan(client);
+
 		return ;
 	}
 	else
@@ -259,15 +271,15 @@ void	Server::read_and_process(int i)
 	str = buffer;
 	if (isCRLF(str, client))
 	{
-    // Server outputs...
-    std::cout << BLU "[CLIENT] " << client_socket << " => " RESET << YEL << client->getMessage() << RESET <<std::endl;
+		// Server outputs...
+		std::cout << BLU "[CLIENT] " << client_socket << " => " RESET << YEL << client->getMessage() << RESET <<std::endl;
 
-    
+
 		const char *mess = (client->getMessage()).c_str();
 		std::vector<std::string> lines = split_line_buffer(mess);
 		int nbr_lines = lines.size();
 		
-    if (lines.size() > 1)
+		if (lines.size() > 1)
 		{
 			int i = 0;
 			while (i < lines.size() && isOpenedSock(client_socket))
@@ -275,8 +287,6 @@ void	Server::read_and_process(int i)
 				parse_exec_cmd(split_buffer(lines[i]), client);
 				i++;
 			}
-      if (!isOpenedSock(client_socket))
-        return ;
 		}
 		else if (client->getMessage().compare(""))
 		{
@@ -284,7 +294,6 @@ void	Server::read_and_process(int i)
 				client->setPrivmsgParam(str); 
 			parse_exec_cmd(split_buffer(client->getMessage()), client);
 		}
-		client->setMessage("");
 	}
 	memset(buffer, 0, sizeof(char) * 512);
 }
@@ -334,6 +343,7 @@ void		Server::processMessage(std::string str, Client *client)
 
 void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
+  	int fd = client->getFd();
 	// else if(cmd.size() != 0 && (cmd[0] == "MODE" || cmd[0] == "MODE"))
 	// 	modei(client, cmd); // welcome invisible user mode msg
 	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
@@ -361,7 +371,11 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 	else if (cmd.size() != 0 && (cmd[0] == "privmsg" || cmd[0] == "PRIVMSG"))
     	privmsg(client, cmd); // sends a msg to a client or to a channel
 	else if (cmd.size() != 0 && (cmd[0] == "quit" || cmd[0] == "QUIT"))
-    quit(client, cmd);
+    	quit(client, cmd);
 	else if (cmd.size() != 0)
 		sendMSG(ERR_UNKNOWNCOMMAND(client->getNickname(), cmd[0]), client->getFd());
+	
+	if (isOpenedSock(fd))
+		client->setMessage("");
+
 }

@@ -117,12 +117,17 @@ void Server::whoIs(Client *client, std::vector<std::string> cmd)
 void 	Server::quit(Client *client, std::vector<std::string> cmd)
 {
 	std::string param = "";
+
 	if (cmd.size() > 1)
 		param = cmd[1].substr(1);
+
 	for (std::vector<Channel *>::iterator it = this->Channels.begin(); it != this->Channels.end(); it++)
 	{
 		if (this->isinChan(client, (*it)))
 			this->sendMSGChan(":" + client->getHostname() + "@localhost QUIT :Quit: " + param, (*it));
 	}
+	// destroy_cli_chan(client);
+
+	// std::cout << RED << "<<QUIT>> LENGTH OF => " << Channels[0]->getClientNb() <<  RESET << std::endl;;
 }
 

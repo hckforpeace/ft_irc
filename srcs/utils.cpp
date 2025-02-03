@@ -126,21 +126,29 @@ void Server::send_to_all_client(std::string message)
 
 void Server::removeChan(Channel *channel)
 {
-	for (std::vector<Channel *>::iterator it = Channels.begin(); it != Channels.end(); it++)
-	{
-		if (!(*it)->getName().compare(channel->getName()))
-		{
-			Channels.erase(it);
-      delete channel;
-			break ;
-		}
-	}
+	// for (std::vector<Channel *>::iterator it = Channels.begin(); it != Channels.end(); it++)
+	// {
+	// 	if (!(*it)->getName().compare(channel->getName()))
+	// 	{
+	// 		Channels.erase(it);
+    // 		// delete channel;
+	// 		break ;
+	// 	}
+	// }
+	std::vector<Channel *>::iterator it = this->getChannelIt(channel->getName());
+	std::cout << "channel name form operator: " << (*it)->getName() << std::endl;
+	this->Channels.erase(this->getChannelIt(channel->getName()));
+	std::cout << "LENGTH OF THE CHANNEL VECTOR IS: " << Channels.size() << std::endl;
+	delete channel;
+
+	// this->Clients.erase(getClientIt(client->getFd()));
+	// delete client;
 }
 
-void Server::removeClient(Client *client)
+void	Server::removeClient(Client *client)
 {
-		this->Clients.erase(getClientIt(client->getFd()));
-		delete client;
+	this->Clients.erase(getClientIt(client->getFd()));
+	delete client;
 }
 
 // void		Server::removeClient(Client *client, Channel *channel)
@@ -211,10 +219,26 @@ void    Server::destroy_cli_chan(Client *client)
 {
   for (std::vector<Channel*>::iterator it = this->Channels.begin(); it != this->Channels.end(); it++)
   {
-    if (this->isinChan(client, (*it)) && (*it)->getClientNb() == 1)
-      this->removeChan((*it));
+    if (this->isinChan(client, (*it)))
+    {
+		std::cout << "***************** should delete the chan***********" << std::endl;;
+		if ((*it)->isOperator(client))
+		{
+			std::cout << "**THE CLIENT YOU WANT TO REMOVE IS AN OPERATOR**" << std::endl;
+			(*it)->removeClient(client);
+		}
+		else if ((*it)->isInChannel(client))
+		{
+			std::cout << "**THE CLIENT YOU WANT TO REMOVE IS NOT AN OPERATOR**" << std::endl;
+			(*it)->removeOperator(client);
+		}
+		if ((*it)->getClientNb() == 1)
+		{
+			this->removeChan((*it)); // problem here
+			break;
+		}
+    }
   }
-  std::cout << "DESTROYING" << std::endl;
   removeClient(client);
 }
 

@@ -58,6 +58,7 @@ class Server {
     	// getters
 		Client*							getClient(int fd);
 		std::vector<Client *>::iterator	getClientIt(int fd);
+		std::vector<Channel *>::iterator getChannelIt(std::string name);
 
     	void		parse_exec_cmd(std::vector<std::string> cmd, Client *client);
 		std::vector<std::string> split_buffer(std::string str);
@@ -104,9 +105,9 @@ class Server {
 		void    	send_to_all_client(std::string message);
 		void		removeClient(Client *client);
 		void		removeChan(Channel *channel);
-    	bool    	isOpenedSock(int socket);
-    	void    	destroy_cli_chan(Client *client);
-    	std::string genWhoisRpl(std::string client, std::string nick);
+		bool    	isOpenedSock(int socket);
+		void    	destroy_cli_chan(Client *client);
+		std::string genWhoisRpl(std::string client, std::string nick);
 
 		// mode
 		void	inviteMode(std::string mode, Client *client, Channel *channel);
