@@ -54,7 +54,7 @@ class Client
 		void	addtoInviteChan(std::string channel);
 		bool	isInvited(std::string channel);
 		void	setPasswordInserted(void);
-    	void	setPrivmsgParam(std::string msg);
+    	void	setPrivmsgParam(std::string msg, bool flag);
 		void	joinChanCounter(void);
 };
 

@@ -279,7 +279,9 @@ void Server::read_and_process(int i)
 		else if (client->getMessage().compare(""))
 		{
 			if (!split_buffer(client->getMessage())[0].compare("PRIVMSG") || !split_buffer(client->getMessage())[0].compare("KICK"))
-				client->setPrivmsgParam(str);
+				client->setPrivmsgParam(str, false);
+			if (!split_buffer(client->getMessage())[0].compare("PART") || !split_buffer(client->getMessage())[0].compare("TOPIC"))
+				client->setPrivmsgParam(str, true);
 			parse_exec_cmd(split_buffer(client->getMessage()), client);
 		}
 		client->setMessage("");

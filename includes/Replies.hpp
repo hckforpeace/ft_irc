@@ -37,7 +37,7 @@
 
 /*================================================== PART ====================================================*/
 
-#define RPL_PART(nickname, username, channel) (":" + nickname + "!~" + username + "@127.0.0.1 PART #" + channel)
+#define RPL_PART(nickname, username, channel, part_msg) (":" + nickname + "!~" + username + "@127.0.0.1 PART #" + channel + " " + part_msg)
 
 /*================================================== KICK ====================================================*/
 
@@ -65,6 +65,9 @@
 
 // Returned by the server by numerous commands to indicate to the client that it didn't supply enough parameters.
 # define ERR_NEEDMOREPARAMS(nickname) (":localhost 461 " + nickname + " :Not enough parameters")
+
+// Returned by the server by numerous commands to indicate to the client that it didn't supply enough parameters.
+# define ERR_NEEDMOREPARAMSMODE(nickname, mode) (":localhost 461 " + nickname + " :MODE " + mode + " Not enough parameters")
 
 // Returned by the server to any link which tries to change part of the registered details (such as password or user details from second USER message).
 # define ERR_ALREADYREGISTRED(user) (":localhost 462 " + user + " :You may not reregister")

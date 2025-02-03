@@ -24,7 +24,7 @@ void Server::mode(std::vector<std::string> cmd, Client *client)
 	else if (!cmd[2].substr(0, 2).compare("-l"))
 		limitMode(cmd[2], "1", client, channel);
 	else if (cmd.size() < 4)
-		return (sendMSG(ERR_NEEDMOREPARAMS(client->getNickname()), client->getFd()));
+		return (sendMSG(ERR_NEEDMOREPARAMSMODE(client->getNickname(), cmd[2]), client->getFd()));
 	else if (!cmd[2].compare("+k") || !cmd[2].compare("+k")) // key mode
 		keyMode(cmd[2], cmd[3], client, channel);
 	else if (!cmd[2].compare("+o") || !cmd[2].compare("-o")) // operator mode

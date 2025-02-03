@@ -41,7 +41,8 @@ void	Server::topic(Client *client, std::vector<std::string> cmd)
 		return (sendMSG(ERR_USERNOTINCHAN1(client->getNickname(), channel->getName()), client->getFd()));
 	if (!isOperator(client, channel) && channel->getTopicMode())
 		return (sendMSG(ERR_NOTOPERATOR(client->getNickname(), channel->getName()), client->getFd()));
-	channel->setTopic(cmd[2].substr(1));
+	std::string topic = client->getPrivmsgParam().substr(client->getPrivmsgParam().find(':') + 1);;
+	channel->setTopic(topic);
 	sendMSGChan(SHOW_TOPIC(client->getHostname(), channel->getName(), channel->getTopic()), channel);
 }
 
@@ -56,7 +57,10 @@ void	Server::part(Client *client, std::vector<std::string> cmd)
 	Channel *channel = findChannel(cmd[1].substr(1));
 	if (!isinChan(client, channel))
 		return (sendMSG(ERR_USERNOTINCHAN1(client->getNickname(), channel->getName()), client->getFd()));
-	sendMSGChan(RPL_PART(client->getNickname(), client->getUsername(), channel->getName()), channel);
+	std::string part_msg = "";
+	if (cmd.size() >= 3)
+		part_msg = client->getPrivmsgParam().substr(client->getPrivmsgParam().find(':') + 1);
+	sendMSGChan(RPL_PART(client->getNickname(), client->getUsername(), channel->getName(), part_msg), channel);
 	if (isOperator(client, channel))
 		channel->removeOperator(client);
 	else
