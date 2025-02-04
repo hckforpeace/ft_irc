@@ -23,8 +23,13 @@ void Server::authenticate(Client *client, std::vector<std::string> cmd, int i)
 			err = ERR_PASSWDMISMATCH(client->getNickname());
 	}
 	this->sendMSG(err, client->getFd());
-	epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &events[i]);
-	destroy_cli_chan(client);
+	// struct linger so_linger;
+    // so_linger.l_onoff = 1;  // Enable SO_LINGER
+    // so_linger.l_linger = 0; // Close immediately with RST
+    // setsockopt(client->getFd(), SOL_SOCKET, SO_LINGER, &so_linger, sizeof(so_linger));
+	// epoll_ctl(epfd, EPOLL_CTL_DEL, fd, nullptr);
+	// destroy_cli_chan(client);
+	// close(fd);
 }
 
 void Server::setNickname(Client *client, std::vector<std::string> cmd)

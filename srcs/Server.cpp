@@ -348,8 +348,10 @@ void	Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client, int i)
 	// 	modei(client, cmd); // welcome invisible user mode msg
 	if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))		
 		authenticate(client, cmd, i);// authenticate
+	else if (cmd.size() != 0 && (cmd[0] == "CAP" || cmd[0] == "CAP"))		
+		std::cout << "" << std::endl;// authenticate
 	else if(cmd.size() != 0 && (cmd[0] == "WHOIS" || cmd[0] == "WHOIS"))
-    whoIs(client, cmd); // welcome invisible user mode msg
+	    whoIs(client, cmd); // welcome invisible user mode msg
 	else if (cmd.size() != 0 && (cmd[0] == "ping" || cmd[0] == "PING"))
     	pong(client, cmd); // answer to ping
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))

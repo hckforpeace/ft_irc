@@ -8,6 +8,8 @@
 # define NETWORK "pedroypablo"
 /*================ CHANNEL ====================*/
 
+# define KILL(nickname) ":localhost KILL " + nickname + ":Invalid password"
+
 # define WLC(user, nick) PREFIX "001 " + nick + " :" GREEN "Welcome to the pedroypablo, " + nick + "[!<" + user + ">@<localhost>]" RESET
 
 // Welcome message when a client joins a channel
