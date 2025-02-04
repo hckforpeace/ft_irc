@@ -1,4 +1,4 @@
-NAME		=	ircserv
+NAME		=	irc_bot
 
 CXX			=	c++ -g3
 CXX_FLAGS	=	-Wall -Wextra -Werror -std=c++98 -g3

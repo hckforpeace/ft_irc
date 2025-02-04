@@ -23,7 +23,7 @@
 
 #define MAX_EVENTS 1000
 
-static bool server_off = false;
+extern bool server_off;
 
 class Server {
 	private:
@@ -51,9 +51,9 @@ class Server {
 		int			setnonblocking(int sock);
 		void 		setupSignals();
 		static void signIntHandler(int code);
-		void		first_connection(int nbr_fds, int i);
+		void		first_connection();
 		void		read_and_process(int i);
-		void		processMessage(std::string str, Client *client);
+		void		processMessage(Client *client);
 
     	// getters
 		Client*							getClient(int fd);

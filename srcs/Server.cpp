@@ -1,5 +1,7 @@
 #include "Server.hpp"
 
+bool server_off = false;
+
 // Constructor starts the server
 Server::Server(char *port, char *password)
 {
@@ -118,8 +120,8 @@ void	Server::run_server()
 	// looping 
 	int nbr_fds;
 	static std::string error;
-	int len;
 	struct stat buf;
+
 	while (!server_off)
 	{
 		nbr_fds = epoll_wait(epfd, events, MAX_EVENTS, -1);
@@ -133,7 +135,7 @@ void	Server::run_server()
 			if (events[i].data.fd == server_socket)
 			{
 				std::cout << "Connection request" << std::endl;
-				first_connection(nbr_fds, i);
+				first_connection();
 			}
 			
 			// socket available for read operation 
@@ -204,7 +206,7 @@ std::vector<Channel *>::iterator Server::getChannelIt(std::string name)
 	return (Channels.begin());
 }
 
-void		Server::first_connection(int nbr_fds, int i)
+void		Server::first_connection()
 {
 	// std::cout << "events[i].data.fd: " << events[i].data.fd << std::endl;
 	// std::cout << "somebody is trying to connect !" << std::endl;
@@ -221,7 +223,7 @@ void		Server::first_connection(int nbr_fds, int i)
 		throw std::runtime_error(error);
 	}
 
-	// setting up params the new event 
+	// setting up params the new event
 	ev.data.fd = con_socket;
 	ev.events = EPOLLIN | EPOLLOUT;
 	setnonblocking(con_socket);
@@ -274,11 +276,10 @@ void	Server::read_and_process(int i)
 
 		const char *mess = (client->getMessage()).c_str();
 		std::vector<std::string> lines = split_line_buffer(mess);
-		int nbr_lines = lines.size();
 		
 		if (lines.size() > 1)
 		{
-			int i = 0;
+			size_t i = 0;
 			while (i < lines.size() && isOpenedSock(client_socket))
 			{
 				parse_exec_cmd(split_buffer(lines[i]), client, i);
@@ -324,7 +325,7 @@ std::vector<std::string> Server::split_line_buffer(const char *sentence)
 	return (message);
 }
 
-void		Server::processMessage(std::string str, Client *client)
+void		Server::processMessage(Client *client)
 {
 	if (!client->isConnected())
 	{
