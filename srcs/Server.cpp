@@ -334,8 +334,8 @@ void Server::processMessage(std::string str, Client *client)
 
 void Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
-	if (cmd.size() != 0 && (cmd[0] == "CAP" || cmd[0] == "WHOIS"))
-		return;
+	if (cmd.size() != 0 && (cmd[0] == "CAP" || cmd[0] == "WHOIS" || cmd[0] == "WHO"))
+		return ;
 	else if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))
 		authenticate(client, cmd); // authenticate
 	else if (cmd.size() != 0 && (cmd[0] == "ping" || cmd[0] == "PING"))

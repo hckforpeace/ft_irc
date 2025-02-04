@@ -74,6 +74,7 @@ class Server {
 
 		// Modes
 		void	mode(std::vector<std::string> cmd, Client *client);
+		void	select_mode(char sign, char mode, std::vector<std::string> cmd, Client *client, Channel *channel);
 
 		// Channel
 		void	join(Client *client, std::vector<std::string> cmd);
@@ -108,11 +109,11 @@ class Server {
     	std::string genWhoisRpl(std::string client, std::string nick);
 
 		// mode
-		void	inviteMode(std::string mode, Client *client, Channel *channel);
-		void	topicMode(std::string mode, Client *client, Channel *channel);
-		void	keyMode(std::string mode, std::string password, Client *client, Channel *channel);
-		void	operatorMode(std::string mode, std::string new_operator, Client *client, Channel *channel);
-		void	limitMode(std::string mode, std::string limit, Client *client, Channel *channel);
+		void	inviteMode(char sign, Client *client, Channel *channel);
+		void	topicMode(char sign, Client *client, Channel *channel);
+		void	keyMode(char sign, std::string password, Client *client, Channel *channel);
+		void	operatorMode(char sign, std::string new_operator, Client *client, Channel *channel);
+		void	limitMode(char sign, std::string limit, Client *client, Channel *channel);
 		bool	login_parse(std::vector<std::string> cmds, Client *client);
 		std::string	generateNick(std::string base);
   		void	check_connection();
