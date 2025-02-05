@@ -16,7 +16,6 @@
 #include <sys/stat.h>
 #include <signal.h>
 #include <vector>
-
 #include "Colors.hpp"
 #include "Client.hpp"
 #include "Replies.hpp"
@@ -24,7 +23,7 @@
 
 #define MAX_EVENTS 1000
 
-static bool server_off = false;
+extern bool server_off;
 
 class Server {
 	private:
@@ -52,25 +51,28 @@ class Server {
 		int			setnonblocking(int sock);
 		void 		setupSignals();
 		static void signIntHandler(int code);
-		void		first_connection(int nbr_fds, int i);
+		void		first_connection();
 		void		read_and_process(int i);
-		void		processMessage(std::string str, Client *client);
+		void		processMessage(Client *client);
 
     	// getters
 		Client*							getClient(int fd);
 		std::vector<Client *>::iterator	getClientIt(int fd);
+		std::vector<Channel *>::iterator getChannelIt(std::string name);
 
-    	void		parse_exec_cmd(std::vector<std::string> cmd, Client *client);
+    	void		parse_exec_cmd(std::vector<std::string> cmd, Client *client, int i);
 		std::vector<std::string> split_buffer(std::string str);
 		std::vector<std::string> split_line_buffer(const char *sentence);
 		
 		// commands execution
-		void	authenticate(Client *client, std::vector<std::string> cmd);
+		void	authenticate(Client *client, std::vector<std::string> cmd, int i);
 		void	setNickname(Client *client, std::vector<std::string> cmd);
 		void	setUsername(Client *client, std::vector<std::string> cmd);
 		void	modei(Client *client, std::vector<std::string> cmd);
-    	void 	pong(Client *client, std::vector<std::string> cmd);
-    	void 	whoIs(Client *client, std::vector<std::string> cmd);
+    void 	pong(Client *client, std::vector<std::string> cmd);
+    void 	whoIs(Client *client, std::vector<std::string> cmd);
+    void 	quit(Client *client, std::vector<std::string> cmd);
+    
 
 		// Modes
 		void	mode(std::vector<std::string> cmd, Client *client);

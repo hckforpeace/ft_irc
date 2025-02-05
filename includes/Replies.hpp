@@ -8,6 +8,8 @@
 # define NETWORK "pedroypablo"
 /*================ CHANNEL ====================*/
 
+# define KILL(nickname) ":localhost KILL " + nickname + ":Invalid password"
+
 # define WLC(user, nick) PREFIX "001 " + nick + " :" GREEN "Welcome to the pedroypablo, " + nick + "[!<" + user + ">@<localhost>]" RESET
 
 // Welcome message when a client joins a channel
@@ -59,7 +61,7 @@
 #define ERR_UNKNOWNCOMMAND(nickname, command) (":localhost 421 " + nickname + " " + command + " :Unknown command")
 
 // Returned by the server to indicate that the client must be registered before the server will allow it to be parsed in detail.
-# define ERR_NOTREGISTERED(nickname) (":localhost 451 " + nickname + " : You have not registered")
+# define ERR_NOTREGISTERED(nickname) (":localhost 451 " + nickname + " :You have not registered")
 
 #define ERR_NONICKNAMEGIVEN(nick) PREFIX "431 " + nick + " :No nickname given"
 

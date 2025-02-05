@@ -52,8 +52,8 @@ class Channel
 		/*methods*/
 		void	add_client(Client *new_client);
 		void	add_operator(Client *new_operator);
-    	bool 	isOperator(Client *client);
-    	bool 	isInChannel(Client *client);
+    bool 	isOperator(Client *client);
+    bool 	isInChannel(Client *client);
 		void	removeClient(Client *client);
 		void	removeOperator(Client *client);
 };

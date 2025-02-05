@@ -10,9 +10,9 @@ Client::Client(int fd) : fd(fd), realname("*"), nickname("*"), username("*"), pa
 
 Client::~Client()
 {
-	std::cout << "Client with fd: " << fd << " destroyed" << std::endl;
-	if (close(fd) == -1)
-		std::cerr << "failed to close fd: " << fd << std::endl;
+    std::cout << "Client with fd: " << fd << " destroyed" << std::endl;
+    if (close(fd) == -1)
+		  std::cerr << "failed to close fd: " << fd << std::endl;
 }
 
 int Client::getFd()
@@ -61,7 +61,7 @@ int Client::getChanCounter(void)
 	return (this->channel_counter);
 }
 
-std::string Client::getPrivmsgParam()
+std::string  Client::getCmdParams()
 {
 	return (this->privmsg_param);
 }
@@ -145,11 +145,25 @@ void Client::setPrivmsgParam(std::string msg, bool flag)
 	param = msg.substr(i);
 	// Remove the \r\n
 	param = param.erase(param.find('\r'), 2);
-	this->privmsg_param = param;
-	std::cout << "The parameter for the privmsg is:*" << param << "*" << std::endl;
+	this->privmsg_param = param; 
 }
 
-bool Client::isRegistered()
+void	Client::setQuitParam(std::string msg)
+{
+	int i = 0;
+	std::string param;
+
+	while (i < msg.size() && msg[i] == ' ')
+	i++;
+	while (msg[i] != ' ')
+	i++;
+	param = msg.substr(i + 1);
+	// Remove the \r\n
+	param = param.erase(param.find('\r'), 2);
+	this->privmsg_param = param; 
+}
+
+bool  Client::isRegistered()
 {
 	return (this->getPassstatus() && this->username.compare("*") && this->realname.compare("*") && this->nickname.compare("*"));
 }
