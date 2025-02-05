@@ -39,6 +39,8 @@ class Bot
     std::vector<std::string>  split_buffer(std::string str);
     void                      createChan();
     bool                      isExplicit();
+    int                      isForbidden(std::vector<std::string> vec);
+    int                      isForbiddenWord(std::string vec);
 };
 
 void    handler(int code);

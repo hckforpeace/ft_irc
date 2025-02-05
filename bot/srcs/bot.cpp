@@ -93,15 +93,56 @@ bool    Bot::isOpenedSock(int socket)
 
 void  Bot::process_messages(std::string message)
 {
+	int idx;
+
 	std::vector<std::string> arr = split_buffer(message);
-	if (arr.size() > 2 && arr[1].compare("464"))
+	if (message.compare(""))
+		std::cout << GREEN "[Server-To-Bot] => " RESET << BLU << message << RESET << std::endl;
+	if (arr.size() > 2 && !arr[1].compare("464"))
 		std::runtime_error("ERROR: Password Incorret");
-	else if (arr.size() >= 2 && arr[1].compare("001"))
+	else if (arr.size() >= 2 && !arr[1].compare("001"))
 	{
 		sendMSG("JOIN #" + this->channel_name, this->bot_socket);
 		this->connected = true;
 	}
-	// else if (arr.size() >= 3 && !arr[0].compare("PRIVMSG"))
+	else if (arr.size() >= 3 && !arr[1].compare("PRIVMSG") && (idx = isForbidden(arr)) != -1)
+	{
+		std::cout << "ICI" << std::endl;
+		if (idx == 3)
+			sendMSG("KICK #" + this->channel_name + " " + arr[0].substr(1) + " :" + "Used forbidden word: " + arr[idx].substr(1), this->bot_socket);
+		else
+			sendMSG("KICK #" + this->channel_name + " " + arr[0].substr(1) + " :" + "Used forbidden word: " + arr[idx], this->bot_socket);
+	}
+}
+
+int	Bot::isForbidden(std::vector<std::string> vec)
+{
+	for (std::size_t i = 3; i < vec.size(); i++)
+	{
+		if (i == 3 && !vec[i].compare(":"))
+			continue;
+		else if (i == 3 && isForbiddenWord(vec[i].substr(1)))
+		{
+			std::cout << "two" << std::endl;	
+			return (i);
+		}
+		else if (isForbiddenWord(vec[i]))
+		{
+			std::cout << "three" << std::endl;	
+			return (i);
+		}
+	}
+	return (-1);
+}
+
+int	Bot::isForbiddenWord(std::string str)
+{
+	for (std::vector<std::string>::iterator it = forbidden_words.begin(); it != forbidden_words.end(); it++)
+	{
+		if (!(*it).compare(str))
+			return (true);
+	}
+	return (false);
 }
 
 
