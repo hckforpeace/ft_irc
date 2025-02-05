@@ -9,17 +9,17 @@ int main (int argc, char *argv[])
 	std::stringstream 			str;
 	int							port;
 
-	if (argc < 6)
-		std::cout << RED << "WRONG INPUT EXPECTED" << RESET GREEN << " => ./bot port_number pass nickname channel_name forbiden_words.."  << RESET << std::endl;  
+	if (argc < 5)
+		std::cout << RED << "WRONG INPUT EXPECTED" << RESET GREEN << " => ./bot port_number pass channel_name forbiden_words.."  << RESET << std::endl;  
 	else
 	{
-		for (int i = 5; i < argc; i++)
+		for (int i = 4; i < argc; i++)
 			forbidden_words.push_back(argv[i]);
 		str << argv[1];
 		str >> port;
 		try
 		{
-			Bot b(port, argv[2], argv[3], argv[4], forbidden_words);
+			Bot b(port, argv[2], argv[3], forbidden_words);
 
 		}
 		catch(const std::exception& e)

@@ -1,7 +1,7 @@
 #include "Client.hpp"
 #include <cstddef>
 
-Client::Client(int fd):fd(fd), realname("*"), nickname("*"), username("*"), password_inserted(false), first_connection(true), privmsg_param("")
+Client::Client(int fd) : fd(fd), realname("*"), nickname("*"), username("*"), password_inserted(false), first_connection(true), privmsg_param("")
 {
 	this->nickname = "*";
 	this->channel_counter = 0;
@@ -15,32 +15,32 @@ Client::~Client()
 		  std::cerr << "failed to close fd: " << fd << std::endl;
 }
 
-int	Client::getFd()
+int Client::getFd()
 {
 	return (this->fd);
 }
 
-std::string&	Client::getMessage()
+std::string &Client::getMessage()
 {
 	return (this->message);
 }
 
-void	Client::setPasswordInserted()
+void Client::setPasswordInserted()
 {
 	this->password_inserted = true;
 }
 
-bool	Client::isConnected()
+bool Client::isConnected()
 {
 	return (this->connected);
 }
 
-std::string	Client::getNickname()
+std::string Client::getNickname()
 {
 	return (this->nickname);
 }
 
-std::string	Client::getUsername()
+std::string Client::getUsername()
 {
 	return (this->username);
 }
@@ -53,41 +53,41 @@ std::string Client::getHostname(void)
 
 std::string Client::getRealname()
 {
-  return (this->realname);
+	return (this->realname);
 }
 
-int		Client::getChanCounter(void)
+int Client::getChanCounter(void)
 {
 	return (this->channel_counter);
 }
 
 std::string  Client::getCmdParams()
 {
-  return (this->privmsg_param);
+	return (this->privmsg_param);
 }
 /*========================== SETTERS ===========================*/
 
-void	Client::setNickname(std::string nick)
+void Client::setNickname(std::string nick)
 {
 	this->nickname = nick;
 }
 
-void	Client::setMessage(std::string str)
+void Client::setMessage(std::string str)
 {
 	this->message = str;
 }
 
-void	Client::setConnection(void)
+void Client::setConnection(void)
 {
 	this->connected = true;
 }
 
-bool		Client::getPassstatus()
+bool Client::getPassstatus()
 {
 	return (this->password_inserted);
 }
 
-bool		Client::firstConnection(void)
+bool Client::firstConnection(void)
 {
 	return (this->first_connection);
 }
@@ -97,36 +97,50 @@ void Client::setUsername(std::string str)
 	this->username = str;
 }
 
-void	Client::setChanCounter(void)
+void Client::increaseChanCounter(void)
 {
 	this->channel_counter++;
 }
 
-void  Client::setRealname(std::string str)
+void Client::decreaseChanCounter(void)
 {
-  this->realname = str;
+	this->channel_counter--;
 }
 
-void	Client::setFirstConnection()
+void Client::setRealname(std::string str)
+{
+	this->realname = str;
+}
+
+void Client::setFirstConnection()
 {
 	this->first_connection = false;
 }
 
-void  Client::setPrivmsgParam(std::string msg)
+void Client::setPrivmsgParam(std::string msg, bool flag)
 {
 	int i = 0;
 	std::string param;
 
 	while (i < msg.size() && msg[i] == ' ')
-	i++;
+		i++;
 	while (msg[i] != ' ')
-	i++;
+		i++;
 	while (i < msg.size() && msg[i] == ' ')
-	i++;
+		i++;
+	if (flag)
+	{
+		param = msg.substr(i);
+		// Remove the \r\n
+		param = param.erase(param.find('\r'), 2);
+		this->privmsg_param = param;
+		std::cout << "The parameter for the privmsg is:*" << param << "*" << std::endl;
+		return ;
+	}
 	while (msg[i] != ' ')
-	i++;
+		i++;
 	while (i < msg.size() && msg[i] == ' ')
-	i++;
+		i++;
 
 	param = msg.substr(i);
 	// Remove the \r\n
@@ -151,10 +165,10 @@ void	Client::setQuitParam(std::string msg)
 
 bool  Client::isRegistered()
 {
-  return (this->getPassstatus() && this->username.compare("*") && this->realname.compare("*") && this->nickname.compare("*"));
+	return (this->getPassstatus() && this->username.compare("*") && this->realname.compare("*") && this->nickname.compare("*"));
 }
 
-void	Client::addtoInviteChan(std::string channel)
+void Client::addtoInviteChan(std::string channel)
 {
 	std::vector<std::string> vec;
 
@@ -163,7 +177,7 @@ void	Client::addtoInviteChan(std::string channel)
 	this->invited_to_chan = vec;
 }
 
-bool	Client::isInvited(std::string channel)
+bool Client::isInvited(std::string channel)
 {
 	if (invited_to_chan.empty())
 		return (false);

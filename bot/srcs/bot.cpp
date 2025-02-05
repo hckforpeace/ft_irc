@@ -2,11 +2,11 @@
 
 bool bot_off = false;
 
-Bot::Bot(int port_number, std::string pass, std::string nick, std::string channel_name, std::vector<std::string> forbidden_words)
+Bot::Bot(int port_number, std::string pass, std::string channel_name, std::vector<std::string> forbidden_words)
 {
 	this->port_number = port_number;
 	this->pass = pass;
-	this->nickname = nick;
+	this->nickname = "bot";
 	this->channel_name = channel_name;
 	this->forbidden_words = forbidden_words;
 	this->connected = false;
@@ -33,7 +33,7 @@ void	Bot::connect_to_server()
 	}
 	setnonblocking(bot_socket);
 
-	std::string first_connection = "CAP LS\nPASS " + this->pass + "\nNICK pipoloni\nUSER "+ nickname + " " + nickname;
+	std::string first_connection = "CAP LS\nPASS " + this->pass + "\nNICK bot\nUSER "+ nickname + " " + nickname;
 	sendMSG(first_connection, bot_socket);
 	signal(SIGINT, handler);
 	// len = recv(bot_socket, buffer, 512 * sizeof(char), 0);
@@ -113,7 +113,7 @@ void  Bot::process_messages(std::string message)
 		else
 			sendMSG("KICK #" + this->channel_name + " " + arr[0].substr(1) + " :" + "Used forbidden word: " + arr[idx], this->bot_socket);
 	}
-}
+}	
 
 int	Bot::isForbidden(std::vector<std::string> vec)
 {

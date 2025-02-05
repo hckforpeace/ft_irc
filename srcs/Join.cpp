@@ -29,12 +29,13 @@ void Server::createChannel(std::string name, Client *client)
 {
 	if (client->getChanCounter() >= 10) // limit of connected channels per client
 		return (sendMSG(ERR_TOOMANYCHANNELS(client->getNickname(), name), client->getFd()));
+	
 	Channel *new_channel = new Channel(name);
-
+	
 	new_channel->setName(name);
 	new_channel->add_operator(client);
 	this->Channels.push_back(new_channel);
-	client->setChanCounter();
+	client->increaseChanCounter();
 	sendMSG(RPL_JOIN(client->getHostname(), new_channel->getName()) + \
 		RPL_NAMES(client->getNickname(), new_channel->getName(), new_channel->getClientLst()) + \
 		RPL_ENDOFNAMES(client->getNickname(),new_channel->getName()), client->getFd());
@@ -50,13 +51,11 @@ void Server::enterChannel(Channel *channel, Client *client, std::string password
 		return (sendMSG(ERR_CHANNELISFULL(client->getNickname(), channel->getName()), client->getFd()));
 	if (channel->isInviteOnly() && !client->isInvited(channel->getName())) // if the channel is invite_only and the client is not invited
 		return (sendMSG(INVITE_ONLY(client->getNickname(), channel->getName()), client->getFd()));
-	std::cout << "channel PASS->" << channel->getPassword() << std::endl;
-	std::cout << "client PASS->" << password << std::endl;
 	if (channel->getKeyMode() && password.compare(channel->getPassword())) // if the channel is channel-protected and the password is wrong
 		return (sendMSG(CHAN_PASS(client->getNickname(), channel->getName()), client->getFd()));
 	sendMSGChan(RPL_JOIN(client->getHostname(), channel->getName()), channel);
 	channel->add_client(client);
-	client->setChanCounter();
+	client->increaseChanCounter();
 	if (channel->getTopic().empty())
 		sendMSG(RPL_JOIN(client->getHostname(), channel->getName()) + \
 			RPL_NAMES(client->getNickname(), channel->getName(), channel->getClientLst()) + \

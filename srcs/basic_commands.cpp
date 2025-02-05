@@ -37,19 +37,15 @@ void Server::setNickname(Client *client, std::vector<std::string> cmd)
 	std::string err;
 	std::string old_nick;
 
-	// if (!client->getPassstatus())
-	// 	err = ERR_NOTREGISTERED(client->getNickname());
 	if (cmd.size() < 2)
 		err = ERR_NONICKNAMEGIVEN(client->getNickname());
 	else if (client->firstConnection() && nickInUse(cmd[1]))
 	{
-		std::cout << "a" << std::endl;
 		sendMSG(":" + cmd[1] + " NICK " + generateNick(cmd[1]), client->getFd());
 		return (client->setNickname(generateNick(cmd[1])));
 	}
 	else if (nickInUse(cmd[1]))
 	{
-		std::cout << "b" << std::endl;
 		sendMSG(":" + client->getNickname() + " NICK " + generateNick(cmd[1]), client->getFd());
 		return (client->setNickname(generateNick(cmd[1])));
 	}

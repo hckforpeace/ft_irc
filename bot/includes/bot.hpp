@@ -31,7 +31,7 @@ class Bot
     bool            connected;
 
   public:
-    Bot(int port_number, std::string pass, std::string nickname, std::string channel_name, std::vector<std::string> forbidden_words);
+    Bot(int port_number, std::string pass, std::string channel_name, std::vector<std::string> forbidden_words);
     void                      sendMSG(std::string message, int fd);
     void                      connect_to_server();
     bool                      isOpenedSock(int socket);

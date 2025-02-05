@@ -134,22 +134,9 @@ void Server::send_to_all_client(std::string message)
 
 void Server::removeChan(Channel *channel)
 {
-	// for (std::vector<Channel *>::iterator it = Channels.begin(); it != Channels.end(); it++)
-	// {
-	// 	if (!(*it)->getName().compare(channel->getName()))
-	// 	{
-	// 		Channels.erase(it);
-    // 		// delete channel;
-	// 		break ;
-	// 	}
-	// }
 	std::vector<Channel *>::iterator it = this->getChannelIt(channel->getName());
-	std::cout << "channel name form operator: " << (*it)->getName() << std::endl;
 	this->Channels.erase(this->getChannelIt(channel->getName()));
-	std::cout << "LENGTH OF THE CHANNEL VECTOR IS: " << Channels.size() << std::endl;
 	delete channel;
-	std::cout << "Number of Channels on the server down to: " << RED << Channels.size() << RESET << std::endl;
-
 }
 
 void	Server::removeClient(Client *client)
@@ -260,26 +247,26 @@ std::string Server::genWhoisRpl(std::string client, std::string nick)
   bool first = true;
   for (std::vector<Channel*>::iterator it = this->Channels.begin(); it != this->Channels.end(); it++)
   {
-    if ((*it)->isOperator(target))
-    {
-      if (first)
-      {
-        reponse += "@#" + (*it)->getName();
-        first = false;
-      }
-      else
-        reponse += " @#" + (*it)->getName();
-    }
-    else if ((*it)->isInChannel(target))
-    {
-      if (first)
-      {
-        reponse += "#" + (*it)->getName();
-        first = false;
-      }
-      else
-        reponse += " #" + (*it)->getName();
-    }
+    // if ((*it)->isOperator(target))
+    // {
+    //   if (first)
+    //   {
+    //     reponse += "@#" + (*it)->getName();
+    //     first = false;
+    //   }
+    //   else
+    //     reponse += " @#" + (*it)->getName();
+    // }
+    // else if ((*it)->isInChannel(target))
+    // {
+	if (first)
+	{
+	reponse += "#" + (*it)->getName();
+	first = false;
+	}
+	else
+	reponse += " #" + (*it)->getName();
+    // }
   }
   return (reponse);
 }
