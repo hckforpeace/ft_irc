@@ -1,4 +1,4 @@
-#include <bot.hpp>
+#include "bot.hpp"
 
 bool bot_off = false;
 
@@ -36,11 +36,6 @@ void	Bot::connect_to_server()
 	std::string first_connection = "CAP LS\nPASS " + this->pass + "\nNICK bot\nUSER "+ nickname + " " + nickname;
 	sendMSG(first_connection, bot_socket);
 	signal(SIGINT, handler);
-	// len = recv(bot_socket, buffer, 512 * sizeof(char), 0);
-	// if (len == -1)
-	// 	bot_off = false;
-	// std::string server_msg = buffer;
-	// if (!split_buffer(server_msg)[1].compare(""))
 
 	while (!bot_off)
 	{

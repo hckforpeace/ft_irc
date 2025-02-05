@@ -12,11 +12,13 @@ void Server::mode(std::vector<std::string> cmd, Client *client)
 		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[1]), client->getFd()));
 	if (cmd.size() < 3)
 		return;
-	Channel *channel = findChannel(cmd[1].substr(1));
+
+	Channel	*channel = findChannel(cmd[1].substr(1));
+	char	s, m = ' ';
+
 	if (!isOperator(client, channel))
 		return (sendMSG(ERR_NOTOPERATOR(client->getNickname(), channel->getName()), client->getFd()));
-	char s, m = ' ';
-	for (int i = 0; i < cmd[2].size(); i++)
+	for (std::size_t i = 0; i < cmd[2].size(); i++)
 	{
 		if (cmd[2].at(i) == '+' || cmd[2].at(i) == '-')
 			s = cmd[2].at(i);
@@ -24,15 +26,14 @@ void Server::mode(std::vector<std::string> cmd, Client *client)
 			sendMSG(ERR_UNKNOWNMODE(client->getNickname(), cmd[2].substr(i, 1)), client->getFd());
 		else
 		{
-			m =  cmd[2].at(i);
+			m = cmd[2].at(i);
 			select_mode(s, m, cmd, client, channel);
 		}
 	}
 }
 
-void	Server::select_mode(char sign, char mode, std::vector<std::string> cmd, Client *client, Channel *channel)
+void Server::select_mode(char sign, char mode, std::vector<std::string> cmd, Client *client, Channel *channel)
 {
-	std::cout << "mode -> " << mode << std::endl;
 	if (mode == 'i') // invite mode
 		inviteMode(sign, client, channel);
 	else if (mode == 't') // topic mode

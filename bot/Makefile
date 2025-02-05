@@ -1,6 +1,6 @@
 NAME		=	irc_bot
 
-CXX			=	c++ -g3
+CXX			=	c++
 CXX_FLAGS	=	-Wall -Wextra -Werror -std=c++98 -g3
 
 SRCS_DIR	=	srcs/

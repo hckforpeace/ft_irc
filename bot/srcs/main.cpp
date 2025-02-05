@@ -1,10 +1,7 @@
 #include "bot.hpp"
-#include "Colors.hpp"
-#include <sstream>
 
 int main (int argc, char *argv[])
 {
-
 	std::vector<std::string>	forbidden_words;
 	std::stringstream 			str;
 	int							port;
@@ -20,15 +17,11 @@ int main (int argc, char *argv[])
 		try
 		{
 			Bot b(port, argv[2], argv[3], forbidden_words);
-
 		}
 		catch(const std::exception& e)
 		{
 			std::cerr << RED << e.what() << RESET << std::endl;
 		}
-		
-
 	}
-
 	return (0);
 }

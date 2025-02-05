@@ -1,9 +1,6 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include <iostream>
-#include <sstream>
-#include <string>
 #include <sys/epoll.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -13,9 +10,17 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <sys/stat.h>
 #include <signal.h>
+
+#include <iostream>
+#include <sstream>
+#include <string>
 #include <vector>
+#include <cstddef>
+
 #include "Colors.hpp"
 #include "Client.hpp"
 #include "Replies.hpp"
@@ -36,10 +41,10 @@ class Server {
  		int			con_socket;
 		epoll_event	ev;
 		epoll_event	events[MAX_EVENTS];
-		sockaddr_in  server_addr;
- 		sockaddr_in  client_addr;
-		std::vector<Client*> Clients;
-		std::vector<Channel*> Channels;
+		sockaddr_in	server_addr;
+ 		sockaddr_in	client_addr;
+		std::vector<Client*>	Clients;
+		std::vector<Channel*>	Channels;
 
  	public:
 		Server(char *port, char *password);
@@ -56,22 +61,21 @@ class Server {
 		void		processMessage(Client *client);
 
     	// getters
-		Client*							getClient(int fd);
-		std::vector<Client *>::iterator	getClientIt(int fd);
-		std::vector<Channel *>::iterator getChannelIt(std::string name);
+		Client*								getClient(int fd);
+		std::vector<Client *>::iterator		getClientIt(int fd);
+		std::vector<Channel *>::iterator	getChannelIt(std::string name);
 
-    	void		parse_exec_cmd(std::vector<std::string> cmd, Client *client, int i);
+    	void	parse_exec_cmd(std::vector<std::string> cmd, Client *client);
 		std::vector<std::string> split_buffer(std::string str);
 		std::vector<std::string> split_line_buffer(const char *sentence);
 		
 		// commands execution
-		void	authenticate(Client *client, std::vector<std::string> cmd, int i);
+		void	authenticate(Client *client, std::vector<std::string> cmd);
 		void	setNickname(Client *client, std::vector<std::string> cmd);
-		void	setUsername(Client *client, std::vector<std::string> cmd);
-		void	modei(Client *client, std::vector<std::string> cmd);
-    void 	pong(Client *client, std::vector<std::string> cmd);
-    void 	whoIs(Client *client, std::vector<std::string> cmd);
-    void 	quit(Client *client, std::vector<std::string> cmd);
+		void	setUser(Client *client, std::vector<std::string> cmd);
+		void 	pong(Client *client, std::vector<std::string> cmd);
+		void 	whoIs(Client *client, std::vector<std::string> cmd);
+		void 	quit(Client *client, std::vector<std::string> cmd);
     
 
 		// Modes
@@ -82,25 +86,24 @@ class Server {
 		void	join(Client *client, std::vector<std::string> cmd);
 		void	createChannel(std::string name, Client *client);
 		void	enterChannel(Channel *channel, Client *client, std::string password);
-		void	setUser(Client *client, std::vector<std::string> cmd);
 	  	void	privmsg(Client *client, std::vector<std::string> cmd);
 		bool 	isOperator(Client *client, Channel *channel);
-		bool	setOperator(Client *client, Channel *channel);
+		//bool	setOperator(Client *client, Channel *channel);
 
 		// CMD
-		void	invite(Client *client, std::vector<std::string> cmd);
-		void	topic(Client *client, std::vector<std::string> cmd);
-		void	part(Client *client, std::vector<std::string> cmd);
-		void	kick(Client *client, std::vector<std::string> cmd);
+		void		invite(Client *client, std::vector<std::string> cmd);
+		void		topic(Client *client, std::vector<std::string> cmd);
+		void		part(Client *client, std::vector<std::string> cmd);
+		void		kick(Client *client, std::vector<std::string> cmd);
 
     	// utils
     	bool		nickInUse(std::string nickname);
 		bool		isCRLF(std::string str, Client *client);
-		bool 		isRegistered(Client *client);
+		//bool 		isRegistered(Client *client);
     	Client*		findClient(std::string nickname);
 		Channel*	findChannel(std::string channel_name);
 		void   		sendMSG(std::string message, int fd);
-		void  		sendToChannel(std::string message, std::string nickname, Channel *channel, Client *client);
+		void  		sendToChannel(std::string message, Channel *channel, Client *client);
 		void    	sendMSGChan(std::string message, Channel *channel);
 		bool		isinChan(Client *client, Channel *channel);
 		void    	send_to_all_client(std::string message);
@@ -111,14 +114,14 @@ class Server {
     	std::string genWhoisRpl(std::string client, std::string nick);
 
 		// mode
-		void	inviteMode(char sign, Client *client, Channel *channel);
-		void	topicMode(char sign, Client *client, Channel *channel);
-		void	keyMode(char sign, std::string password, Client *client, Channel *channel);
-		void	operatorMode(char sign, std::string new_operator, Client *client, Channel *channel);
-		void	limitMode(char sign, std::string limit, Client *client, Channel *channel);
-		bool	login_parse(std::vector<std::string> cmds, Client *client);
+		void		inviteMode(char sign, Client *client, Channel *channel);
+		void		topicMode(char sign, Client *client, Channel *channel);
+		void		keyMode(char sign, std::string password, Client *client, Channel *channel);
+		void		operatorMode(char sign, std::string new_operator, Client *client, Channel *channel);
+		void		limitMode(char sign, std::string limit, Client *client, Channel *channel);
+		//bool		login_parse(std::vector<std::string> cmds, Client *client);
 		std::string	generateNick(std::string base);
-  		void	check_connection();
+  		void		check_connection();
 };
 
 #endif

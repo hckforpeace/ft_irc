@@ -2,7 +2,6 @@
 
 int	main(int argc, char **argv)
 {
-
 	if (argc != 3)
 	{
 		std::cout << RED << "Wrong number of arguments. Run as ./ircserver <port> <password>" << RESET << std::endl;
@@ -11,7 +10,6 @@ int	main(int argc, char **argv)
 	try
 	{
 		Server server(argv[1], argv[2]);
-		// launch server here
 	}
 	catch(const std::exception& e)
 	{

@@ -10,7 +10,6 @@ Server::Server(char *port, char *password)
 	init_server();
 	setupSignals();
 	run_server();
-	// do stuff;
 }
 
 // Destructor Deletes Clients and Channels
@@ -127,7 +126,7 @@ void Server::run_server()
 	{
 		nbr_fds = epoll_wait(epfd, events, MAX_EVENTS, -1);
 		check_connection();
-		for (int i = 0;  i < nbr_fds; ++i)
+		for (int i = 0; i < nbr_fds; ++i)
 		{
 			if (fstat(events[i].data.fd, &buf) == 0 && errno == EBADF)
 				break;
@@ -142,7 +141,6 @@ void Server::run_server()
 				read_and_process(i);
 		}
 	}
-	std::cout << "out of the loop" << std::endl;
 	if (close(server_socket) == -1)
 		std::cout << RED << "failed to closed server_socket" << RESET << std::endl;
 	if (close(epfd) == -1)
@@ -205,11 +203,8 @@ std::vector<Channel *>::iterator Server::getChannelIt(std::string name)
 	return (Channels.begin());
 }
 
-void		Server::first_connection(void)
+void Server::first_connection(void)
 {
-	// std::cout << "events[i].data.fd: " << events[i].data.fd << std::endl;
-	// std::cout << "somebody is trying to connect !" << std::endl;
-
 	socklen_t client_len = sizeof(client_addr);
 	con_socket = accept(server_socket, (struct sockaddr *)&client_addr, &client_len);
 
@@ -236,9 +231,6 @@ void		Server::first_connection(void)
 	// Creating and adding a new obj Client to the vector
 	Client *new_connection = new Client(con_socket);
 	Clients.push_back(new_connection);
-
-	// std::cout << "success !! con_socket " << con_socket <<  " Connected" << std::endl;
-	// send(con_socket, "Insert Password: ", sizeof(char) * 18, 0);
 }
 
 void Server::read_and_process(int i)
@@ -253,11 +245,11 @@ void Server::read_and_process(int i)
 	// Error
 	if (len == 0 || len == -1)
 	{
-		std::cout << "An error has occured during recv of the client socket => " << events[i].data.fd << std::endl ;
+		std::cout << "An error has occured during recv of the client socket => " << events[i].data.fd << std::endl;
 		std::cout << "Client deleted !" << std::endl;
 		epoll_ctl(epfd, EPOLL_CTL_DEL, client_socket, &events[i]);
 		destroy_cli_chan(client);
-		return ;
+		return;
 	}
 	else
 	{
@@ -268,16 +260,16 @@ void Server::read_and_process(int i)
 	if (isCRLF(str, client))
 	{
 		// Server outputs...
-		std::cout << BLU "[CLIENT] " << client_socket << " => " RESET << YEL << client->getMessage() << RESET <<std::endl;
+		std::cout << BLU "[CLIENT] " << client_socket << " => " RESET << YEL << client->getMessage() << RESET << std::endl;
 		const char *mess = (client->getMessage()).c_str();
 		std::vector<std::string> lines = split_line_buffer(mess);
-		
+
 		if (lines.size() > 1)
 		{
 			size_t i = 0;
 			while (i < lines.size() && isOpenedSock(client_socket))
 			{
-				parse_exec_cmd(split_buffer(lines[i]), client, i);
+				parse_exec_cmd(split_buffer(lines[i]), client);
 				i++;
 			}
 		}
@@ -289,7 +281,7 @@ void Server::read_and_process(int i)
 				client->setPrivmsgParam(str, true);
 			else if (!split_buffer(client->getMessage())[0].compare("QUIT"))
 				client->setQuitParam(str);
-			parse_exec_cmd(split_buffer(client->getMessage()), client, i);
+			parse_exec_cmd(split_buffer(client->getMessage()), client);
 		}
 	}
 	memset(buffer, 0, sizeof(char) * 512);
@@ -322,7 +314,7 @@ std::vector<std::string> Server::split_line_buffer(const char *sentence)
 	return (message);
 }
 
-void		Server::processMessage(Client *client)
+void Server::processMessage(Client *client)
 {
 	if (!client->isConnected())
 	{
@@ -338,15 +330,15 @@ void		Server::processMessage(Client *client)
 	}
 }
 
-void Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client, int i)
+void Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
 	int fd = client->getFd();
 	if (cmd.size() != 0 && (cmd[0] == "CAP" || cmd[0] == "WHO"))
 		std::cout << "" << std::endl;
 	else if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))
-		authenticate(client, cmd, i); // authenticate
-	else if(cmd.size() != 0 && (cmd[0] == "WHOIS" || cmd[0] == "WHOIS"))
-	    whoIs(client, cmd); // welcome invisible user mode msg
+		authenticate(client, cmd); // authenticate
+	else if (cmd.size() != 0 && (cmd[0] == "WHOIS" || cmd[0] == "WHOIS"))
+		whoIs(client, cmd); // welcome invisible user mode msg
 	else if (cmd.size() != 0 && (cmd[0] == "ping" || cmd[0] == "PING"))
 		pong(client, cmd); // answer to ping
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
@@ -368,7 +360,7 @@ void Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client, int i)
 	else if (cmd.size() != 0 && (cmd[0] == "privmsg" || cmd[0] == "PRIVMSG"))
 		privmsg(client, cmd); // sends a msg to a client or to a channel
 	else if (cmd.size() != 0 && (cmd[0] == "quit" || cmd[0] == "QUIT"))
-    	quit(client, cmd);
+		quit(client, cmd);
 	else if (cmd.size() != 0)
 		sendMSG(ERR_UNKNOWNCOMMAND(client->getNickname(), cmd[0]), client->getFd());
 	if (isOpenedSock(fd))

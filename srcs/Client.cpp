@@ -1,5 +1,4 @@
-#include "Client.hpp"
-#include <cstddef>
+#include "Server.hpp"
 
 Client::Client(int fd) : fd(fd), realname("*"), nickname("*"), username("*"), password_inserted(false), first_connection(true), privmsg_param("")
 {
@@ -119,7 +118,7 @@ void Client::setFirstConnection()
 
 void Client::setPrivmsgParam(std::string msg, bool flag)
 {
-	int i = 0;
+	size_t i = 0;
 	std::string param;
 
 	while (i < msg.size() && msg[i] == ' ')
@@ -150,7 +149,7 @@ void Client::setPrivmsgParam(std::string msg, bool flag)
 
 void	Client::setQuitParam(std::string msg)
 {
-	int i = 0;
+	size_t i = 0;
 	std::string param;
 
 	while (i < msg.size() && msg[i] == ' ')

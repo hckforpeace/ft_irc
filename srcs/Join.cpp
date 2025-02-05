@@ -2,8 +2,8 @@
 
 void Server::join(Client *client, std::vector<std::string> cmd)
 {
-	int flag = 0;
-	std::string	password;
+	int 		flag = 0;
+	std::string password;
 
 	if (cmd.size() < 3)
 		password = "";
@@ -13,38 +13,40 @@ void Server::join(Client *client, std::vector<std::string> cmd)
 		return (sendMSG(ERR_NEEDMOREPARAMS(client->getNickname()), client->getFd()));
 	if (cmd[1].empty() || cmd[1].at(0) != '#' || (cmd[1].at(0) == '#' && cmd[1].length() == 1))
 		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[1]), client->getFd()));
-	for (int i = 0; i < this->Channels.size(); i++)
+	for (std::size_t i = 0; i < this->Channels.size(); i++)
 	{
 		if (this->Channels[i]->getName() == cmd[1].substr(1))
 		{
 			enterChannel(this->Channels[i], client, password);
 			flag = 1;
-			break ;
+			break;
 		}
 	}
 	if (!flag)
 		createChannel(cmd[1].substr(1), client);
 }
+
 void Server::createChannel(std::string name, Client *client)
 {
 	if (client->getChanCounter() >= 10) // limit of connected channels per client
 		return (sendMSG(ERR_TOOMANYCHANNELS(client->getNickname(), name), client->getFd()));
-	
+
 	Channel *new_channel = new Channel(name);
-	
+
 	new_channel->setName(name);
 	new_channel->add_operator(client);
 	this->Channels.push_back(new_channel);
 	client->increaseChanCounter();
-	sendMSG(RPL_JOIN(client->getHostname(), new_channel->getName()) + \
-		RPL_NAMES(client->getNickname(), new_channel->getName(), new_channel->getClientLst()) + \
-		RPL_ENDOFNAMES(client->getNickname(),new_channel->getName()), client->getFd());
+	sendMSG(RPL_JOIN(client->getHostname(), new_channel->getName()) +
+				RPL_NAMES(client->getNickname(), new_channel->getName(), new_channel->getClientLst()) +
+				RPL_ENDOFNAMES(client->getNickname(), new_channel->getName()),
+			client->getFd());
 }
 
 void Server::enterChannel(Channel *channel, Client *client, std::string password)
 {
 	if (isinChan(client, channel)) // if the client is already on the channel it can't reconnect
-		return ;
+		return;
 	if (client->getChanCounter() >= 10) // limit of connected channels per client
 		return (sendMSG(ERR_TOOMANYCHANNELS(client->getNickname(), channel->getName()), client->getFd()));
 	if (channel->getTotalClient() >= channel->getLimit()) // if limit of connected clients in the channel
@@ -57,12 +59,14 @@ void Server::enterChannel(Channel *channel, Client *client, std::string password
 	channel->add_client(client);
 	client->increaseChanCounter();
 	if (channel->getTopic().empty())
-		sendMSG(RPL_JOIN(client->getHostname(), channel->getName()) + \
-			RPL_NAMES(client->getNickname(), channel->getName(), channel->getClientLst()) + \
-			RPL_ENDOFNAMES(client->getNickname(),channel->getName()), client->getFd());
+		sendMSG(RPL_JOIN(client->getHostname(), channel->getName()) +
+					RPL_NAMES(client->getNickname(), channel->getName(), channel->getClientLst()) +
+					RPL_ENDOFNAMES(client->getNickname(), channel->getName()),
+				client->getFd());
 	else
-		sendMSG(RPL_JOIN(client->getHostname(), channel->getName()) + \
-			RPL_TOPIC(client->getNickname(), channel->getName(), channel->getTopic()) + \
-			RPL_NAMES(client->getNickname(), channel->getName(), channel->getClientLst()) + \
-			RPL_ENDOFNAMES(client->getNickname(),channel->getName()), client->getFd());
+		sendMSG(RPL_JOIN(client->getHostname(), channel->getName()) +
+					RPL_TOPIC(client->getNickname(), channel->getName(), channel->getTopic()) +
+					RPL_NAMES(client->getNickname(), channel->getName(), channel->getClientLst()) +
+					RPL_ENDOFNAMES(client->getNickname(), channel->getName()),
+				client->getFd());
 }

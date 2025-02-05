@@ -9,19 +9,18 @@
 class Client 
 {
 	private:
-		std::string realname;
-		std::string username;
-		std::string nickname;
-		// std::string	denied_nick;
-		std::string message;
-    std::string privmsg_param;
-		std::vector<std::string>	cmd;
-		std::vector<std::string>	invited_to_chan;
 		int			fd;
-		int			channel_counter; // max 10
-		bool		connected; // false by default
+		std::string realname;
+		std::string nickname;
+		std::string username;
+		std::string message;
 		bool		password_inserted; // false by default
 		bool		first_connection;
+    	std::string privmsg_param;
+		std::vector<std::string>	cmd;
+		std::vector<std::string>	invited_to_chan;
+		int			channel_counter; // max 10
+		bool		connected; // false by default
 
 	public:
 		Client(int fd);

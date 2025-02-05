@@ -1,12 +1,9 @@
-#include "Replies.hpp"
-#include <Server.hpp>
-#include <string>
+#include "Server.hpp"
 
-// Commands
-void Server::authenticate(Client *client, std::vector<std::string> cmd, int i)
+void Server::authenticate(Client *client, std::vector<std::string> cmd)
 {
 	std::string err;
-	int fd = client->getFd();
+
 	if (cmd.size() < 2)
 		err = ERR_NEEDMOREPARAMS(client->getNickname());
 	else if (client->isConnected())
@@ -23,13 +20,6 @@ void Server::authenticate(Client *client, std::vector<std::string> cmd, int i)
 			err = ERR_PASSWDMISMATCH(client->getNickname());
 	}
 	this->sendMSG(err, client->getFd());
-	// struct linger so_linger;
-    // so_linger.l_onoff = 1;  // Enable SO_LINGER
-    // so_linger.l_linger = 0; // Close immediately with RST
-    // setsockopt(client->getFd(), SOL_SOCKET, SO_LINGER, &so_linger, sizeof(so_linger));
-	// epoll_ctl(epfd, EPOLL_CTL_DEL, fd, nullptr);
-	// destroy_cli_chan(client);
-	// close(fd);
 }
 
 void Server::setNickname(Client *client, std::vector<std::string> cmd)
@@ -77,8 +67,7 @@ void Server::setUser(Client *client, std::vector<std::string> cmd)
 void Server::privmsg(Client *client, std::vector<std::string> cmd)
 {
 	std::string err;
-	Client *rcv;
-	Channel *chan;
+	Client 		*rcv;
 	std::string channel;
 	std::string msg;
 
@@ -89,7 +78,7 @@ void Server::privmsg(Client *client, std::vector<std::string> cmd)
 	else if (cmd[1].at(0) == '#')
 	{
 		if (findChannel(cmd[1].substr(1)))
-			return (sendToChannel(client->getCmdParams().substr(1), client->getNickname(), findChannel(cmd[1].substr(1)), client));
+			return (sendToChannel(client->getCmdParams().substr(1), findChannel(cmd[1].substr(1)), client));
 		return (sendMSG(ERR_NOSUCHCHANNEL(client->getNickname(), cmd[1]), client->getFd()));
 	}
 	else
@@ -99,11 +88,6 @@ void Server::privmsg(Client *client, std::vector<std::string> cmd)
 		else
 			return (sendMSG(ERR_NOSUCHNICK(client->getNickname(), cmd[1]), client->getFd()));
 	}
-}
-
-void Server::modei(Client *client, std::vector<std::string> cmd)
-{
-	sendMSG(":localhost MODE " + client->getNickname() + " +i", client->getFd());
 }
 
 void Server::pong(Client *client, std::vector<std::string> cmd)
@@ -116,7 +100,7 @@ void Server::whoIs(Client *client, std::vector<std::string> cmd)
 	sendMSG(this->genWhoisRpl(client->getNickname(), cmd[1]), client->getFd());
 }
 
-void 	Server::quit(Client *client, std::vector<std::string> cmd)
+void Server::quit(Client *client, std::vector<std::string> cmd)
 {
 	std::string param = "";
 
