@@ -94,7 +94,7 @@ void	Server::kick(Client *client, std::vector<std::string> cmd)
 		return (sendMSG(ERR_USERNOTINCHAN1(client->getNickname(), channel->getName()), client->getFd()));
 	if (!isinChan(kicked_client, channel))
 		return (sendMSG(ERR_USERNOTINCHAN2(client->getNickname(), cmd[2], channel->getName()), client->getFd()));
-	if (!isOperator(client, channel) && channel->getTopicMode())
+	if (!isOperator(client, channel))
 		return (sendMSG(ERR_NOTOPERATOR(client->getNickname(), channel->getName()), client->getFd()));
 	size_t index = client->getCmdParams().find(':');
 	std::string reason = client->getCmdParams().substr(index + 1);

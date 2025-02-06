@@ -1,3 +1,4 @@
+#include "Colors.hpp"
 #include "Server.hpp"
 
 Channel::Channel(std::string name)
@@ -14,6 +15,7 @@ Channel::Channel(std::string name)
 
 Channel::~Channel()
 {
+  std::cout << "Channel: " << RED << this->name << RESET << " was destroyed" << std::endl;
 }
 
 /*=========================== METHODS ==============================*/
