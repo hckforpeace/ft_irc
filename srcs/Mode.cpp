@@ -101,7 +101,7 @@ void Server::operatorMode(char sign, std::string new_operator, Client *client, C
 	if (!op)
 		return (sendMSG(ERR_NOSUCHNICK(client->getNickname(), new_operator), client->getFd()));
 	if (!isinChan(op, channel))
-		return (sendMSG(ERR_USERNOTINCHAN2(client->getNickname(), channel->getName()), client->getFd()));
+		return (sendMSG(ERR_USERNOTINCHAN2(client->getNickname(), op->getNickname(), channel->getName()), client->getFd()));
 	if (sign == '+')
 	{
 		if (!isOperator(op, channel))

@@ -129,21 +129,17 @@ void Client::setPrivmsgParam(std::string msg, bool flag)
 		i++;
 	if (flag)
 	{
-		param = msg.substr(i);
-		// Remove the \r\n
-		param = param.erase(param.find('\r'), 2);
+		param = msg.substr(i); 
+		param = param.erase(param.find('\r'), 2); // Remove the \r\n
 		this->privmsg_param = param;
-		std::cout << "The parameter for the privmsg is:*" << param << "*" << std::endl;
 		return ;
 	}
 	while (msg[i] != ' ')
 		i++;
 	while (i < msg.size() && msg[i] == ' ')
 		i++;
-
 	param = msg.substr(i);
-	// Remove the \r\n
-	param = param.erase(param.find('\r'), 2);
+	param = param.erase(param.find('\r'), 2); // Remove the \r\n
 	this->privmsg_param = param; 
 }
 

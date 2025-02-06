@@ -24,7 +24,7 @@
 
 # define ERR_USERNOTINCHAN1(nickname, channel) (":localhost 442 " + nickname + " #" + channel + " :You're not on that channel")
 
-# define ERR_USERNOTINCHAN2(nickname, channel) (":localhost 442 " + nickname + " #" + channel + " :They aren't on that channel")
+# define ERR_USERNOTINCHAN2(nickname, target, channel) (":localhost 442 " + nickname + " " + target + " #" + channel + " :They aren't on that channel")
 
 // Sent to a user when they have joined the maximum number of allowed channels and they try to join another channel.
 # define ERR_TOOMANYCHANNELS(nickname, channel) (":localhost 405 " + nickname + " :#" + channel)

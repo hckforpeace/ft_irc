@@ -42,7 +42,7 @@ void	Server::topic(Client *client, std::vector<std::string> cmd)
 		return(sendMSG(RPL_TOPIC(client->getNickname(), channel->getName(), channel->getTopic()), client->getFd()));
 	}
 	if (!isinChan(client, channel))
-		return (sendMSG(ERR_USERNOTINCHAN1(client->getNickname(), channel->getName()), client->getFd()));
+		return (sendMSG((client->getNickname(), channel->getName()), client->getFd()));
 	if (!isOperator(client, channel) && channel->getTopicMode())
 		return (sendMSG(ERR_NOTOPERATOR(client->getNickname(), channel->getName()), client->getFd()));
 	std::string topic = client->getCmdParams().substr(client->getCmdParams().find(':') + 1);;
@@ -91,9 +91,9 @@ void	Server::kick(Client *client, std::vector<std::string> cmd)
 	if (!kicked_client)
 		return (sendMSG(ERR_NOSUCHNICK(client->getNickname(), cmd[2]), client->getFd()));
 	if (!isinChan(client, channel))
-		return (sendMSG(ERR_USERNOTINCHAN2(client->getNickname(), channel->getName()), client->getFd()));
+		return (sendMSG(ERR_USERNOTINCHAN1(client->getNickname(), channel->getName()), client->getFd()));
 	if (!isinChan(kicked_client, channel))
-		return (sendMSG(ERR_USERNOTINCHAN2(cmd[2], channel->getName()), client->getFd()));
+		return (sendMSG(ERR_USERNOTINCHAN2(client->getNickname(), cmd[2], channel->getName()), client->getFd()));
 	if (!isOperator(client, channel) && channel->getTopicMode())
 		return (sendMSG(ERR_NOTOPERATOR(client->getNickname(), channel->getName()), client->getFd()));
 	size_t index = client->getCmdParams().find(':');
