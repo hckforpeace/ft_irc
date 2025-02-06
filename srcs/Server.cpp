@@ -276,11 +276,11 @@ void Server::read_and_process(int i)
 		else if (client->getMessage().compare(""))
 		{
 			if (!split_buffer(client->getMessage())[0].compare("PRIVMSG") || !split_buffer(client->getMessage())[0].compare("KICK"))
-				client->setPrivmsgParam(str, false);
+				client->setPrivmsgParam(client->getMessage(), false);
 			else if (!split_buffer(client->getMessage())[0].compare("PART") || !split_buffer(client->getMessage())[0].compare("TOPIC"))
-				client->setPrivmsgParam(str, true);
+				client->setPrivmsgParam(client->getMessage(), true);
 			else if (!split_buffer(client->getMessage())[0].compare("QUIT"))
-				client->setQuitParam(str);
+				client->setQuitParam(client->getMessage());
 			parse_exec_cmd(split_buffer(client->getMessage()), client);
 		}
 	}

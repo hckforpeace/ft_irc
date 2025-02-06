@@ -120,26 +120,30 @@ void Client::setPrivmsgParam(std::string msg, bool flag)
 {
 	size_t i = 0;
 	std::string param;
-
+	// #chan\r\n\0
+	std::cout << msg << std::endl;
 	while (i < msg.size() && msg[i] == ' ')
 		i++;
-	while (msg[i] != ' ')
+	while (i < msg.size() && msg[i] != ' ')
 		i++;
 	while (i < msg.size() && msg[i] == ' ')
 		i++;
 	if (flag)
 	{
-		param = msg.substr(i); 
-		param = param.erase(param.find('\r'), 2); // Remove the \r\n
+		param = msg.substr(i);
+		std::cout << "param: " << param << std::endl;
+		if (param.find('\r') != std::string::npos)
+			param = param.erase(param.find('\r'), 2); // Remove the \r\n
 		this->privmsg_param = param;
 		return ;
 	}
-	while (msg[i] != ' ')
+	while (i < msg.size() && msg[i] != ' ')
 		i++;
 	while (i < msg.size() && msg[i] == ' ')
 		i++;
 	param = msg.substr(i);
-	param = param.erase(param.find('\r'), 2); // Remove the \r\n
+	if (param.find('\r') != std::string::npos)
+		param = param.erase(param.find('\r'), 2); // Remove the \r\n
 	this->privmsg_param = param; 
 }
 
@@ -150,11 +154,12 @@ void	Client::setQuitParam(std::string msg)
 
 	while (i < msg.size() && msg[i] == ' ')
 	i++;
-	while (msg[i] != ' ')
+	while (i < msg.size() && msg[i] != ' ')
 	i++;
 	param = msg.substr(i + 1);
 	// Remove the \r\n
-	param = param.erase(param.find('\r'), 2);
+	if (param.find('\r') != std::string::npos)
+		param = param.erase(param.find('\r'), 2);
 	this->privmsg_param = param; 
 }
 
