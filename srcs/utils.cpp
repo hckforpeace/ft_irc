@@ -122,6 +122,24 @@ void Server::sendToChannel(std::string message, Channel *chan, Client *client)
 	}
 }
 
+void    	Server::sendChanExptcli(Channel *chan, std::string msg, Client *client)
+{
+	std::vector<Client *> cli = chan->getClients();
+	std::vector<Client *> operators = chan->getOperators();
+
+	for (std::vector<Client *>::iterator it = cli.begin(); it != cli.end(); it++)
+	{
+		if ((*it) != client)
+			this->sendMSG(msg, (*it)->getFd());
+	}
+	for (std::vector<Client *>::iterator it = operators.begin(); it != operators.end(); it++)
+	{
+		if ((*it) != client)
+			this->sendMSG(msg, (*it)->getFd());
+	}
+}	
+
+
 void Server::send_to_all_client(std::string message)
 {
 	for (std::vector<Client *>::iterator it = Clients.begin(); it != Clients.end(); it++)
@@ -148,11 +166,15 @@ std::string Server::generateNick(std::string base)
 	for (int i = 1; i < 2000; i++)
 	{
 		str << i;
+		std::cout << RED << str.str()  << RESET << std::endl;
 		newNick = base + str.str();
 		if (!nickInUse(newNick))
+		{
 			return (newNick);
+		}
+		str.str("");
 		str.clear();
-		str << "";
+		newNick = base;
 	}
 	return ("Error");
 }

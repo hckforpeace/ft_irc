@@ -32,16 +32,19 @@ void Server::setNickname(Client *client, std::vector<std::string> cmd)
 	else if (client->firstConnection() && nickInUse(cmd[1]))
 	{
 		sendMSG(":" + cmd[1] + " NICK " + generateNick(cmd[1]), client->getFd());
+		updateNickInChan(client, cmd[1], generateNick(cmd[1]));
 		return (client->setNickname(generateNick(cmd[1])));
 	}
 	else if (nickInUse(cmd[1]))
 	{
 		sendMSG(":" + client->getNickname() + " NICK " + generateNick(cmd[1]), client->getFd());
+		updateNickInChan(client, client->getNickname(), generateNick(cmd[1]));
 		return (client->setNickname(generateNick(cmd[1])));
 	}
 	else
 	{
 		sendMSG(":" + client->getNickname() + " NICK " + cmd[1], client->getFd());
+		updateNickInChan(client, client->getNickname(), cmd[1]);
 		return (client->setNickname(cmd[1]));
 	}
 	this->sendMSG(err, client->getFd());
@@ -111,5 +114,14 @@ void Server::quit(Client *client, std::vector<std::string> cmd)
 	{
 		if (this->isinChan(client, (*it)))
 			this->sendMSGChan(":" + client->getHostname() + "@localhost QUIT :Quit: " + param.substr(1), (*it));
+	}
+}
+
+void 	Server::updateNickInChan(Client *client, std::string oldNick, std::string newNick)
+{
+	for (std::vector<Channel *>::iterator it = this->Channels.begin(); it != this->Channels.end(); it++)
+	{
+		if (this->isinChan(client, (*it)))
+			this->sendChanExptcli((*it), ":" + oldNick + " NICK " + newNick, client);
 	}
 }

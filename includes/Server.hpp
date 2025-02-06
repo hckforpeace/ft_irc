@@ -76,6 +76,7 @@ class Server {
 		void 	pong(Client *client, std::vector<std::string> cmd);
 		void 	whoIs(Client *client, std::vector<std::string> cmd);
 		void 	quit(Client *client, std::vector<std::string> cmd);
+		void 	updateNickInChan(Client *client, std::string oldNick, std::string newNick);
     
 
 		// Modes
@@ -105,6 +106,7 @@ class Server {
 		void   		sendMSG(std::string message, int fd);
 		void  		sendToChannel(std::string message, Channel *channel, Client *client);
 		void    	sendMSGChan(std::string message, Channel *channel);
+		void    	sendChanExptcli(Channel *chan, std::string msg, Client *client);		
 		bool		isinChan(Client *client, Channel *channel);
 		void    	send_to_all_client(std::string message);
 		void		removeClient(Client *client);
