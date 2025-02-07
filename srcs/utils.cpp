@@ -166,7 +166,6 @@ std::string Server::generateNick(std::string base)
 	for (int i = 1; i < 2000; i++)
 	{
 		str << i;
-		std::cout << RED << str.str()  << RESET << std::endl;
 		newNick = base + str.str();
 		if (!nickInUse(newNick))
 		{

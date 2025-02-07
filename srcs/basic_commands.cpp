@@ -112,8 +112,10 @@ void Server::quit(Client *client, std::vector<std::string> cmd)
 
 	for (std::vector<Channel *>::iterator it = this->Channels.begin(); it != this->Channels.end(); it++)
 	{
-		if (this->isinChan(client, (*it)))
+		if (this->isinChan(client, (*it)) && param.length() > 0)
 			this->sendMSGChan(":" + client->getHostname() + "@localhost QUIT :Quit: " + param.substr(1), (*it));
+		else
+			this->sendMSGChan(":" + client->getHostname() + "@localhost QUIT :Quit: Leaving", (*it));
 	}
 }
 

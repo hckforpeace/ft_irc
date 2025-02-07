@@ -31,7 +31,11 @@ void	Bot::connect_to_server()
 		server_msg = strerror(errno);
 		throw std::runtime_error("ERROR COULD NOT REACH SERVER " + server_msg);
 	}
-	setnonblocking(bot_socket);
+	if (fcntl(bot_socket , F_SETFL , O_NONBLOCK) == -1)
+	{
+		std::cout << RED "fcntl Failed" RESET << std::endl;
+		return ;
+	}
 
 	std::string first_connection = "CAP LS\nPASS " + this->pass + "\nNICK bot\nUSER "+ nickname + " " + nickname;
 	sendMSG(first_connection, bot_socket);
@@ -173,6 +177,6 @@ int setnonblocking(int sock)
 
     flags |= O_NONBLOCK;
 
-    result = fcntl(sock , F_SETFL , flags);
+    result = fcntl(sock , F_SETFL , O_NONBLOCK);
     return result;
 }

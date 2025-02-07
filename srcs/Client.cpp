@@ -120,8 +120,6 @@ void Client::setPrivmsgParam(std::string msg, bool flag)
 {
 	size_t i = 0;
 	std::string param;
-	// #chan\r\n\0
-	std::cout << msg << std::endl;
 	while (i < msg.size() && msg[i] == ' ')
 		i++;
 	while (i < msg.size() && msg[i] != ' ')
@@ -131,7 +129,6 @@ void Client::setPrivmsgParam(std::string msg, bool flag)
 	if (flag)
 	{
 		param = msg.substr(i);
-		std::cout << "param: " << param << std::endl;
 		if (param.find('\r') != std::string::npos)
 			param = param.erase(param.find('\r'), 2); // Remove the \r\n
 		this->privmsg_param = param;

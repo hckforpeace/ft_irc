@@ -47,7 +47,7 @@
 
 /*================================================= TOPIC ====================================================*/
 
-#define RPL_TOPIC(nickname, channel, topic) (":localhost 332 " + nickname + " #" + channel + " " + topic + "\r\n")
+#define RPL_TOPIC(nickname, channel, topic) (":localhost 332 " + nickname + " #" + channel + " :" + topic + "\r\n")
 
 # define EMPTY_TOPIC(nickname, channel) (":localhost 331 " + nickname + " #" + channel + " :No topic is set.")
 

@@ -53,7 +53,7 @@ void Server::init_server_socket()
 	// setting up server parameters
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(_port);
-	server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	server_addr.sin_addr.s_addr = INADDR_ANY;
 
 	// bind
 	if (bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1)
@@ -219,7 +219,8 @@ void Server::first_connection(void)
 	// setting up params the new event
 	ev.data.fd = con_socket;
 	ev.events = EPOLLIN | EPOLLOUT;
-	setnonblocking(con_socket);
+	if (fcntl(con_socket , F_SETFL , O_NONBLOCK) == -1)
+		throw std::runtime_error("fcntl FAILED");
 	// adding the event to the interest list
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, con_socket, &ev) == -1)
 	{
@@ -260,7 +261,7 @@ void Server::read_and_process(int i)
 	if (isCRLF(str, client))
 	{
 		// Server outputs...
-		std::cout << BLU "[CLIENT] " << client_socket << " => " RESET << YEL << client->getMessage() << RESET << std::endl;
+		std::cout << BLU "[CLIENT] <" << client_socket << "> => " RESET << YEL << client->getMessage() << RESET << std::endl;
 		const char *mess = (client->getMessage()).c_str();
 		std::vector<std::string> lines = split_line_buffer(mess);
 
@@ -273,16 +274,16 @@ void Server::read_and_process(int i)
 				i++;
 			}
 		}
-		else if (client->getMessage().compare(""))
+		else if (client->getMessage().compare("") && split_buffer(client->getMessage()).size() != 0)
 		{
 			if (!split_buffer(client->getMessage())[0].compare("PRIVMSG") || !split_buffer(client->getMessage())[0].compare("KICK"))
 				client->setPrivmsgParam(client->getMessage(), false);
 			else if (!split_buffer(client->getMessage())[0].compare("PART") || !split_buffer(client->getMessage())[0].compare("TOPIC"))
 				client->setPrivmsgParam(client->getMessage(), true);
-			else if (!split_buffer(client->getMessage())[0].compare("QUIT"))
+			else if (!split_buffer(client->getMessage())[0].compare("QUIT") && split_buffer(client->getMessage()).size() >= 2)
 				client->setQuitParam(client->getMessage());
-			parse_exec_cmd(split_buffer(client->getMessage()), client);
 		}
+		parse_exec_cmd(split_buffer(client->getMessage()), client);
 	}
 	memset(buffer, 0, sizeof(char) * 512);
 }
