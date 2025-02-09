@@ -4,7 +4,7 @@ Client::Client(int fd) : fd(fd), realname("*"), nickname("*"), username("*"), pa
 {
 	this->nickname = "*";
 	this->channel_counter = 0;
-	this->connected = false;
+	this->authenticated = false;
 }
 
 Client::~Client()
@@ -14,6 +14,9 @@ Client::~Client()
 		  std::cerr << "failed to close fd: " << fd << std::endl;
 }
 
+/* ************************************************************************** */
+/*                                  Getters                                   */
+/* ************************************************************************** */
 int Client::getFd()
 {
 	return (this->fd);
@@ -24,14 +27,10 @@ std::string &Client::getMessage()
 	return (this->message);
 }
 
-void Client::setPasswordInserted()
-{
-	this->password_inserted = true;
-}
 
-bool Client::isConnected()
+bool Client::isAuthenticated()
 {
-	return (this->connected);
+	return (this->authenticated);
 }
 
 std::string Client::getNickname()
@@ -64,7 +63,23 @@ std::string  Client::getCmdParams()
 {
 	return (this->privmsg_param);
 }
+
+bool Client::getPassstatus()
+{
+	return (this->password_inserted);
+}
+
+bool Client::firstConnection(void)
+{
+	return (this->first_connection);
+}
+
 /*========================== SETTERS ===========================*/
+
+void Client::setPasswordInserted()
+{
+	this->password_inserted = true;
+}
 
 void Client::setNickname(std::string nick)
 {
@@ -76,19 +91,9 @@ void Client::setMessage(std::string str)
 	this->message = str;
 }
 
-void Client::setConnection(void)
+void Client::setAuthentication(void)
 {
-	this->connected = true;
-}
-
-bool Client::getPassstatus()
-{
-	return (this->password_inserted);
-}
-
-bool Client::firstConnection(void)
-{
-	return (this->first_connection);
+	this->authenticated = true;
 }
 
 void Client::setUsername(std::string str)
@@ -116,6 +121,11 @@ void Client::setFirstConnection()
 	this->first_connection = false;
 }
 
+/* ************************************************************************** */
+/*                             Public Member Methods                          */
+/* ************************************************************************** */
+
+// stores the parameter of PRIVMSG command
 void Client::setPrivmsgParam(std::string msg, bool flag)
 {
 	size_t i = 0;
@@ -144,6 +154,7 @@ void Client::setPrivmsgParam(std::string msg, bool flag)
 	this->privmsg_param = param; 
 }
 
+// stores the parameter of QUIT command
 void	Client::setQuitParam(std::string msg)
 {
 	size_t i = 0;
@@ -160,6 +171,7 @@ void	Client::setQuitParam(std::string msg)
 	this->privmsg_param = param; 
 }
 
+// A Client is registered if he has set succesffuly the password, if nickname is set and if USER is set
 bool  Client::isRegistered()
 {
 	return (this->getPassstatus() && this->username.compare("*") && this->realname.compare("*") && this->nickname.compare("*"));

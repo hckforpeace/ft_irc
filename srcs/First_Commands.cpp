@@ -6,7 +6,7 @@ void Server::authenticate(Client *client, std::vector<std::string> cmd)
 
 	if (cmd.size() < 2)
 		err = ERR_NEEDMOREPARAMS(client->getNickname());
-	else if (client->isConnected())
+	else if (client->getPassstatus())
 		err = ERR_ALREADYREGISTRED(client->getNickname());
 	else
 	{

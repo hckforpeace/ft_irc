@@ -28,7 +28,7 @@ void Server::join(Client *client, std::vector<std::string> cmd)
 
 void Server::createChannel(std::string name, Client *client)
 {
-	if (client->getChanCounter() >= 10) // limit of connected channels per client
+	if (client->getChanCounter() >= 10) // limit of authenticated channels per client
 		return (sendMSG(ERR_TOOMANYCHANNELS(client->getNickname(), name), client->getFd()));
 
 	Channel *new_channel = new Channel(name);
@@ -47,9 +47,9 @@ void Server::enterChannel(Channel *channel, Client *client, std::string password
 {
 	if (isinChan(client, channel)) // if the client is already on the channel it can't reconnect
 		return;
-	if (client->getChanCounter() >= 10) // limit of connected channels per client
+	if (client->getChanCounter() >= 10) // limit of authenticated channels per client
 		return (sendMSG(ERR_TOOMANYCHANNELS(client->getNickname(), channel->getName()), client->getFd()));
-	if (channel->getTotalClient() >= channel->getLimit()) // if limit of connected clients in the channel
+	if (channel->getTotalClient() >= channel->getLimit()) // if limit of authenticated clients in the channel
 		return (sendMSG(ERR_CHANNELISFULL(client->getNickname(), channel->getName()), client->getFd()));
 	if (channel->isInviteOnly() && !client->isInvited(channel->getName())) // if the channel is invite_only and the client is not invited
 		return (sendMSG(INVITE_ONLY(client->getNickname(), channel->getName()), client->getFd()));

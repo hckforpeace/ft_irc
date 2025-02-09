@@ -20,16 +20,17 @@ class Client
 		std::vector<std::string>	cmd;
 		std::vector<std::string>	invited_to_chan;
 		int			channel_counter; // max 10
-		bool		connected; // false by default
+		bool		authenticated; // false by default
 
 	public:
 		Client(int fd);
 		~Client();
 		
+		// Getters
 		int	getFd();
 		std::vector<std::string> getCmd() {return (this->cmd);};
 		std::string&	getMessage();
-		bool		isConnected(void);
+		bool		isAuthenticated(void);
     	bool		isRegistered(void);
 		std::string	getNickname(void);
 		std::string	getUsername(void);  
@@ -41,9 +42,10 @@ class Client
 		bool		firstConnection(void);
     	std::string  getCmdParams();
 
+		//Setters
 		void	setMessage(std::string str);
 		void	setFirstConnection();
-		void	setConnection(void);
+		void	setAuthentication(void);
 		void	setCmd(std::vector<std::string> cmd) {this->cmd = cmd;};
 		void	setNickname(std::string nick);
 		void	setUsername(std::string str);

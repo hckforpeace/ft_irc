@@ -26,6 +26,11 @@ Server::~Server()
 		delete *it;
 }
 
+
+/* ************************************************************************** */
+/*                             Server Methods                                  */
+/* ************************************************************************** */
+
 // Creates socket on which the server will listen for incoming connections
 void Server::init_server_socket()
 {
@@ -97,31 +102,14 @@ void Server::init_server()
 		std::cerr << "Error during epoll_ctl => " << strerror(errno) << std::endl;
 }
 
-// stes an fd or a socket to nonblocking
-int Server::setnonblocking(int sock)
-{
-	int result;
-	int flags;
-
-	flags = ::fcntl(sock, F_GETFL, 0);
-
-	if (flags == -1)
-		return -1; // error
-
-	flags |= O_NONBLOCK;
-
-	result = fcntl(sock, F_SETFL, flags);
-	return result;
-}
-
 // General Loop for server
 void Server::run_server()
 {
-	// looping
 	int nbr_fds;
 	static std::string error;
 	struct stat buf;
 
+	// looping
 	while (!server_off)
 	{
 		nbr_fds = epoll_wait(epfd, events, MAX_EVENTS, -1);
@@ -147,61 +135,23 @@ void Server::run_server()
 		std::cout << RED << "Successfully closed epfd" << RESET << std::endl;
 }
 
-void Server::parse_args(char *port, char *password)
+// stes an fd or a socket to nonblocking
+int Server::setnonblocking(int sock)
 {
-	std::string s_password(password);
-	std::stringstream ss(port);
-	int port_nb;
+	int result;
+	int flags;
 
-	ss >> port_nb;
-	if (ss.fail())
-		throw std::runtime_error("Port is not a number");
-	if (port_nb > 65535)
-		throw std::runtime_error("Port must be between 0 and 65535");
-	this->_port = port_nb;
-	this->_password = s_password; // password has a length limit?
+	flags = ::fcntl(sock, F_GETFL, 0);
+
+	if (flags == -1)
+		return -1; // error
+
+	flags |= O_NONBLOCK;
+
+	result = fcntl(sock, F_SETFL, flags);
+	return result;
 }
 
-void Server::setupSignals()
-{
-	signal(SIGINT, signIntHandler);
-}
-
-void Server::signIntHandler(int code)
-{
-	if (code == 2)
-		server_off = true;
-}
-
-Client *Server::getClient(int fd)
-{
-	for (std::vector<Client *>::iterator it = Clients.begin(); it != Clients.end(); it++)
-	{
-		if ((*it)->getFd() == fd)
-			return (*it);
-	}
-	return (NULL);
-}
-
-std::vector<Client *>::iterator Server::getClientIt(int fd)
-{
-	for (std::vector<Client *>::iterator it = Clients.begin(); it != Clients.end(); it++)
-	{
-		if ((*it)->getFd() == fd)
-			return (it);
-	}
-	return (Clients.begin());
-}
-
-std::vector<Channel *>::iterator Server::getChannelIt(std::string name)
-{
-	for (std::vector<Channel *>::iterator it = Channels.begin(); it != Channels.end(); it++)
-	{
-		if (!name.compare((*it)->getName()))
-			return (it);
-	}
-	return (Channels.begin());
-}
 
 void Server::first_connection(void)
 {
@@ -288,49 +238,7 @@ void Server::read_and_process(int i)
 	memset(buffer, 0, sizeof(char) * 512);
 }
 
-std::vector<std::string> Server::split_buffer(std::string str)
-{
-	std::vector<std::string> vec;
-	std::istringstream ss(str);
-	std::string token;
-
-	while (ss >> token)
-	{
-		vec.push_back(token);
-		token.clear();
-	}
-	return (vec);
-}
-
-std::vector<std::string> Server::split_line_buffer(const char *sentence)
-{
-	std::stringstream ss(sentence);
-	std::vector<std::string> message;
-	std::string line;
-	if (sentence != NULL)
-	{
-		while (std::getline(ss, line, '\n'))
-			message.push_back(line);
-	}
-	return (message);
-}
-
-void Server::processMessage(Client *client)
-{
-	if (!client->isConnected())
-	{
-		if (!this->_password.compare(client->getMessage()))
-		{
-			std::cout << "Welcome" << std::endl;
-			client->setConnection();
-		}
-		else
-		{
-			std::cout << RED << "Failed to Connect" << RESET << std::endl;
-		}
-	}
-}
-
+// parse and executes command
 void Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 {
 	int fd = client->getFd();
@@ -367,3 +275,53 @@ void Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 	if (isOpenedSock(fd))
 		client->setMessage("");
 }
+
+/* ************************************************************************** */
+/*                                Signals                                     */
+/* ************************************************************************** */
+void Server::setupSignals()
+{
+	signal(SIGINT, signalsHandler);
+	signal(SIGQUIT, signalsHandler);
+}
+
+void Server::signalsHandler(int code)
+{
+	(void) code;
+	server_off = true;
+}
+
+/* ************************************************************************** */
+/*                             	   Getters                                    */
+/* ************************************************************************** */
+
+Client *Server::getClient(int fd)
+{
+	for (std::vector<Client *>::iterator it = Clients.begin(); it != Clients.end(); it++)
+	{
+		if ((*it)->getFd() == fd)
+			return (*it);
+	}
+	return (NULL);
+}
+
+std::vector<Client *>::iterator Server::getClientIt(int fd)
+{
+	for (std::vector<Client *>::iterator it = Clients.begin(); it != Clients.end(); it++)
+	{
+		if ((*it)->getFd() == fd)
+			return (it);
+	}
+	return (Clients.begin());
+}
+
+std::vector<Channel *>::iterator Server::getChannelIt(std::string name)
+{
+	for (std::vector<Channel *>::iterator it = Channels.begin(); it != Channels.end(); it++)
+	{
+		if (!name.compare((*it)->getName()))
+			return (it);
+	}
+	return (Channels.begin());
+}
+

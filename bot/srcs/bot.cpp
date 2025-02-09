@@ -9,7 +9,7 @@ Bot::Bot(int port_number, std::string pass, std::string channel_name, std::vecto
 	this->nickname = "bot";
 	this->channel_name = channel_name;
 	this->forbidden_words = forbidden_words;
-	this->connected = false;
+	this->authenticated = false;
 	connect_to_server();
 }
 
@@ -102,7 +102,7 @@ void  Bot::process_messages(std::string message)
 	else if (arr.size() >= 2 && !arr[1].compare("001"))
 	{
 		sendMSG("JOIN #" + this->channel_name, this->bot_socket);
-		this->connected = true;
+		this->authenticated = true;
 	}
 	else if (arr.size() >= 3 && !arr[1].compare("PRIVMSG") && (idx = isForbidden(arr)) != -1)
 	{

@@ -30,7 +30,7 @@ class Bot
 		std::vector<std::string> forbidden_words;
 		int bot_socket;
 		sockaddr_in serverAddr;
-		bool connected;
+		bool authenticated;
 
 	public:
 		Bot(int port_number, std::string pass, std::string channel_name, std::vector<std::string> forbidden_words);

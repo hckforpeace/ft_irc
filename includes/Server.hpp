@@ -49,27 +49,31 @@ class Server {
  	public:
 		Server(char *port, char *password);
 		~Server(void);
-		void		parse_args(char *port, char *password);
+
+		// Server Methods
 		void		init_server_socket();
 		void		init_server();
 		void		run_server();
 		int			setnonblocking(int sock);
-		void 		setupSignals();
-		static void signIntHandler(int code);
 		void		first_connection();
 		void		read_and_process(int i);
-		void		processMessage(Client *client);
+
+		// Signals
+		void 		setupSignals();
+		static void signalsHandler(int code);
 
     	// getters
 		Client*								getClient(int fd);
 		std::vector<Client *>::iterator		getClientIt(int fd);
 		std::vector<Channel *>::iterator	getChannelIt(std::string name);
 
+		// Parsers => parser.cpp
+		void		parse_args(char *port, char *password);
     	void	parse_exec_cmd(std::vector<std::string> cmd, Client *client);
 		std::vector<std::string> split_buffer(std::string str);
 		std::vector<std::string> split_line_buffer(const char *sentence);
 		
-		// commands execution
+		// First Commands => First_Commands
 		void	authenticate(Client *client, std::vector<std::string> cmd);
 		void	setNickname(Client *client, std::vector<std::string> cmd);
 		void	setUser(Client *client, std::vector<std::string> cmd);
@@ -89,7 +93,6 @@ class Server {
 		void	enterChannel(Channel *channel, Client *client, std::string password);
 	  	void	privmsg(Client *client, std::vector<std::string> cmd);
 		bool 	isOperator(Client *client, Channel *channel);
-		//bool	setOperator(Client *client, Channel *channel);
 
 		// CMD
 		void		invite(Client *client, std::vector<std::string> cmd);
@@ -100,7 +103,6 @@ class Server {
     	// utils
     	bool		nickInUse(std::string nickname);
 		bool		isCRLF(std::string str, Client *client);
-		//bool 		isRegistered(Client *client);
     	Client*		findClient(std::string nickname);
 		Channel*	findChannel(std::string channel_name);
 		void   		sendMSG(std::string message, int fd);
@@ -121,7 +123,6 @@ class Server {
 		void		keyMode(char sign, std::string password, Client *client, Channel *channel);
 		void		operatorMode(char sign, std::string new_operator, Client *client, Channel *channel);
 		void		limitMode(char sign, std::string limit, Client *client, Channel *channel);
-		//bool		login_parse(std::vector<std::string> cmds, Client *client);
 		std::string	generateNick(std::string base);
   		void		check_connection();
 };

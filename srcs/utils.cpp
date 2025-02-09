@@ -10,6 +10,7 @@ bool Server::nickInUse(std::string nickname)
 	return (false);
 }
 
+// check if the message sent by the client is ended by '\r\n' 
 bool Server::isCRLF(std::string str, Client *client)
 {
 	std::size_t pos = str.find("\r\n");
@@ -25,6 +26,7 @@ bool Server::isCRLF(std::string str, Client *client)
 	return (true);
 }
 
+// Send a messahe to all clients in a channel
 void Server::sendMSGChan(std::string message, Channel *channel)
 {
 	std::vector<Client *> client = channel->getClients();
@@ -70,8 +72,6 @@ bool Server::isOperator(Client *client, Channel *channel)
 	return (false);
 }
 
-/*======================================== GETTERS ===============================================*/
-
 Client *Server::findClient(std::string nickname)
 {
 	for (std::vector<Client *>::iterator it = this->Clients.begin(); it != this->Clients.end(); it++)
@@ -82,6 +82,7 @@ Client *Server::findClient(std::string nickname)
 	return (NULL);
 }
 
+// send a RPL to the Client in the IRC format norm
 void Server::sendMSG(std::string message, int fd)
 {
 	const char *buffer;
@@ -158,6 +159,7 @@ void Server::removeClient(Client *client)
 	delete client;
 }
 
+// generates a newNickName in case a client has by default a nickname already in use
 std::string Server::generateNick(std::string base)
 {
 	std::string newNick;
@@ -178,19 +180,21 @@ std::string Server::generateNick(std::string base)
 	return ("Error");
 }
 
+// verify if the clietn is well authenticated and if so sends the welcome message ONLY ONCE
 void Server::check_connection()
 {
 	for (std::vector<Client *>::iterator it = Clients.begin(); it != Clients.end(); it++)
 	{
-		if (!(*it)->isConnected() && (*it)->isRegistered())
+		if (!(*it)->isAuthenticated() && (*it)->isRegistered())
 		{
-			(*it)->setConnection();
+			(*it)->setAuthentication();
 			(*it)->setFirstConnection();
 			sendMSG(WLC((*it)->getUsername(), (*it)->getNickname()), (*it)->getFd());
 		}
 	}
 }
 
+// chekc if a socket is still opened
 bool Server::isOpenedSock(int socket)
 {
 	struct stat statbuf;
@@ -201,6 +205,7 @@ bool Server::isOpenedSock(int socket)
 	return (true);
 }
 
+// destroys a channel if it only contains the client that will be destroyed and then destroyes the channel
 void Server::destroy_cli_chan(Client *client)
 {
 	for (std::vector<Channel *>::iterator it = this->Channels.begin(); it != this->Channels.end(); it++)
