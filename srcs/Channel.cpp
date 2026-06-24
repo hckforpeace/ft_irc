@@ -15,6 +15,7 @@ Channel::Channel(std::string name)
 
 Channel::~Channel()
 {
+  std::cout << RED << "Channel: " << this->getName() << " destroyed"  << RESET << std::endl;
 	// for (std::vector<Client *>::iterator it = chan_clients.begin(); it != chan_clients.end(); it++)
 	//	delete *it;
 	// for (std::vector<Client *>::iterator it1 = operators.begin(); it1 != operators.end(); it1++)

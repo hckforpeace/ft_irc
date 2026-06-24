@@ -1,5 +1,7 @@
 #include "Server.hpp"
 
+bool server_off = false;
+
 // Constructor starts the server
 Server::Server(char *port, char *password)
 {
@@ -119,22 +121,20 @@ void Server::run_server()
 	// looping
 	int nbr_fds;
 	static std::string error;
-	int len;
 	struct stat buf;
+
 	while (!server_off)
 	{
 		nbr_fds = epoll_wait(epfd, events, MAX_EVENTS, -1);
 		check_connection();
-		// if (errno == EAGAIN)
-		// std::cout << "tell me" << std::endl;
-		for (int i = 0; i < nbr_fds; ++i)
+		for (int i = 0;  i < nbr_fds; ++i)
 		{
 			if (fstat(events[i].data.fd, &buf) == 0 && errno == EBADF)
 				break;
 			if (events[i].data.fd == server_socket)
 			{
 				std::cout << "Connection request" << std::endl;
-				first_connection(nbr_fds, i);
+				first_connection();
 			}
 
 			// socket available for read operation
@@ -195,7 +195,17 @@ std::vector<Client *>::iterator Server::getClientIt(int fd)
 	return (Clients.begin());
 }
 
-void Server::first_connection(int nbr_fds, int i)
+std::vector<Channel *>::iterator Server::getChannelIt(std::string name)
+{
+	for (std::vector<Channel *>::iterator it = Channels.begin(); it != Channels.end(); it++)
+	{
+		if (!name.compare((*it)->getName()))
+			return (it);
+	}
+	return (Channels.begin());
+}
+
+void		Server::first_connection(void)
 {
 	// std::cout << "events[i].data.fd: " << events[i].data.fd << std::endl;
 	// std::cout << "somebody is trying to connect !" << std::endl;
@@ -240,15 +250,14 @@ void Server::read_and_process(int i)
 
 	// reading string sent from the Client
 	len = recv(events[i].data.fd, buffer, 512 * sizeof(char), 0);
-	// std::cout << "Client has sent: " << std::endl << buffer << std::endl;
 	// Error
-	if (len == 0)
+	if (len == 0 || len == -1)
 	{
-		std::cout << "An error has occured during recv of the client socket => " << events[i].data.fd << std::endl;
-		this->Clients.erase(getClientIt(client->getFd()));
-		delete client;
+		std::cout << "An error has occured during recv of the client socket => " << events[i].data.fd << std::endl ;
 		std::cout << "Client deleted !" << std::endl;
-		return;
+		epoll_ctl(epfd, EPOLL_CTL_DEL, client_socket, &events[i]);
+		destroy_cli_chan(client);
+		return ;
 	}
 	else
 	{
@@ -259,32 +268,29 @@ void Server::read_and_process(int i)
 	if (isCRLF(str, client))
 	{
 		// Server outputs...
-		std::cout << BLU "[CLIENT] " << client_socket << " => " RESET << YEL << client->getMessage() << RESET << std::endl;
-
+		std::cout << BLU "[CLIENT] " << client_socket << " => " RESET << YEL << client->getMessage() << RESET <<std::endl;
 		const char *mess = (client->getMessage()).c_str();
 		std::vector<std::string> lines = split_line_buffer(mess);
-		int nbr_lines = lines.size();
-
+		
 		if (lines.size() > 1)
 		{
-			int i = 0;
+			size_t i = 0;
 			while (i < lines.size() && isOpenedSock(client_socket))
 			{
-				parse_exec_cmd(split_buffer(lines[i]), client);
+				parse_exec_cmd(split_buffer(lines[i]), client, i);
 				i++;
 			}
-			if (!isOpenedSock(client_socket))
-				return;
 		}
 		else if (client->getMessage().compare(""))
 		{
 			if (!split_buffer(client->getMessage())[0].compare("PRIVMSG") || !split_buffer(client->getMessage())[0].compare("KICK"))
 				client->setPrivmsgParam(str, false);
-			if (!split_buffer(client->getMessage())[0].compare("PART") || !split_buffer(client->getMessage())[0].compare("TOPIC"))
+			else if (!split_buffer(client->getMessage())[0].compare("PART") || !split_buffer(client->getMessage())[0].compare("TOPIC"))
 				client->setPrivmsgParam(str, true);
-			parse_exec_cmd(split_buffer(client->getMessage()), client);
+			else if (!split_buffer(client->getMessage())[0].compare("QUIT"))
+				client->setQuitParam(str);
+			parse_exec_cmd(split_buffer(client->getMessage()), client, i);
 		}
-		client->setMessage("");
 	}
 	memset(buffer, 0, sizeof(char) * 512);
 }
@@ -316,7 +322,7 @@ std::vector<std::string> Server::split_line_buffer(const char *sentence)
 	return (message);
 }
 
-void Server::processMessage(std::string str, Client *client)
+void		Server::processMessage(Client *client)
 {
 	if (!client->isConnected())
 	{
@@ -332,12 +338,15 @@ void Server::processMessage(std::string str, Client *client)
 	}
 }
 
-void Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
+void Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client, int i)
 {
-	if (cmd.size() != 0 && (cmd[0] == "CAP" || cmd[0] == "WHOIS" || cmd[0] == "WHO"))
-		return ;
+	int fd = client->getFd();
+	if (cmd.size() != 0 && (cmd[0] == "CAP" || cmd[0] == "WHO"))
+		std::cout << "" << std::endl;
 	else if (cmd.size() != 0 && (cmd[0] == "pass" || cmd[0] == "PASS"))
-		authenticate(client, cmd); // authenticate
+		authenticate(client, cmd, i); // authenticate
+	else if(cmd.size() != 0 && (cmd[0] == "WHOIS" || cmd[0] == "WHOIS"))
+	    whoIs(client, cmd); // welcome invisible user mode msg
 	else if (cmd.size() != 0 && (cmd[0] == "ping" || cmd[0] == "PING"))
 		pong(client, cmd); // answer to ping
 	else if (cmd.size() != 0 && (cmd[0] == "nick" || cmd[0] == "NICK"))
@@ -359,7 +368,9 @@ void Server::parse_exec_cmd(std::vector<std::string> cmd, Client *client)
 	else if (cmd.size() != 0 && (cmd[0] == "privmsg" || cmd[0] == "PRIVMSG"))
 		privmsg(client, cmd); // sends a msg to a client or to a channel
 	else if (cmd.size() != 0 && (cmd[0] == "quit" || cmd[0] == "QUIT"))
-		std::cout << "test" << std::endl; // quit the server
+    	quit(client, cmd);
 	else if (cmd.size() != 0)
 		sendMSG(ERR_UNKNOWNCOMMAND(client->getNickname(), cmd[0]), client->getFd());
+	if (isOpenedSock(fd))
+		client->setMessage("");
 }
